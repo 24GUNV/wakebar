@@ -1,5 +1,5 @@
 #if os(iOS) && canImport(AlarmKit)
-import AlarmKit
+@preconcurrency import AlarmKit
 import Foundation
 import SwiftUI
 
