@@ -4,7 +4,8 @@ import Foundation
 import SwiftUI
 
 @available(iOS 26.0, *)
-public actor AlarmKitPhoneAlarmClient: PhoneAlarmClient {
+@MainActor
+public final class AlarmKitPhoneAlarmClient: PhoneAlarmClient {
     private let manager = AlarmManager.shared
 
     public init() {}
