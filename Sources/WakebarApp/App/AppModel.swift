@@ -199,15 +199,15 @@ final class AppModel {
         guard !schedule.isEnabled else { return nil }
         switch phoneAlarmPublishState {
         case .draft:
-            nil
+            return nil
         case .publishing:
-            "Turning off the previous iPhone alarm…"
+            return "Turning off the previous iPhone alarm…"
         case .published:
-            "Waiting for the iPhone to turn off the previous alarm."
+            return "Waiting for the iPhone to turn off the previous alarm."
         case .confirmed:
-            "The iPhone confirmed the previous alarm is off."
+            return "The iPhone confirmed the previous alarm is off."
         case .failed:
-            "Wakebar could not turn off the previous iPhone alarm. It may still ring."
+            return "Wakebar could not turn off the previous iPhone alarm. It may still ring."
         }
     }
 
