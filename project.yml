@@ -97,6 +97,7 @@ targets:
     scheme:
       testTargets:
         - WakebarCoreTests
+        - WakebarPhoneUITests
       gatherCoverageData: true
 
   WakebarCoreTests:
@@ -116,3 +117,18 @@ targets:
         GENERATE_INFOPLIST_FILE: true
         PRODUCT_BUNDLE_IDENTIFIER: com.24gunv.wakebar.core-tests
         PRODUCT_NAME: WakebarCoreTests
+
+  WakebarPhoneUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    deploymentTarget: "26.0"
+    sources:
+      - path: UITests/WakebarPhoneUITests
+    dependencies:
+      - target: WakebarPhone
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: true
+        PRODUCT_BUNDLE_IDENTIFIER: com.24gunv.wakebar.phone-ui-tests
+        PRODUCT_NAME: WakebarPhoneUITests
+        TEST_TARGET_NAME: WakebarPhone

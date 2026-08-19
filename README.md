@@ -71,7 +71,7 @@ Build and launch the debug app:
 WAKEBAR_DEVELOPMENT_TEAM=YOUR_TEAM_ID ./Scripts/compile_and_run.sh
 ```
 
-GitHub Actions builds the macOS and iPhone Debug and Release configurations with Xcode 26.6. It also runs 69 XCTest tests on macOS. The local Command Line Tools installation can build `WakebarCore`, but it does not include the iOS 26 SDK.
+GitHub Actions builds the macOS and iPhone Debug and Release configurations with Xcode 26.6. The same 69 shared XCTest tests run on macOS and iOS Simulator. One iPhone UI test also checks the first-launch, no-schedule screen without access to iCloud or AlarmKit. The local Command Line Tools installation can build `WakebarCore`, but it does not include the iOS 26 SDK.
 
 Before distributing the apps, complete the signed physical-device checks in the [release checklist](Docs/RELEASE_CHECKLIST.md).
 

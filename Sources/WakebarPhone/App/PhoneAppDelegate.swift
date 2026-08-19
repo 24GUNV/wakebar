@@ -8,7 +8,9 @@ final class PhoneAppDelegate: NSObject, UIApplicationDelegate {
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
         _ = launchOptions
-        application.registerForRemoteNotifications()
+        if !PhoneCompanionRuntime.isUITesting {
+            application.registerForRemoteNotifications()
+        }
         return true
     }
 

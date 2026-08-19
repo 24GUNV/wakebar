@@ -51,6 +51,17 @@
                ReferencedContainer = "container:Wakebar.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "6543B9A1D67C957C6809CAB2"
+               BuildableName = "WakebarPhoneUITests.xctest"
+               BlueprintName = "WakebarPhoneUITests"
+               ReferencedContainer = "container:Wakebar.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <CommandLineArguments>
       </CommandLineArguments>

@@ -34,15 +34,17 @@ jobs:
           CODE_SIGNING_ALLOWED=NO
           test
 
-      - name: Build iPhone companion
-        run: >-
-          xcodebuild
-          -project Wakebar.xcodeproj
-          -scheme WakebarPhone
-          -configuration Debug
-          -destination 'generic/platform=iOS Simulator'
-          CODE_SIGNING_ALLOWED=NO
-          build
+      - name: Test iPhone companion
+        run: |
+          wakebar_simulator_id="$(python3 Scripts/select_ios_simulator.py)"
+          test -n "$wakebar_simulator_id"
+          xcodebuild \
+            -project Wakebar.xcodeproj \
+            -scheme WakebarPhone \
+            -configuration Debug \
+            -destination "platform=iOS Simulator,id=$wakebar_simulator_id" \
+            CODE_SIGNING_ALLOWED=NO \
+            test
 
       - name: Build macOS Release configuration
         run: >-

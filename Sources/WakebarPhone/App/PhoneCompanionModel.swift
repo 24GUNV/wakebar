@@ -23,9 +23,13 @@ final class PhoneCompanionModel {
     init(
         client: any PhoneAlarmClient,
         repository: any PhoneAlarmScheduleRepository,
+        installationStore: any PhoneAlarmInstallationPersisting = PhoneAlarmInstallationStore(),
         payload: PhoneAlarmSchedulePayload? = nil
     ) {
-        coordinator = PhoneAlarmCoordinator(client: client)
+        coordinator = PhoneAlarmCoordinator(
+            client: client,
+            installationStore: installationStore
+        )
         self.repository = repository
         latestPayload = payload
         status = payload == nil ? .waitingForSchedule : .permissionRequired
