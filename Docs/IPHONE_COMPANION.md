@@ -65,7 +65,7 @@ The Mac and iPhone targets use the same iCloud container. Silent CloudKit subscr
 
 ## Verification status
 
-The `WakebarCore` target builds when the command selects the matching macOS 15.4 Command Line Tools SDK. GitHub Actions uses Xcode 26.6 to run 67 XCTest tests and build both app targets against their current SDKs, including the AlarmKit branch.
+The `WakebarCore` target builds when the command selects the matching macOS 15.4 Command Line Tools SDK. GitHub Actions uses Xcode 26.6 to run 69 XCTest tests and build both app targets against their current SDKs, including the AlarmKit branch.
 
 The available local command-line tools do not include XCTest or the iOS 26 SDK. Signed CloudKit delivery and AlarmKit behavior still require a physical iPhone.
 
