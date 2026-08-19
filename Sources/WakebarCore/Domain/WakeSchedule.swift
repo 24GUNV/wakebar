@@ -96,7 +96,7 @@ public struct WakeSchedule: Identifiable, Codable, Equatable, Sendable {
         Self(
             id: UUID(),
             revision: UUID(),
-            isEnabled: true,
+            isEnabled: false,
             hour: 7,
             minute: 0,
             selectedWeekdays: Weekday.workweek,

@@ -3,6 +3,10 @@ import XCTest
 @testable import WakebarCore
 
 final class WakeScheduleTests: XCTestCase {
+    func testDefaultScheduleIsAnUnpublishedDraft() {
+        XCTAssertFalse(WakeSchedule.default.isEnabled)
+    }
+
     func testLegacyScheduleDecodesWithNewDefaults() throws {
         let json = """
         {

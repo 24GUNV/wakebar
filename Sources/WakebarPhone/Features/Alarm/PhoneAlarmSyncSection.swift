@@ -9,7 +9,8 @@ struct PhoneAlarmSyncSection: View {
         Section {
             LabeledContent("From", value: "Wakebar on Mac")
             LabeledContent("iCloud", value: deliveryLabel)
-            LabeledContent("Background updates", value: subscriptionLabel)
+            LabeledContent("Cloud subscription", value: subscriptionLabel)
+            LabeledContent("This iPhone", value: model.remoteNotificationState.displayName)
             LabeledContent("Updated") {
                 Text(payload.revision.modifiedAt, format: .relative(presentation: .named))
             }
@@ -25,6 +26,11 @@ struct PhoneAlarmSyncSection: View {
             }
             if let subscriptionIssue {
                 Text(subscriptionIssue)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+            if let notificationIssue = model.remoteNotificationState.issue {
+                Text(notificationIssue)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }

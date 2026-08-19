@@ -33,7 +33,7 @@ struct ScheduleEditorView: View {
 
                 Spacer()
 
-                Button("Done", action: save)
+                Button("Save and sync", action: save)
                     .buttonStyle(.link)
                     .disabled(!draft.isValid)
                     .keyboardShortcut(.defaultAction)

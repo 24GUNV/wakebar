@@ -15,6 +15,7 @@ final class PhoneCompanionModel {
     private(set) var latestPayload: PhoneAlarmSchedulePayload?
     private(set) var deliveryState: PhoneScheduleDeliveryState = .neverChecked
     private(set) var subscriptionState: PhoneScheduleSubscriptionState = .notInstalled
+    private(set) var remoteNotificationState: PhoneRemoteNotificationState = .registering
     private(set) var acknowledgementError: String?
     private(set) var status: PhoneCompanionStatus = .waitingForSchedule
     private(set) var isBusy = false
@@ -85,6 +86,14 @@ final class PhoneCompanionModel {
         case .noSchedule, .accountChanged, .current:
             return previousRevision != latestPayload?.revision ? .newData : .noData
         }
+    }
+
+    func markRemoteNotificationsRegistered() {
+        remoteNotificationState = .registered
+    }
+
+    func markRemoteNotificationsFailed(_ message: String) {
+        remoteNotificationState = .failed(message)
     }
 
     private func reconcileLatestPayload() async {

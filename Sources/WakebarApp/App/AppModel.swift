@@ -27,7 +27,11 @@ final class AppModel {
                 try? await Task.sleep(for: .milliseconds(250))
                 guard !Task.isCancelled else { return }
                 await persist(scheduleToSave)
-                await publishPhoneSchedule(scheduleToSave)
+                if scheduleToSave.isEnabled {
+                    await publishPhoneSchedule(scheduleToSave)
+                } else {
+                    phoneAlarmPublishState = .draft
+                }
             }
         }
     }
@@ -125,7 +129,9 @@ final class AppModel {
 
     var executionSummaries: [String] {
         schedule.providerIDs.map { provider in
-            "\(provider.displayName): \(schedule.backend(for: provider).statusText(for: provider))"
+            let isConfirmed = providerDeliveryStates[provider]?.isCurrentRevisionConfirmed == true
+            let status = isConfirmed ? "confirmed by you" : "setup required"
+            return "\(provider.displayName): \(status)"
         }
     }
 
@@ -144,7 +150,7 @@ final class AppModel {
         let backends = Set(schedule.providerIDs.map { schedule.backend(for: $0) })
         guard !backends.isEmpty else { return "Choose a provider" }
         let location = if backends == [.providerCloud] {
-            providerReadiness == .ready ? "Cloud" : "Cloud · setup required"
+            providerReadiness == .ready ? "Cloud · confirmed by you" : "Cloud · setup required"
         } else if backends == [.thisMac] {
             "Requires this Mac awake"
         } else if backends == [.alwaysOnRunner] {
@@ -180,24 +186,10 @@ final class AppModel {
     }
 
     var scheduleStatusText: String {
-        guard schedule.isEnabled else { return "Paused" }
+        guard schedule.isEnabled else { return "Draft" }
         let providersAreReady = providerReadiness == .ready
         let alarmIsReady = !schedule.alarmOnIPhone || phoneAlarmReadiness == .ready
         return providersAreReady && alarmIsReady ? "Ready" : "Setup required"
-    }
-
-    var hasSkippedNextWake: Bool {
-        guard let skippedWakeDate = schedule.skippedWakeDate else { return false }
-        return skippedWakeDate > .now
-    }
-
-    func supportedBackends(for provider: ProviderID) -> [ExecutionBackend] {
-        switch provider {
-        case .claude:
-            ExecutionBackend.allCases
-        case .codex:
-            [.providerCloud, .thisMac, .alwaysOnRunner]
-        }
     }
 
     func load() async {
@@ -206,7 +198,12 @@ final class AppModel {
         defer { isLoading = false }
 
         do {
-            schedule = try await scheduleStore.load() ?? .default
+            var loadedSchedule = try await scheduleStore.load() ?? .default
+            loadedSchedule.skippedWakeDate = nil
+            loadedSchedule.claudeBackend = .providerCloud
+            loadedSchedule.codexBackend = .providerCloud
+            loadedSchedule.codexRoute = .chatGPTWebTask
+            schedule = loadedSchedule
             if !schedule.isValid {
                 schedule.isEnabled = false
             }
@@ -229,29 +226,20 @@ final class AppModel {
         isLoaded = true
         launchAtLoginState = launchAtLoginService.state
         await refreshProviders()
-        await publishPhoneSchedule(schedule)
+        if schedule.isEnabled {
+            await publishPhoneSchedule(schedule)
+        }
     }
 
     func saveSchedule(_ updatedSchedule: WakeSchedule) {
-        schedule = updatedSchedule
-    }
-
-    func toggleSkipNextWake() {
-        if hasSkippedNextWake {
-            schedule.skippedWakeDate = nil
-            showTransientMessage("Tomorrow is scheduled again.")
-            return
-        }
-
-        var scheduleWithoutSkip = schedule
-        scheduleWithoutSkip.skippedWakeDate = nil
-        guard let wakeDate = scheduleCalculator.nextWakeOccurrence(after: .now, for: scheduleWithoutSkip) else {
-            activityNotice = .error("There is no upcoming wake time to skip.")
-            return
-        }
-
-        schedule.skippedWakeDate = wakeDate
-        showTransientMessage("The next wake time is skipped.")
+        var scheduleToActivate = updatedSchedule
+        scheduleToActivate.isEnabled = true
+        scheduleToActivate.skippedWakeDate = nil
+        scheduleToActivate.claudeBackend = .providerCloud
+        scheduleToActivate.codexBackend = .providerCloud
+        scheduleToActivate.codexRoute = .chatGPTWebTask
+        schedule = scheduleToActivate
+        showTransientMessage("Schedule saved. Syncing the iPhone alarm.")
     }
 
     func refreshProviders() async {
@@ -365,6 +353,15 @@ final class AppModel {
         saveProviderDeliveryStates()
     }
 
+    func refreshPhoneAcknowledgement() async {
+        guard case let .published(receipt) = phoneAlarmPublishState else { return }
+        if await applyAcknowledgement(for: receipt) {
+            showTransientMessage("The iPhone alarm is confirmed.")
+        } else {
+            showTransientMessage("Still waiting for the iPhone.")
+        }
+    }
+
     func enableLaunchAtLogin() {
         updateLaunchAtLogin(isEnabled: true)
     }
@@ -401,20 +398,34 @@ final class AppModel {
     private func startPhoneAcknowledgementChecks(for receipt: PhoneAlarmPublishReceipt) {
         phoneAcknowledgementTask?.cancel()
         phoneAcknowledgementTask = Task {
-            for attempt in 0..<6 {
-                if attempt > 0 {
-                    try? await Task.sleep(for: .seconds(5))
+            var delaySeconds = 0
+            while !Task.isCancelled {
+                if delaySeconds > 0 {
+                    try? await Task.sleep(for: .seconds(delaySeconds))
                 }
                 guard !Task.isCancelled else { return }
 
-                if let acknowledgement = try? await phoneSchedulePublisher.acknowledgement(
-                    for: receipt.scheduleID
-                ), acknowledgement.revision == receipt.revision {
-                    phoneAlarmPublishState = .confirmed(acknowledgement)
+                guard case let .published(currentReceipt) = phoneAlarmPublishState,
+                      currentReceipt == receipt
+                else { return }
+
+                if await applyAcknowledgement(for: receipt) {
                     return
                 }
+
+                delaySeconds = delaySeconds == 0 ? 5 : min(delaySeconds * 2, 300)
             }
         }
+    }
+
+    private func applyAcknowledgement(for receipt: PhoneAlarmPublishReceipt) async -> Bool {
+        guard let acknowledgement = try? await phoneSchedulePublisher.acknowledgement(
+            for: receipt.scheduleID
+        ), acknowledgement.revision == receipt.revision
+        else { return false }
+
+        phoneAlarmPublishState = .confirmed(acknowledgement)
+        return true
     }
 
     private func saveProviderDeliveryStates() {

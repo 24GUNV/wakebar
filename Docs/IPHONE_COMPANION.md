@@ -51,7 +51,7 @@ If the writer identifier changes, the new writer can take ownership only after i
 
 Wakebar retains CloudKit system fields and uses conditional saves. If another write from the same writer wins, Wakebar fetches that version, applies the sequence rules, and retries. It does not overwrite a newer server revision with `.allKeys`.
 
-The iPhone registers a silent record-zone subscription that filters for `WakeSchedule`. Acknowledgement writes do not trigger this subscription. Wakebar migrates the earlier unfiltered subscription identifier when it starts. After AlarmKit accepts a new revision, the iPhone writes one `WakeScheduleAcknowledgement` record named `ack-<schedule UUID>`. It does not rewrite the record for an already confirmed revision. The record contains the schedule and alarm identifiers, revision fields, and confirmation date. The Mac can distinguish **iCloud updated** from **iPhone confirmed**.
+The iPhone registers with Apple Push Notification service and saves a silent record-zone subscription that filters for `WakeSchedule`. The interface reports these two steps separately. Acknowledgement writes do not trigger this subscription. Wakebar migrates the earlier unfiltered subscription identifier when it starts. After AlarmKit accepts a new revision, the iPhone writes one `WakeScheduleAcknowledgement` record named `ack-<schedule UUID>`. It does not rewrite the record for an already confirmed revision. The record contains the schedule and alarm identifiers, revision fields, and confirmation date. The Mac can distinguish **iCloud updated** from **iPhone confirmed**.
 
 The iPhone stores a transaction journal before it changes an alarm. The journal contains all managed alarm identifiers and the prior payload. It closes the process-termination gap between AlarmKit scheduling and local persistence. The app compares the journal with `AlarmManager.alarms` at launch and after AlarmKit updates. If the system alarm is missing, the interface offers **Set alarm again** instead of showing a stale confirmation. If replacement or cleanup fails, Wakebar restores the prior alarm when possible and keeps all unresolved identifiers for the next reconciliation.
 
@@ -65,9 +65,9 @@ The Mac and iPhone targets use the same iCloud container. Silent CloudKit subscr
 
 ## Verification status
 
-The `WakebarCore` target builds when the command selects the matching macOS 15.4 Command Line Tools SDK. The repository includes XCTest coverage for the pure components, failure recovery, and CloudKit record conversion. The full generated Xcode project still requires Xcode 26.
+The `WakebarCore` target builds when the command selects the matching macOS 15.4 Command Line Tools SDK. GitHub Actions uses Xcode 26.6 to run 67 XCTest tests and build both app targets against their current SDKs, including the AlarmKit branch.
 
-The available command-line tools do not include XCTest or the iOS 26 SDK. This machine therefore cannot execute those tests or type-check the AlarmKit branch. Conditional compilation with `os(iOS)` and `canImport(AlarmKit)` isolates the adapter.
+The available local command-line tools do not include XCTest or the iOS 26 SDK. Signed CloudKit delivery and AlarmKit behavior still require a physical iPhone.
 
 The adapter uses the current iOS 26.1 alert initializer and an iOS 26.0 fallback. Run the iPhone target and tests with an Xcode installation that includes the iOS 26 SDK before release.
 

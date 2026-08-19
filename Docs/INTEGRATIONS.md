@@ -17,14 +17,9 @@ Official references: [Claude Code Routines](https://code.claude.com/docs/en/rout
 
 ## Codex
 
-Wakebar models four possible Codex routes:
+Wakebar’s first release uses a hosted ChatGPT scheduled task. This route can run while the Mac is off, but it cannot use a local project folder.
 
-- A hosted ChatGPT scheduled task, which can run while the Mac is off but cannot use a local project folder.
-- A desktop project task, which requires the Mac and ChatGPT app to remain available.
-- A local `codex exec` job, which requires an external scheduler and an awake host.
-- An opt-in always-on runner.
-
-The local preview uses an ephemeral, read-only Codex command. Wakebar does not run it live yet.
+The shared core also describes desktop, local `codex exec`, and always-on runner capabilities for later work. The current interface does not let the user select or confirm those unimplemented routes.
 
 OpenAI documentation does not confirm that a small scheduled prompt starts or resets a Codex subscription window. Wakebar therefore labels this result as unverified until an account-level test confirms it.
 
@@ -35,6 +30,8 @@ Official references: [Scheduled tasks](https://learn.chatgpt.com/docs/automation
 The iPhone companion schedules the alarm locally with AlarmKit. The system can then present the alarm when the companion app is not running. AlarmKit requires user authorization and iOS 26 or later.
 
 The Mac publishes one versioned active schedule to the user’s private CloudKit database. Conditional saves reject stale concurrent writes. The phone fetches the record at launch, in the foreground, and after a background change notification. It keeps an account-scoped local copy for temporary network failures and removes that copy after an account change.
+
+At launch, the companion registers this iPhone with Apple Push Notification service. The interface reports APNs device registration and the saved CloudKit subscription as separate states. The app can also refresh in the foreground or after a manual request.
 
 Wakebar tracks CloudKit delivery, AlarmKit authorization, the installed alarm revision, and the phone acknowledgement separately. The phone reconciles its saved revision with AlarmKit and reports a removed alarm instead of retaining a stale **Alarm is set** state.
 

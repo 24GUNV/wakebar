@@ -29,7 +29,7 @@ This repository contains native macOS and iPhone applications with shared schedu
 ## Intended execution paths
 
 - **Claude Code:** Use a Claude Routine so the Mac can be off.
-- **Codex:** Use a verified web scheduled task or an opt-in always-on runner.
+- **Codex:** Use a hosted ChatGPT scheduled task so the Mac can be off.
 - **Alarm:** Use an iPhone companion app with AlarmKit.
 
 The app must verify each step independently. A scheduled event is not the same as a sent prompt, and a sent prompt is not proof that a usage window reset.
@@ -50,8 +50,8 @@ See [provider and alarm integrations](Docs/INTEGRATIONS.md) for the current capa
 Requirements:
 
 - macOS 14 or later
-- Swift 6.2 or later
-- A Swift compiler that matches the installed macOS software development kit
+- Xcode 26 or later
+- An Apple development team with the Wakebar CloudKit container enabled
 
 Run the tests:
 
@@ -59,19 +59,21 @@ Run the tests:
 swift test
 ```
 
-Build an ad-hoc signed app bundle:
+Create a signed macOS archive:
 
 ```sh
-./Scripts/package_app.sh release
+WAKEBAR_DEVELOPMENT_TEAM=YOUR_TEAM_ID ./Scripts/package_app.sh release
 ```
 
 Build and launch the debug app:
 
 ```sh
-./Scripts/compile_and_run.sh
+WAKEBAR_DEVELOPMENT_TEAM=YOUR_TEAM_ID ./Scripts/compile_and_run.sh
 ```
 
-`WakebarCore` builds with the available macOS 15.4 software development kit. The full apps and XCTest suite still need an Xcode installation with matching macOS and iOS 26 toolchains. The current Command Line Tools installation cannot type-check AlarmKit or run XCTest.
+GitHub Actions builds the macOS and iPhone Debug and Release configurations with Xcode 26.6. It also runs 67 XCTest tests on macOS. The local Command Line Tools installation can build `WakebarCore`, but it does not include the iOS 26 SDK.
+
+Before distributing the apps, complete the signed physical-device checks in the [release checklist](Docs/RELEASE_CHECKLIST.md).
 
 ## Safety boundaries
 

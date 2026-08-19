@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-configuration="${1:-debug}"
+configuration="${1:-release}"
 case "$configuration" in
-  debug|release) ;;
+  debug) xcode_configuration="Debug" ;;
+  release) xcode_configuration="Release" ;;
   *)
     echo "Unsupported configuration: $configuration" >&2
     exit 1
@@ -13,13 +14,21 @@ esac
 project_root="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$project_root"
 
-swift build -c "$configuration"
-binary_directory="$(swift build -c "$configuration" --show-bin-path)"
-app_directory="$project_root/.build/Wakebar.app"
+if [[ -z "${WAKEBAR_DEVELOPMENT_TEAM:-}" ]]; then
+  echo "Set WAKEBAR_DEVELOPMENT_TEAM to your Apple development team identifier." >&2
+  echo "Wakebar needs a signed CloudKit entitlement; an ad-hoc package cannot sync the iPhone alarm." >&2
+  exit 1
+fi
 
-mkdir -p "$app_directory/Contents/MacOS" "$app_directory/Contents/Resources"
-cp "$binary_directory/Wakebar" "$app_directory/Contents/MacOS/Wakebar"
-cp "$project_root/Resources/Info.plist" "$app_directory/Contents/Info.plist"
+archive_path="$project_root/.build/Wakebar-${xcode_configuration}.xcarchive"
+xcodebuild \
+  -project Wakebar.xcodeproj \
+  -scheme Wakebar \
+  -configuration "$xcode_configuration" \
+  -destination "generic/platform=macOS" \
+  -archivePath "$archive_path" \
+  DEVELOPMENT_TEAM="$WAKEBAR_DEVELOPMENT_TEAM" \
+  CODE_SIGN_STYLE=Automatic \
+  archive
 
-codesign --force --deep --sign - "$app_directory"
-echo "$app_directory"
+echo "$archive_path"

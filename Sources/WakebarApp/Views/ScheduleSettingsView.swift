@@ -9,7 +9,13 @@ struct ScheduleSettingsView: View {
             LaunchAtLoginSectionView(model: model)
 
             Section("Schedule") {
-                Toggle("Schedule enabled", isOn: $model.schedule.isEnabled)
+                if !model.schedule.isEnabled {
+                    Button("Save and sync schedule") {
+                        model.saveSchedule(model.schedule)
+                    }
+                    Text("Nothing is published until you save this draft.")
+                        .foregroundStyle(.secondary)
+                }
 
                 Picker("Hour", selection: $model.schedule.hour) {
                     ForEach(0..<24, id: \.self) { hour in
@@ -65,6 +71,14 @@ struct ScheduleSettingsView: View {
                 }
                 Text(alarmHelpText)
                     .foregroundStyle(.secondary)
+
+                if case .published = model.phoneAlarmPublishState {
+                    Button("Check iPhone now") {
+                        Task {
+                            await model.refreshPhoneAcknowledgement()
+                        }
+                    }
+                }
             }
 
             Section("Providers") {
@@ -100,19 +114,11 @@ struct ScheduleSettingsView: View {
 
             Section("Execution") {
                 if model.schedule.includeClaude {
-                    Picker("Claude Code", selection: $model.schedule.claudeBackend) {
-                        ForEach(model.supportedBackends(for: .claude)) { backend in
-                            Text(backend.displayName).tag(backend)
-                        }
-                    }
+                    LabeledContent("Claude Code", value: "Cloud Routine")
                 }
 
                 if model.schedule.includeCodex {
-                    Picker("Codex route", selection: $model.schedule.codexRoute) {
-                        ForEach(CodexSchedulingRoute.allCases) { route in
-                            Text(route.displayName).tag(route)
-                        }
-                    }
+                    LabeledContent("Codex", value: "ChatGPT scheduled task")
                 }
 
                 ForEach(model.executionSummaries, id: \.self) { summary in
@@ -120,7 +126,7 @@ struct ScheduleSettingsView: View {
                         .foregroundStyle(.secondary)
                 }
 
-                Text("Provider setup and session starts remain in preview mode in this build.")
+                Text("Create these cloud tasks in each provider, then confirm the saved times in Wakebar.")
                     .foregroundStyle(.secondary)
             }
 

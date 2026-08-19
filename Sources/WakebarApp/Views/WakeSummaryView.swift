@@ -9,7 +9,6 @@ struct WakeSummaryView: View {
     var body: some View {
         VStack(spacing: 0) {
             WakebarHeaderView(
-                isEnabled: $model.schedule.isEnabled,
                 status: model.scheduleStatusText,
                 onEdit: onEdit
             )
@@ -56,7 +55,7 @@ struct WakeSummaryView: View {
                 }
                 .padding(.horizontal, WakebarDesign.horizontalPadding)
             } else {
-                PausedScheduleView()
+                DraftScheduleView(onFinishSetup: onEdit)
             }
 
             if let activityNotice = model.activityNotice {
@@ -66,11 +65,6 @@ struct WakeSummaryView: View {
             Divider()
 
             HStack(spacing: WakebarDesign.compactSpacing) {
-                Button(
-                    model.hasSkippedNextWake ? "Restore next" : "Skip next",
-                    action: model.toggleSkipNextWake
-                )
-
                 Spacer()
 
                 Button("Settings", systemImage: "gearshape", action: showSettings)

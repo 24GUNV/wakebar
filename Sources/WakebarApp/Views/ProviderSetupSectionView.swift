@@ -31,7 +31,7 @@ struct ProviderSetupSectionView: View {
                 ProviderConfirmationButton(model: model, provider: .codex)
             }
 
-            Text("After setup, confirm each provider schedule before Wakebar marks it ready.")
+            Text("After setup, confirm each provider schedule before Wakebar marks it ready. Pause or delete provider tasks in Claude or ChatGPT.")
                 .foregroundStyle(.secondary)
         }
     }

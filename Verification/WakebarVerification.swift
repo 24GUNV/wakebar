@@ -18,6 +18,7 @@ enum WakebarVerification {
         calendar.timeZone = utc
 
         var schedule = WakeSchedule.default
+        schedule.isEnabled = true
         schedule.hour = 7
         schedule.minute = 0
         schedule.selectedWeekdays = Weekday.workweek
