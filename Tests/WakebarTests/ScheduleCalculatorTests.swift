@@ -1,87 +1,82 @@
 import Foundation
-import Testing
+import XCTest
 @testable import WakebarCore
 
-struct ScheduleCalculatorTests {
-    @Test
-    func weekdayScheduleSkipsWeekend() throws {
+final class ScheduleCalculatorTests: XCTestCase {
+    func testWeekdayScheduleSkipsWeekend() throws {
         let calendar = try utcCalendar()
         let calculator = ScheduleCalculator(calendar: calendar)
-        let fridayAfternoon = try #require(
+        let fridayAfternoon = try XCTUnwrap(
             calendar.date(from: DateComponents(year: 2026, month: 8, day: 21, hour: 17))
         )
         let schedule = makeSchedule()
 
-        let nextWake = try #require(calculator.nextWakeOccurrence(after: fridayAfternoon, for: schedule))
+        let nextWake = try XCTUnwrap(calculator.nextWakeOccurrence(after: fridayAfternoon, for: schedule))
         let components = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: nextWake)
 
-        #expect(components.year == 2026)
-        #expect(components.month == 8)
-        #expect(components.day == 24)
-        #expect(components.hour == 7)
-        #expect(components.minute == 0)
+        XCTAssertEqual(components.year, 2026)
+        XCTAssertEqual(components.month, 8)
+        XCTAssertEqual(components.day, 24)
+        XCTAssertEqual(components.hour, 7)
+        XCTAssertEqual(components.minute, 0)
     }
 
-    @Test
-    func sessionStartUsesConfiguredLeadTime() throws {
+    func testSessionStartUsesConfiguredLeadTime() throws {
         let calendar = try utcCalendar()
         let calculator = ScheduleCalculator(calendar: calendar)
-        let morning = try #require(
+        let morning = try XCTUnwrap(
             calendar.date(from: DateComponents(year: 2026, month: 8, day: 20, hour: 6))
         )
         let schedule = makeSchedule()
 
-        let nextStart = try #require(calculator.nextSessionStart(after: morning, for: schedule))
+        let nextStart = try XCTUnwrap(calculator.nextSessionStart(after: morning, for: schedule))
         let components = calendar.dateComponents([.day, .hour, .minute], from: nextStart)
 
-        #expect(components.day == 20)
-        #expect(components.hour == 6)
-        #expect(components.minute == 50)
+        XCTAssertEqual(components.day, 20)
+        XCTAssertEqual(components.hour, 6)
+        XCTAssertEqual(components.minute, 50)
     }
 
-    @Test
-    func missedSessionStartMovesToNextSelectedDay() throws {
+    func testMissedSessionStartMovesToNextSelectedDay() throws {
         let calendar = try utcCalendar()
         let calculator = ScheduleCalculator(calendar: calendar)
-        let afterPrime = try #require(
+        let afterPrime = try XCTUnwrap(
             calendar.date(from: DateComponents(year: 2026, month: 8, day: 20, hour: 6, minute: 55))
         )
         let schedule = makeSchedule()
 
-        let nextStart = try #require(calculator.nextSessionStart(after: afterPrime, for: schedule))
+        let nextStart = try XCTUnwrap(calculator.nextSessionStart(after: afterPrime, for: schedule))
         let components = calendar.dateComponents([.day, .hour, .minute], from: nextStart)
 
-        #expect(components.day == 21)
-        #expect(components.hour == 6)
-        #expect(components.minute == 50)
+        XCTAssertEqual(components.day, 21)
+        XCTAssertEqual(components.hour, 6)
+        XCTAssertEqual(components.minute, 50)
     }
 
-    @Test
-    func skippedWakeMovesToFollowingOccurrence() throws {
+    func testSkippedWakeMovesToFollowingOccurrence() throws {
         let calendar = try utcCalendar()
         let calculator = ScheduleCalculator(calendar: calendar)
-        let thursdayMorning = try #require(
+        let thursdayMorning = try XCTUnwrap(
             calendar.date(from: DateComponents(year: 2026, month: 8, day: 20, hour: 6))
         )
-        let skippedWake = try #require(
+        let skippedWake = try XCTUnwrap(
             calendar.date(from: DateComponents(year: 2026, month: 8, day: 20, hour: 7))
         )
         var schedule = makeSchedule()
         schedule.skippedWakeDate = skippedWake
 
-        let nextWake = try #require(calculator.nextWakeOccurrence(after: thursdayMorning, for: schedule))
+        let nextWake = try XCTUnwrap(calculator.nextWakeOccurrence(after: thursdayMorning, for: schedule))
         let components = calendar.dateComponents([.day, .hour, .minute], from: nextWake)
 
-        #expect(components.day == 21)
-        #expect(components.hour == 7)
-        #expect(components.minute == 0)
+        XCTAssertEqual(components.day, 21)
+        XCTAssertEqual(components.hour, 7)
+        XCTAssertEqual(components.minute, 0)
     }
 
-    @Test
-    func fixedTimeZoneControlsWallClockTime() throws {
+    func testFixedTimeZoneControlsWallClockTime() throws {
         let calendar = try utcCalendar()
         let calculator = ScheduleCalculator(calendar: calendar)
-        let afterStartInTokyo = try #require(
+        let afterStartInTokyo = try XCTUnwrap(
             calendar.date(from: DateComponents(year: 2026, month: 8, day: 20, hour: 0))
         )
         var schedule = makeSchedule()
@@ -89,14 +84,14 @@ struct ScheduleCalculatorTests {
         schedule.followsSystemTimeZone = false
         schedule.timeZoneIdentifier = "Asia/Tokyo"
 
-        let nextWake = try #require(calculator.nextWakeOccurrence(after: afterStartInTokyo, for: schedule))
+        let nextWake = try XCTUnwrap(calculator.nextWakeOccurrence(after: afterStartInTokyo, for: schedule))
         var tokyoCalendar = Calendar(identifier: .gregorian)
-        tokyoCalendar.timeZone = try #require(TimeZone(identifier: "Asia/Tokyo"))
+        tokyoCalendar.timeZone = try XCTUnwrap(TimeZone(identifier: "Asia/Tokyo"))
         let components = tokyoCalendar.dateComponents([.day, .hour, .minute], from: nextWake)
 
-        #expect(components.day == 21)
-        #expect(components.hour == 7)
-        #expect(components.minute == 0)
+        XCTAssertEqual(components.day, 21)
+        XCTAssertEqual(components.hour, 7)
+        XCTAssertEqual(components.minute, 0)
     }
 
     private func makeSchedule() -> WakeSchedule {
@@ -121,7 +116,7 @@ struct ScheduleCalculatorTests {
 
     private func utcCalendar() throws -> Calendar {
         var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = try #require(TimeZone(secondsFromGMT: 0))
+        calendar.timeZone = try XCTUnwrap(TimeZone(secondsFromGMT: 0))
         return calendar
     }
 }

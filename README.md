@@ -6,13 +6,25 @@ Set one wake time. Wakebar prepares Claude Code and Codex a few minutes earlier,
 
 ## Current status
 
-This repository contains the first native application draft.
+This repository contains native macOS and iPhone applications with shared scheduling logic.
 
 - SwiftUI provides the menu-bar summary and schedule editor.
+
 - Schedules persist as version-tolerant JSON in Application Support.
-- The schedule supports weekdays, lead time, time zones, skip-next, and five-hour repeats.
-- Provider actions use preview adapters and do not send live prompts.
-- The iPhone alarm remains an interface placeholder until the companion app adds AlarmKit.
+
+- The schedule compiler produces the initial prompt, phone alarm, and five-hour refresh events.
+
+- An execution ledger prevents the same compiled event from running twice.
+
+- Provider-specific preview adapters model Claude Routine and Codex scheduling capabilities.
+
+- Provider actions remain in preview mode and do not send live prompts by default.
+
+- The iPhone companion receives schedules through the user’s private CloudKit database and registers them with AlarmKit.
+
+- The iPhone confirms accepted or disabled revisions back to the Mac through a separate CloudKit acknowledgement.
+
+- AlarmKit and cross-device delivery still require an iOS 26 physical-device test before release.
 
 ## Intended execution paths
 
@@ -22,11 +34,15 @@ This repository contains the first native application draft.
 
 The app must verify each step independently. A scheduled event is not the same as a sent prompt, and a sent prompt is not proof that a usage window reset.
 
+See [provider and alarm integrations](Docs/INTEGRATIONS.md) for the current capability boundaries.
+
 ## Project structure
 
 - `Sources/WakebarCore`: schedule, provider, persistence, and execution logic.
 - `Sources/WakebarApp`: menu-bar application and SwiftUI views.
+- `Sources/WakebarPhone`: iPhone companion, AlarmKit status, and CloudKit delivery interface.
 - `Tests/WakebarTests`: deterministic schedule tests.
+- `project.yml`: macOS and iOS Xcode target definitions.
 - `Scripts`: local packaging and launch scripts.
 
 ## Build
@@ -55,7 +71,7 @@ Build and launch the debug app:
 ./Scripts/compile_and_run.sh
 ```
 
-The current machine has a compiler and software development kit version mismatch. Source parsing succeeds, but a semantic build cannot complete until Xcode selects a matching toolchain.
+`WakebarCore` builds with the available macOS 15.4 software development kit. The full apps and XCTest suite still need an Xcode installation with matching macOS and iOS 26 toolchains. The current Command Line Tools installation cannot type-check AlarmKit or run XCTest.
 
 ## Safety boundaries
 

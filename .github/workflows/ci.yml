@@ -1,0 +1,45 @@
+name: Build and test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: wakebar-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apple-platforms:
+    runs-on: macos-26
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Test shared core and macOS app
+        run: >-
+          xcodebuild
+          -project Wakebar.xcodeproj
+          -scheme Wakebar
+          -configuration Debug
+          -destination 'platform=macOS'
+          CODE_SIGNING_ALLOWED=NO
+          test
+
+      - name: Build iPhone companion
+        run: >-
+          xcodebuild
+          -project Wakebar.xcodeproj
+          -scheme WakebarPhone
+          -configuration Debug
+          -destination 'generic/platform=iOS Simulator'
+          CODE_SIGNING_ALLOWED=NO
+          build

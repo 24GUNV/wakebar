@@ -1,4 +1,4 @@
-public enum ProviderID: String, CaseIterable, Codable, Identifiable, Sendable {
+public enum ProviderID: String, CaseIterable, Codable, Hashable, Identifiable, Sendable {
     case claude
     case codex
 

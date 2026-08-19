@@ -1,0 +1,1487 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 90;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		01A8F14200B62BA76F3AE70E /* PhoneAlarmInstallation.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4FBC9C248CA9ACFB3708747 /* PhoneAlarmInstallation.swift */; };
+		02096DD0144B486A2DC07065 /* TriggerReceipt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 836FD85741091B9495B00D03 /* TriggerReceipt.swift */; };
+		06CF4066371E971A3E6C2B10 /* CodexHostRequirement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 181150B37857659380D20EED /* CodexHostRequirement.swift */; };
+		06FD1E0E88BFFFF13B9958A9 /* IndeterminateTestError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 511C53FF2AEFA8A637F234F2 /* IndeterminateTestError.swift */; };
+		0B04D1206ECBA8D1AD75EED0 /* PhoneCompanionRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E0FB4242F71C2E089D229A1 /* PhoneCompanionRuntime.swift */; };
+		0D1F7EE0BD5B39BAC54AFCDB /* PhoneAlarmScheduleValidationError.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA85E3C9BD6590E9EEFCFBE0 /* PhoneAlarmScheduleValidationError.swift */; };
+		0DA9B3DB15872F0FEAEA8BC4 /* PhoneCompanionStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B8ABBAF78607841DE662A12 /* PhoneCompanionStatus.swift */; };
+		0F8627C02770F41EA43D7834 /* CodexCLIPreviewError.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0BFDEF32E41263F54947CC /* CodexCLIPreviewError.swift */; };
+		0FC927E1CA99BAA8BFD5CC92 /* WeekdayPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A03F2E7C0B76BB68E318898 /* WeekdayPicker.swift */; };
+		147C521EAA9CF77F34356EB9 /* ClaudeRoutineScheduleCompilerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C809991E280F5A1C4AD835A0 /* ClaudeRoutineScheduleCompilerTests.swift */; };
+		16354778731D106FF7604E31 /* TestPhoneAlarmClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A87D10D736170A139CFD5DE /* TestPhoneAlarmClient.swift */; };
+		176E79852F778DEF7A1A92C4 /* ClaudeRoutineCredentialStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2757278882C5F9B942BCCDF /* ClaudeRoutineCredentialStore.swift */; };
+		180AECD660B332C65A4D5A8F /* ClaudeRoutineProvisionerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97D9980F4F83375EF2866150 /* ClaudeRoutineProvisionerTests.swift */; };
+		1A2923FDD221331835FF4327 /* WakeScheduleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5105C4CA14AC76307425C711 /* WakeScheduleTests.swift */; };
+		1AFEAF0AB3DB300B43629DD3 /* CodexPreviewProviderAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179B1A42CE0572A6540FC711 /* CodexPreviewProviderAdapter.swift */; };
+		1C7FE49226882E01A95CB2B0 /* ProviderDeliveryPhase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5923CF1C4FAF98D49B4D6B27 /* ProviderDeliveryPhase.swift */; };
+		1E85B176D691DD8DF0A09949 /* ClaudeRoutineProvisioner.swift in Sources */ = {isa = PBXBuildFile; fileRef = A498D00BA02FC7BECD8DCF26 /* ClaudeRoutineProvisioner.swift */; };
+		1FB0C240598D6A378CD2FA10 /* ClaudeRoutineFireResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 642478F114826D2DB7C41DBD /* ClaudeRoutineFireResponse.swift */; };
+		1FE718906DDF44B59BBCF89F /* PhoneAlarmPublishReceipt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E7F291324B1B9DFDCD88A7D /* PhoneAlarmPublishReceipt.swift */; };
+		2008ECAF714BF85DAEF39EB8 /* PhoneAlarmStatusSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E573007AD95607E766C1E7B /* PhoneAlarmStatusSection.swift */; };
+		21EF05AF8D1466B19FE1507B /* CloudKitPhoneAlarmScheduleRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1846F014A0E34486C90B0E8 /* CloudKitPhoneAlarmScheduleRepository.swift */; };
+		2559B3711FE40BDE40B7FE27 /* PhoneScheduleRevisionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25C9BCF6C6FA71FB326F931B /* PhoneScheduleRevisionStore.swift */; };
+		28315B7B438C470BE52607CA /* PhoneAlarmCloudRecordError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 638A8AD263B47DD56711099B /* PhoneAlarmCloudRecordError.swift */; };
+		29869C2452BAFF1CEFD9294D /* WakeSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74E290EC8FCFBAB0134993C5 /* WakeSummaryView.swift */; };
+		2E2E70E1E2F95EC7466261B8 /* PhoneAlarmCoordinatorError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9663740F5648B9A380A3C3E2 /* PhoneAlarmCoordinatorError.swift */; };
+		2EFE2D6D17661D49B4DCED74 /* ProviderExecutionCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D2EBC07281B731082C22037 /* ProviderExecutionCoordinator.swift */; };
+		313451FF1161636D5F8CF582 /* ProviderExecutionCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF752CC6A624542668AF1171 /* ProviderExecutionCoordinatorTests.swift */; };
+		31D8D5430807B297E78AEE11 /* WakebarPhoneApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61248A74C7AFA4337D4BF1D9 /* WakebarPhoneApp.swift */; };
+		321977BD2428D45B23E2129E /* ClaudeRoutineFireResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51A90C9048DD9A3A1D73814 /* ClaudeRoutineFireResult.swift */; };
+		342243734EADBC050667E5D2 /* ProviderDeliveryState.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA05BFDE35A3489DF67E331C /* ProviderDeliveryState.swift */; };
+		35588226345340E4B93C5D40 /* PhoneAlarmCloudKitRecordCodecTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B46AD11E7DFB1E90257782BC /* PhoneAlarmCloudKitRecordCodecTests.swift */; };
+		359216C6A056C736121451D4 /* CodexCLIPreviewPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC637CEE46C6580A3D1BC495 /* CodexCLIPreviewPlan.swift */; };
+		362E5476A905EA2B03357AC2 /* PhoneScheduleRevision.swift in Sources */ = {isa = PBXBuildFile; fileRef = 234138588E171B47649EF542 /* PhoneScheduleRevision.swift */; };
+		36FE724426033D1F7AE3B0CD /* ClaudeRoutineCapability.swift in Sources */ = {isa = PBXBuildFile; fileRef = B74D7086142571A3345DAB6A /* ClaudeRoutineCapability.swift */; };
+		378C9BFAE3649E84F2CEA2BA /* ProviderAvailability.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5E954EC2BDA9FB0787F52B1 /* ProviderAvailability.swift */; };
+		37FD5285BCA3303F63EF92C3 /* DryRunProviderAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0C8A4244EEB93ED3E59B55E /* DryRunProviderAdapter.swift */; };
+		38FBD09374C8CBA669332B5D /* ClaudeRoutineProvisioningPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0576AE54B8CB5D60BEA27CD5 /* ClaudeRoutineProvisioningPlan.swift */; };
+		3AE534E229C8D519061C2D8D /* ProviderSetupSectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8C2791C8A0B30139275E509 /* ProviderSetupSectionView.swift */; };
+		3C199EAF4BAA23D82F55AA3B /* PhoneScheduleSubscriptionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C62A4CC3B9CD8F6A858145D /* PhoneScheduleSubscriptionState.swift */; };
+		3CB72C78B4D5DB1FAF7B0AD9 /* ScheduleCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74D86960FEE286DCEBD1AD84 /* ScheduleCalculatorTests.swift */; };
+		3D3E3341E92A457B2432B3CC /* TriggerOutcome.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DEE766B86BF690E0B1E8DB8 /* TriggerOutcome.swift */; };
+		3E4735222EC626E1F343F48F /* ScheduleSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30B5BBDF2FDDD28ADABB7C6C /* ScheduleSettingsView.swift */; };
+		3E737CB50AA208EAEF37D5EC /* RecurringSessionSlotCompiler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AF261C4694BEA67E3F3759A /* RecurringSessionSlotCompiler.swift */; };
+		3EEF326FE3789C419A8D1176 /* ProviderID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FD1B8EB9AA8AE50EB87FD8 /* ProviderID.swift */; };
+		3FE94FB6114ED6561D90A058 /* CachedPhoneAlarmSchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 508E3890627E7F1F879563C0 /* CachedPhoneAlarmSchedule.swift */; };
+		3FF7FB02614DD28D1FAB078E /* NextWakeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEF6E6BB78A6CF71460CC8B0 /* NextWakeView.swift */; };
+		40160EA37D375D073D505199 /* PhoneAlarmAcknowledgement.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD50CDBAE2E37441534E7D46 /* PhoneAlarmAcknowledgement.swift */; };
+		409BC8EF1239F14BE1524C03 /* PhoneAlarmPermissionSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 266EC4C3F1E085E4DAE58E62 /* PhoneAlarmPermissionSection.swift */; };
+		41C75DF4336AD15BB730B049 /* ClaudeRoutineScheduleCompiler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92986556E64E808D91FA6E4C /* ClaudeRoutineScheduleCompiler.swift */; };
+		44B2D194ADE18C3BFA663304 /* CodexCLIPreviewPlanTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E62B05AA11A54BE9851B371 /* CodexCLIPreviewPlanTests.swift */; };
+		4940F720E0B8BFDF8E202F5E /* PhoneAlarmScheduleRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BF26B0DC48541108D66D5DD /* PhoneAlarmScheduleRepository.swift */; };
+		494C50FEFE3B176A9946949B /* ExecutionLedger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F824DF263926E1241BE326C /* ExecutionLedger.swift */; };
+		49E847967011801675D4481C /* TriggerRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB6FA09102774D1D707B9AA2 /* TriggerRequest.swift */; };
+		49EC55EE0E0CCEDE0B03EC61 /* ProviderAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A39D9B14D086B7CB09645585 /* ProviderAdapter.swift */; };
+		4A212CC0D315447BC933880B /* PhoneCompanionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED33FB3CCEC6409BDF93F674 /* PhoneCompanionModel.swift */; };
+		4C1A82CE856D085C0A05B379 /* LaunchAtLoginService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29AA880F4E31394C1A80643E /* LaunchAtLoginService.swift */; };
+		4CE5B05FE63B372622A253AE /* PhoneAlarmOverview.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB9784B156261D382FB5C774 /* PhoneAlarmOverview.swift */; };
+		537467927DBF41CE7ADEF55F /* PhoneAlarmSchedulePayloadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9810015B9B50C6833672C9BD /* PhoneAlarmSchedulePayloadTests.swift */; };
+		5424BC88622B898BE567CBE1 /* ActivityNotice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FAE88055478865CCA6BF8A8 /* ActivityNotice.swift */; };
+		55CCD798BD1722676C854869 /* WakebarHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 219DCDE35EB8F0EDDF550539 /* WakebarHeaderView.swift */; };
+		56268FB2E5987F427FC15849 /* ClaudeRoutineError.swift in Sources */ = {isa = PBXBuildFile; fileRef = D639ABF417B3E7AE93102872 /* ClaudeRoutineError.swift */; };
+		5643325EA2C1AFEB0433C74C /* PhoneAlarmCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9CF96C95DFB73E3655C7A9B /* PhoneAlarmCoordinator.swift */; };
+		5A5737A9BA3347D93568B73B /* ClaudeRoutineAdapterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F480A78074C66B657A38F93 /* ClaudeRoutineAdapterTests.swift */; };
+		5B26D840552E17221BCE9EE3 /* ClaudeRoutineWakePrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2219799908B6A3C83B7C142 /* ClaudeRoutineWakePrompt.swift */; };
+		5C3FEA13BD0CC9433D8DE698 /* CodexSchedulingCatalogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C93F963B8DDA868367DB980C /* CodexSchedulingCatalogTests.swift */; };
+		5E7410C025B77552BF9D6BD4 /* WakebarCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 223BFD28DD1C28DF2CE4B413 /* WakebarCore.framework */; };
+		62FD9AEF4F162C96853AF1AD /* ScheduleStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11761F1B5EB2B45FA0CE4CCC /* ScheduleStore.swift */; };
+		6477CCC1B5008B376254BA75 /* ExecutionAttemptResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0077739726B264C77AEF863A /* ExecutionAttemptResult.swift */; };
+		6645CC0B908503E04925DD5D /* PhoneAppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BED3F1FF8A6BE18F751FD77A /* PhoneAppDelegate.swift */; };
+		677335A13441AC792CC03329 /* ProviderSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF8B9D9D30DD74B0A2F8AF4F /* ProviderSnapshot.swift */; };
+		6B9FD461702A29BE36F659DD /* Weekday.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAB6DC89E20B60ED7F45EF30 /* Weekday.swift */; };
+		6DD46EC25104B79F06067B75 /* CodexCapabilityStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12571F3F593CC9DADE7DB740 /* CodexCapabilityStatus.swift */; };
+		702CC5DC27FF82FA110C65AC /* LaunchAtLoginSectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A5F230D29AD5B15BA59F4FB /* LaunchAtLoginSectionView.swift */; };
+		705386FE1F1AECBD473C391D /* ProviderDeliveryStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A6EBEC82C463D9807D5B23F /* ProviderDeliveryStoreTests.swift */; };
+		7376184C6B469722BA844A85 /* CodexCLIAvailability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4016F97F843FBF6CDDF3448E /* CodexCLIAvailability.swift */; };
+		738D4A1254EEB66EFCCE160D /* UnavailablePhoneAlarmClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEEFA0C8092D422A9BA482D6 /* UnavailablePhoneAlarmClient.swift */; };
+		74B75753A1E1BB46B1FFF711 /* PhoneScheduleWriterState.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFB68BDD2F55FFACA1993E15 /* PhoneScheduleWriterState.swift */; };
+		7653AE5DF80E6243DEF2AB35 /* WakebarCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 223BFD28DD1C28DF2CE4B413 /* WakebarCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		76C8F86BCC03EB41FDE9EAFD /* ActivityNoticeKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A6C86FBCBA709FF095F4839 /* ActivityNoticeKind.swift */; };
+		7A69E1430939F15FBE1F2B06 /* ExecutionBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5AA081163B4AD8F3EF37CFB /* ExecutionBackend.swift */; };
+		7CB197C7D0B13D710BEBC7EF /* AlarmKitPhoneAlarmClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B08B2821A346957377D39D61 /* AlarmKitPhoneAlarmClient.swift */; };
+		7DCD6247B439C5DF385F7807 /* CloudKitPhoneScheduleRepositoryError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04F565E1A19642D6585F2E1F /* CloudKitPhoneScheduleRepositoryError.swift */; };
+		7E9360DBDAC43A93AC3A43C8 /* PhoneDesign.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E6E555636A4C10002968719 /* PhoneDesign.swift */; };
+		7F7104C4F337D2E4CB7933A7 /* PhoneAlarmInstallationPersisting.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0EC5ED205BF55E535A53023 /* PhoneAlarmInstallationPersisting.swift */; };
+		7FC78DEF23D8CE4B08B82297 /* WakebarCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 223BFD28DD1C28DF2CE4B413 /* WakebarCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		8303AEBCD4181E85FEB9BB9D /* RecurringSessionSlotCompilerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7AA2E081A416CDB7DB1527A /* RecurringSessionSlotCompilerTests.swift */; };
+		831D573EE42552AB1757F441 /* ClaudeRoutineFireBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 005D04E4C89830AC89CEA865 /* ClaudeRoutineFireBody.swift */; };
+		8437D09D1FBA401EB4381905 /* UnavailablePhoneAlarmScheduleRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4005835E41289E972333009 /* UnavailablePhoneAlarmScheduleRepository.swift */; };
+		844275B35999D82F38CBFABA /* PhoneAlarmPayloadStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9F5BF9FCA06FCCEE57FAB68 /* PhoneAlarmPayloadStore.swift */; };
+		845037D0987F85C41BE4B6A4 /* WakebarDesign.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06865EF7A87058059E9C6BE4 /* WakebarDesign.swift */; };
+		84F949956CC720CF601CB847 /* ScheduledEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B8797F205DC7C9D46DE82D7 /* ScheduledEvent.swift */; };
+		87000838895157CA4BE8DB17 /* ClaudeRoutineHTTPResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = F56F9C67047ED591165EA7D5 /* ClaudeRoutineHTTPResponse.swift */; };
+		883552448CEA2D51D2281B36 /* PhoneAlarmClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69C75624F2B781B0CC9FA814 /* PhoneAlarmClient.swift */; };
+		887A32C9F195D15AD1EADDD7 /* WakebarCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 223BFD28DD1C28DF2CE4B413 /* WakebarCore.framework */; };
+		89C09EE1A12885C6D8D05128 /* WakebarCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 223BFD28DD1C28DF2CE4B413 /* WakebarCore.framework */; };
+		8C7C0E22F3055F57A0F6B855 /* ClaudeRoutineTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = C34C044C571FC955202C6A1F /* ClaudeRoutineTransport.swift */; };
+		8D820F41BED856D770FAA728 /* PhoneAlarmCloudRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BA4674C7B824AA0AF67C70A /* PhoneAlarmCloudRecord.swift */; };
+		8FE86D2E564236EC1F09E68A /* ExecutionLedgerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 265890BFDF3C85C20978BDD2 /* ExecutionLedgerTests.swift */; };
+		932CD02B7F768082881441A5 /* CodexSchedulingCapability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 009C61F8662DC2329C0F13D3 /* CodexSchedulingCapability.swift */; };
+		9506858D42576D32BDEEC954 /* PhoneCompanionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88F8E2E4AF060B723A4FDEFB /* PhoneCompanionView.swift */; };
+		9A425DA712B42A5FD7B23580 /* ClaudeRoutineAPIConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64F168CAF36B2065AA16AAD8 /* ClaudeRoutineAPIConfiguration.swift */; };
+		9C6510C9DCA403E3B3915169 /* ActivityStripView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A17408794414CD093A18399 /* ActivityStripView.swift */; };
+		9CC924F434E97074BED49170 /* SchedulePlannerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90394D1C6F8A8667A3646A66 /* SchedulePlannerTests.swift */; };
+		9DC697DF1943EF5C616B3140 /* CodexScheduleManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDEAEFC91BFEF198B3A9960D /* CodexScheduleManager.swift */; };
+		9FD53F8BC8EBA049F4475E3C /* URLSessionClaudeRoutineTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EEC138B82EA1B4F6782CE0D /* URLSessionClaudeRoutineTransport.swift */; };
+		A1D732702E3B00D74A27CEB3 /* WakebarAlarmMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 674281D5DD1ABA8CF111C2FE /* WakebarAlarmMetadata.swift */; };
+		A23B7ADB056E1E6C33A7C09C /* ClaudeRoutineAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 931EF5C211164E5ADE936CF9 /* ClaudeRoutineAdapter.swift */; };
+		A3EFE3326680DD2515BAAEC4 /* PhoneAlarmAcknowledgementTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F4B40B4A7D65F31B04CC014 /* PhoneAlarmAcknowledgementTests.swift */; };
+		A4C767579062E9798A2CB8AE /* SchedulePlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD75C3F9BF9282F8934AEB8 /* SchedulePlanner.swift */; };
+		A4F49F6368B3F027018D5348 /* PhoneAlarmReconciliationResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADA614A3D8A5CD22FC24EDF2 /* PhoneAlarmReconciliationResult.swift */; };
+		A9A7228D949557CB77464C59 /* CodexSchedulingCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59BCBD1337B89B4D6024A24 /* CodexSchedulingCatalog.swift */; };
+		ABE1280FB0DC8A0C2CFC0ADF /* PhoneAlarmCloudKitRecordCodec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3909BB84E57279EE673C914C /* PhoneAlarmCloudKitRecordCodec.swift */; };
+		AD076D6048C2AB2342F8CF1D /* ProviderAdapterError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 462CD78E872F6647E93DA39E /* ProviderAdapterError.swift */; };
+		B06F527EFCD08921AA02B1F0 /* PhoneAlarmAuthorizationState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1025A0CC47F5197C1B6AE66A /* PhoneAlarmAuthorizationState.swift */; };
+		B0A242119447778B1AD598AA /* PhoneCompanionOperationQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FE389562749DD684D8E0A09 /* PhoneCompanionOperationQueue.swift */; };
+		B3DB82FB9DC518E242E5C834 /* IndeterminateProviderAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D81E72A5E1E83231B9ED5255 /* IndeterminateProviderAdapter.swift */; };
+		B5444FBD6103ADFB73B251A5 /* ExecutionLedgerError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75AF0A9B9201266770BFF8CF /* ExecutionLedgerError.swift */; };
+		B5466DA49E3B035189DD5A18 /* ProviderExecutionCoordinatorError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52A5591D00C61C48B2ECD794 /* ProviderExecutionCoordinatorError.swift */; };
+		B5CA78930A6664BF65ABED66 /* PhoneCompanionModel+Preview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89C78B24B793634074BC4827 /* PhoneCompanionModel+Preview.swift */; };
+		B62F4C67E10EDF2B404D6439 /* PausedScheduleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F9E40D39FC773AF3128D681 /* PausedScheduleView.swift */; };
+		B833833D8706C0861D854E13 /* MenuBarContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15C0C9609345F02F2CCF8185 /* MenuBarContentView.swift */; };
+		B997D5E36250C885B627C8A1 /* PhoneBackgroundRefreshResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF601E9B61A1620C25E3C3BE /* PhoneBackgroundRefreshResult.swift */; };
+		BCF9817112D4C297A6BFCB76 /* ScheduleCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA93802DAC79D74C5E7E4AC /* ScheduleCalculator.swift */; };
+		BF3E0C46AC2E581A9C454DA2 /* PhoneAlarmSchedulePayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5524E566C5343C1907492BC5 /* PhoneAlarmSchedulePayload.swift */; };
+		C0806A5E1474BEA8B8D3F2FA /* PhoneAlarmClientError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 135309E0DC9D09E51DFB3726 /* PhoneAlarmClientError.swift */; };
+		C0D5396B74D27D243C909FED /* ProviderSelectionRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FBC9BEDC124E4136540B0F7 /* ProviderSelectionRow.swift */; };
+		C1715892650BB6A13D820FA3 /* SuccessfulProviderAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 872D82DCDF4960B3D4F56DB6 /* SuccessfulProviderAdapter.swift */; };
+		C4EE72584F5249E90B184FA9 /* RecurringSessionSlot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C390CC997C0974C492870DE /* RecurringSessionSlot.swift */; };
+		CB2E75FF600A122C2886B9B8 /* CodexPreviewProviderAdapterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A2E37952D1757B8DEB3EBFC /* CodexPreviewProviderAdapterTests.swift */; };
+		CB6937CBA71FF7230C5C021D /* CodexUsageWindowEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88A44F1F0CD1A22F1CB90DC1 /* CodexUsageWindowEffect.swift */; };
+		D0371A786B86B061BDA8E738 /* ScheduledEventKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88ECCAD439FA677A958D7569 /* ScheduledEventKind.swift */; };
+		D1AE572322E609173D56E3A6 /* PasteboardService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09FA64DBEC3818D24E71E081 /* PasteboardService.swift */; };
+		D388F020D20D182905036D10 /* ClaudeRoutineScheduleRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BCC959991ED5E180D12F236 /* ClaudeRoutineScheduleRequest.swift */; };
+		D49CB5B919B88C262C9B10D3 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94BFE9AD3A7942028433E46C /* AppModel.swift */; };
+		D4A4836FDCFFF81F3FFF9370 /* PhoneAlarmApplicationResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6543206B2581B2E423217BC5 /* PhoneAlarmApplicationResult.swift */; };
+		D66FD63AF781FE172749E6FB /* WakeSchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = C149D2E4F803C269EBDDEADB /* WakeSchedule.swift */; };
+		D6D160F25035A1A06817EACC /* MacPhoneSchedulePublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AF642D39D46E3B7CCB613EE /* MacPhoneSchedulePublisher.swift */; };
+		D94B1C2F75D00336426BE8CB /* PhoneAlarmInstallationStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B42F5EEC6D1AA8B7B0D0D970 /* PhoneAlarmInstallationStore.swift */; };
+		DAB89A5CC0B242B36694612D /* WakebarCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 223BFD28DD1C28DF2CE4B413 /* WakebarCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		E42CD023E2B966B72B926162 /* ScheduleEventRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1D536C00D73457BB75B3110 /* ScheduleEventRow.swift */; };
+		E6AE445F38269E80ADF0B6FC /* PhoneAlarmSyncSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03C39068666625FC1B5B4538 /* PhoneAlarmSyncSection.swift */; };
+		E8EBAE1DF43878D925A9FDBD /* PhoneAlarmPublishState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99C3F587397C0980045C9F3E /* PhoneAlarmPublishState.swift */; };
+		EB99EE4A839DDDE52B800A26 /* ProviderConfirmationButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBB2238F7A572FFD643174A9 /* ProviderConfirmationButton.swift */; };
+		ED402F8B07B85EA14086AFBB /* ScheduleEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97A89DA20EFA40C320C82060 /* ScheduleEditorView.swift */; };
+		EF9F66CB166BA15FD7138B09 /* ScheduleEventReadiness.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68F7E1A498A80C84B99782CD /* ScheduleEventReadiness.swift */; };
+		F08EF63050C7EBFBF0892508 /* PhoneScheduleDeliveryState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F6A1B2376AA2C05F95A6006 /* PhoneScheduleDeliveryState.swift */; };
+		F139CFF2ADECE294E74831A0 /* ClaudeRoutineProvisioningError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 466054CA668B6445F1B71422 /* ClaudeRoutineProvisioningError.swift */; };
+		F15704C571C31C9B9F32949E /* CodexSchedulingRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73494841005A98F0890AFA81 /* CodexSchedulingRoute.swift */; };
+		F26EFF017077F74866668280 /* TestPhoneAlarmClientError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99619341F91C329A4CFD0CC9 /* TestPhoneAlarmClientError.swift */; };
+		F294FE1C2E6BD6DD5E8ED9D3 /* PhoneAlarmCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A05EB0B15AC7EA376D2FAA98 /* PhoneAlarmCoordinatorTests.swift */; };
+		F590AF01F053D2D95BB2C6F5 /* ClaudeRoutineCredentialReference.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3088BFF5C9E7B73E55FA531 /* ClaudeRoutineCredentialReference.swift */; };
+		F6A9BAFEF1D6C7446D5E65B0 /* LaunchAtLoginState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B517468EFB76B12DBC565FA /* LaunchAtLoginState.swift */; };
+		F7F38B94747F5297A4CCD4A2 /* ExecutionRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17F2D2C5B0A44C51C961754E /* ExecutionRecord.swift */; };
+		F8C64E018C3A5ACECC740DE0 /* TestPhoneAlarmInstallationStoreError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7849445E586D9746F6E61389 /* TestPhoneAlarmInstallationStoreError.swift */; };
+		F8F255DB2DD2C96E6BC7F8F9 /* ExecutionDeliveryState.swift in Sources */ = {isa = PBXBuildFile; fileRef = E694474ABE1F7AB3C0C8C583 /* ExecutionDeliveryState.swift */; };
+		FAA4AFC819417FF12CC741A0 /* ProviderDeliveryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 060EF47C0474F0B9E4BF69ED /* ProviderDeliveryStore.swift */; };
+		FBB705119732D777492E5D26 /* TestPhoneAlarmInstallationStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60D9EDE3BCC632DAD04CB563 /* TestPhoneAlarmInstallationStore.swift */; };
+		FBC6622C43E25614D6EDBFA6 /* WakebarApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CFEB54F927587C82CF5287 /* WakebarApp.swift */; };
+		FE4B243A9F46C98E85D59DAE /* ProviderSessionPhase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7594C76114000DB7251F53FD /* ProviderSessionPhase.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		7D81D618F24259C26A69EB4C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A10BE6EF88DF2938CD32196B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AF1BA5EBA092E295407A25AA;
+			remoteInfo = WakebarCore;
+		};
+		B993E4703C47B7A7E36564DC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A10BE6EF88DF2938CD32196B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AF1BA5EBA092E295407A25AA;
+			remoteInfo = WakebarCore;
+		};
+		F6423B5D87058277774FF833 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A10BE6EF88DF2938CD32196B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AF1BA5EBA092E295407A25AA;
+			remoteInfo = WakebarCore;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		3AEBFEBC5DE49B943DCFB882 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				7653AE5DF80E6243DEF2AB35 /* WakebarCore.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8715F334EA1AF71648E43657 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				7FC78DEF23D8CE4B08B82297 /* WakebarCore.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F4ED103A8F1B5CCA6BA61B33 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				DAB89A5CC0B242B36694612D /* WakebarCore.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		005D04E4C89830AC89CEA865 /* ClaudeRoutineFireBody.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeRoutineFireBody.swift; sourceTree = "<group>"; };
+		0077739726B264C77AEF863A /* ExecutionAttemptResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionAttemptResult.swift; sourceTree = "<group>"; };
+		009C61F8662DC2329C0F13D3 /* CodexSchedulingCapability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexSchedulingCapability.swift; sourceTree = "<group>"; };
+		03C39068666625FC1B5B4538 /* PhoneAlarmSyncSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneAlarmSyncSection.swift; sourceTree = "<group>"; };
+		04F565E1A19642D6585F2E1F /* CloudKitPhoneScheduleRepositoryError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudKitPhoneScheduleRepositoryError.swift; sourceTree = "<group>"; };
+		0576AE54B8CB5D60BEA27CD5 /* ClaudeRoutineProvisioningPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeRoutineProvisioningPlan.swift; sourceTree = "<group>"; };
+		060EF47C0474F0B9E4BF69ED /* ProviderDeliveryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderDeliveryStore.swift; sourceTree = "<group>"; };
+		06865EF7A87058059E9C6BE4 /* WakebarDesign.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WakebarDesign.swift; sourceTree = "<group>"; };
+		09FA64DBEC3818D24E71E081 /* PasteboardService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasteboardService.swift; sourceTree = "<group>"; };
+		0A03F2E7C0B76BB68E318898 /* WeekdayPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeekdayPicker.swift; sourceTree = "<group>"; };
+		0E573007AD95607E766C1E7B /* PhoneAlarmStatusSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneAlarmStatusSection.swift; sourceTree = "<group>"; };
+		0F4B40B4A7D65F31B04CC014 /* PhoneAlarmAcknowledgementTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneAlarmAcknowledgementTests.swift; sourceTree = "<group>"; };
+		1025A0CC47F5197C1B6AE66A /* PhoneAlarmAuthorizationState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneAlarmAuthorizationState.swift; sourceTree = "<group>"; };
+		11761F1B5EB2B45FA0CE4CCC /* ScheduleStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleStore.swift; sourceTree = "<group>"; };
+		12571F3F593CC9DADE7DB740 /* CodexCapabilityStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexCapabilityStatus.swift; sourceTree = "<group>"; };
+		135309E0DC9D09E51DFB3726 /* PhoneAlarmClientError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneAlarmClientError.swift; sourceTree = "<group>"; };
+		15C0C9609345F02F2CCF8185 /* MenuBarContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarContentView.swift; sourceTree = "<group>"; };
+		179B1A42CE0572A6540FC711 /* CodexPreviewProviderAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexPreviewProviderAdapter.swift; sourceTree = "<group>"; };
+		17F2D2C5B0A44C51C961754E /* ExecutionRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionRecord.swift; sourceTree = "<group>"; };
+		181150B37857659380D20EED /* CodexHostRequirement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexHostRequirement.swift; sourceTree = "<group>"; };
+		1A6C86FBCBA709FF095F4839 /* ActivityNoticeKind.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityNoticeKind.swift; sourceTree = "<group>"; };
+		1A87D10D736170A139CFD5DE /* TestPhoneAlarmClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestPhoneAlarmClient.swift; sourceTree = "<group>"; };
+		1FE389562749DD684D8E0A09 /* PhoneCompanionOperationQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneCompanionOperationQueue.swift; sourceTree = "<group>"; };
+		219DCDE35EB8F0EDDF550539 /* WakebarHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WakebarHeaderView.swift; sourceTree = "<group>"; };
+		223BFD28DD1C28DF2CE4B413 /* WakebarCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = WakebarCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		234138588E171B47649EF542 /* PhoneScheduleRevision.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneScheduleRevision.swift; sourceTree = "<group>"; };
+		25C9BCF6C6FA71FB326F931B /* PhoneScheduleRevisionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneScheduleRevisionStore.swift; sourceTree = "<group>"; };
+		265890BFDF3C85C20978BDD2 /* ExecutionLedgerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionLedgerTests.swift; sourceTree = "<group>"; };
+		266EC4C3F1E085E4DAE58E62 /* PhoneAlarmPermissionSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneAlarmPermissionSection.swift; sourceTree = "<group>"; };
+		282B17689F802A30AA1E46CA /* Wakebar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Wakebar.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		29AA880F4E31394C1A80643E /* LaunchAtLoginService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchAtLoginService.swift; sourceTree = "<group>"; };
+		2E62B05AA11A54BE9851B371 /* CodexCLIPreviewPlanTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexCLIPreviewPlanTests.swift; sourceTree = "<group>"; };
+		30B5BBDF2FDDD28ADABB7C6C /* ScheduleSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleSettingsView.swift; sourceTree = "<group>"; };
+		3909BB84E57279EE673C914C /* PhoneAlarmCloudKitRecordCodec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneAlarmCloudKitRecordCodec.swift; sourceTree = "<group>"; };
+		3F824DF263926E1241BE326C /* ExecutionLedger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionLedger.swift; sourceTree = "<group>"; };
+		4016F97F843FBF6CDDF3448E /* CodexCLIAvailability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexCLIAvailability.swift; sourceTree = "<group>"; };
+		462CD78E872F6647E93DA39E /* ProviderAdapterError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderAdapterError.swift; sourceTree = "<group>"; };
+		466054CA668B6445F1B71422 /* ClaudeRoutineProvisioningError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeRoutineProvisioningError.swift; sourceTree = "<group>"; };
+		4B8797F205DC7C9D46DE82D7 /* ScheduledEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduledEvent.swift; sourceTree = "<group>"; };
+		4BA4674C7B824AA0AF67C70A /* PhoneAlarmCloudRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneAlarmCloudRecord.swift; sourceTree = "<group>"; };
+		4BCC959991ED5E180D12F236 /* ClaudeRoutineScheduleRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeRoutineScheduleRequest.swift; sourceTree = "<group>"; };
+		4C62A4CC3B9CD8F6A858145D /* PhoneScheduleSubscriptionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneScheduleSubscriptionState.swift; sourceTree = "<group>"; };
+		4E0FB4242F71C2E089D229A1 /* PhoneCompanionRuntime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneCompanionRuntime.swift; sourceTree = "<group>"; };
+		508E3890627E7F1F879563C0 /* CachedPhoneAlarmSchedule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CachedPhoneAlarmSchedule.swift; sourceTree = "<group>"; };
+		5105C4CA14AC76307425C711 /* WakeScheduleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WakeScheduleTests.swift; sourceTree = "<group>"; };
+		511C53FF2AEFA8A637F234F2 /* IndeterminateTestError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndeterminateTestError.swift; sourceTree = "<group>"; };
+		52A5591D00C61C48B2ECD794 /* ProviderExecutionCoordinatorError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderExecutionCoordinatorError.swift; sourceTree = "<group>"; };
+		5524E566C5343C1907492BC5 /* PhoneAlarmSchedulePayload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneAlarmSchedulePayload.swift; sourceTree = "<group>"; };
+		5923CF1C4FAF98D49B4D6B27 /* ProviderDeliveryPhase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderDeliveryPhase.swift; sourceTree = "<group>"; };
+		5A6EBEC82C463D9807D5B23F /* ProviderDeliveryStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderDeliveryStoreTests.swift; sourceTree = "<group>"; };
+		5E7F291324B1B9DFDCD88A7D /* PhoneAlarmPublishReceipt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneAlarmPublishReceipt.swift; sourceTree = "<group>"; };
+		5F480A78074C66B657A38F93 /* ClaudeRoutineAdapterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeRoutineAdapterTests.swift; sourceTree = "<group>"; };
+		60D9EDE3BCC632DAD04CB563 /* TestPhoneAlarmInstallationStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestPhoneAlarmInstallationStore.swift; sourceTree = "<group>"; };
+		61248A74C7AFA4337D4BF1D9 /* WakebarPhoneApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WakebarPhoneApp.swift; sourceTree = "<group>"; };
+		638A8AD263B47DD56711099B /* PhoneAlarmCloudRecordError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneAlarmCloudRecordError.swift; sourceTree = "<group>"; };
+		642478F114826D2DB7C41DBD /* ClaudeRoutineFireResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeRoutineFireResponse.swift; sourceTree = "<group>"; };
+		64F168CAF36B2065AA16AAD8 /* ClaudeRoutineAPIConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeRoutineAPIConfiguration.swift; sourceTree = "<group>"; };
+		6543206B2581B2E423217BC5 /* PhoneAlarmApplicationResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneAlarmApplicationResult.swift; sourceTree = "<group>"; };
+		674281D5DD1ABA8CF111C2FE /* WakebarAlarmMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WakebarAlarmMetadata.swift; sourceTree = "<group>"; };
+		68F7E1A498A80C84B99782CD /* ScheduleEventReadiness.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleEventReadiness.swift; sourceTree = "<group>"; };
+		69C75624F2B781B0CC9FA814 /* PhoneAlarmClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneAlarmClient.swift; sourceTree = "<group>"; };
+		6A5F230D29AD5B15BA59F4FB /* LaunchAtLoginSectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchAtLoginSectionView.swift; sourceTree = "<group>"; };
+		6AF261C4694BEA67E3F3759A /* RecurringSessionSlotCompiler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringSessionSlotCompiler.swift; sourceTree = "<group>"; };
+		6AF642D39D46E3B7CCB613EE /* MacPhoneSchedulePublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacPhoneSchedulePublisher.swift; sourceTree = "<group>"; };
+		6B517468EFB76B12DBC565FA /* LaunchAtLoginState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchAtLoginState.swift; sourceTree = "<group>"; };
+		6B8ABBAF78607841DE662A12 /* PhoneCompanionStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneCompanionStatus.swift; sourceTree = "<group>"; };
+		6FBC9BEDC124E4136540B0F7 /* ProviderSelectionRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderSelectionRow.swift; sourceTree = "<group>"; };
+		73494841005A98F0890AFA81 /* CodexSchedulingRoute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexSchedulingRoute.swift; sourceTree = "<group>"; };
+		74D86960FEE286DCEBD1AD84 /* ScheduleCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleCalculatorTests.swift; sourceTree = "<group>"; };
+		74E290EC8FCFBAB0134993C5 /* WakeSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WakeSummaryView.swift; sourceTree = "<group>"; };
+		7594C76114000DB7251F53FD /* ProviderSessionPhase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderSessionPhase.swift; sourceTree = "<group>"; };
+		75AF0A9B9201266770BFF8CF /* ExecutionLedgerError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionLedgerError.swift; sourceTree = "<group>"; };
+		7849445E586D9746F6E61389 /* TestPhoneAlarmInstallationStoreError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestPhoneAlarmInstallationStoreError.swift; sourceTree = "<group>"; };
+		7A17408794414CD093A18399 /* ActivityStripView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityStripView.swift; sourceTree = "<group>"; };
+		7A2E37952D1757B8DEB3EBFC /* CodexPreviewProviderAdapterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexPreviewProviderAdapterTests.swift; sourceTree = "<group>"; };
+		7BF26B0DC48541108D66D5DD /* PhoneAlarmScheduleRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneAlarmScheduleRepository.swift; sourceTree = "<group>"; };
+		7C390CC997C0974C492870DE /* RecurringSessionSlot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringSessionSlot.swift; sourceTree = "<group>"; };
+		7C4D194BE8F457B7CCB422BF /* WakebarPhone.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WakebarPhone.entitlements; sourceTree = "<group>"; };
+		7D2EBC07281B731082C22037 /* ProviderExecutionCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderExecutionCoordinator.swift; sourceTree = "<group>"; };
+		7DA93802DAC79D74C5E7E4AC /* ScheduleCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleCalculator.swift; sourceTree = "<group>"; };
+		7F6A1B2376AA2C05F95A6006 /* PhoneScheduleDeliveryState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneScheduleDeliveryState.swift; sourceTree = "<group>"; };
+		7FAE88055478865CCA6BF8A8 /* ActivityNotice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityNotice.swift; sourceTree = "<group>"; };
+		836FD85741091B9495B00D03 /* TriggerReceipt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerReceipt.swift; sourceTree = "<group>"; };
+		84FD1B8EB9AA8AE50EB87FD8 /* ProviderID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderID.swift; sourceTree = "<group>"; };
+		864302993F9DB734424059BF /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
+		872D82DCDF4960B3D4F56DB6 /* SuccessfulProviderAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuccessfulProviderAdapter.swift; sourceTree = "<group>"; };
+		88A44F1F0CD1A22F1CB90DC1 /* CodexUsageWindowEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexUsageWindowEffect.swift; sourceTree = "<group>"; };
+		88ECCAD439FA677A958D7569 /* ScheduledEventKind.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduledEventKind.swift; sourceTree = "<group>"; };
+		88F8E2E4AF060B723A4FDEFB /* PhoneCompanionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneCompanionView.swift; sourceTree = "<group>"; };
+		89C78B24B793634074BC4827 /* PhoneCompanionModel+Preview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PhoneCompanionModel+Preview.swift"; sourceTree = "<group>"; };
+		8DEE766B86BF690E0B1E8DB8 /* TriggerOutcome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerOutcome.swift; sourceTree = "<group>"; };
+		8E6E555636A4C10002968719 /* PhoneDesign.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneDesign.swift; sourceTree = "<group>"; };
+		8F9E40D39FC773AF3128D681 /* PausedScheduleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PausedScheduleView.swift; sourceTree = "<group>"; };
+		90394D1C6F8A8667A3646A66 /* SchedulePlannerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchedulePlannerTests.swift; sourceTree = "<group>"; };
+		92986556E64E808D91FA6E4C /* ClaudeRoutineScheduleCompiler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeRoutineScheduleCompiler.swift; sourceTree = "<group>"; };
+		931EF5C211164E5ADE936CF9 /* ClaudeRoutineAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeRoutineAdapter.swift; sourceTree = "<group>"; };
+		94BFE9AD3A7942028433E46C /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		9663740F5648B9A380A3C3E2 /* PhoneAlarmCoordinatorError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneAlarmCoordinatorError.swift; sourceTree = "<group>"; };
+		97A89DA20EFA40C320C82060 /* ScheduleEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleEditorView.swift; sourceTree = "<group>"; };
+		97D9980F4F83375EF2866150 /* ClaudeRoutineProvisionerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeRoutineProvisionerTests.swift; sourceTree = "<group>"; };
+		9810015B9B50C6833672C9BD /* PhoneAlarmSchedulePayloadTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneAlarmSchedulePayloadTests.swift; sourceTree = "<group>"; };
+		98B179641D883D9EAC50E6D1 /* Common.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Common.xcconfig; sourceTree = "<group>"; };
+		99619341F91C329A4CFD0CC9 /* TestPhoneAlarmClientError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestPhoneAlarmClientError.swift; sourceTree = "<group>"; };
+		99C3F587397C0980045C9F3E /* PhoneAlarmPublishState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneAlarmPublishState.swift; sourceTree = "<group>"; };
+		9EEC138B82EA1B4F6782CE0D /* URLSessionClaudeRoutineTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLSessionClaudeRoutineTransport.swift; sourceTree = "<group>"; };
+		A05EB0B15AC7EA376D2FAA98 /* PhoneAlarmCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneAlarmCoordinatorTests.swift; sourceTree = "<group>"; };
+		A39D9B14D086B7CB09645585 /* ProviderAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderAdapter.swift; sourceTree = "<group>"; };
+		A498D00BA02FC7BECD8DCF26 /* ClaudeRoutineProvisioner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeRoutineProvisioner.swift; sourceTree = "<group>"; };
+		A51A90C9048DD9A3A1D73814 /* ClaudeRoutineFireResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeRoutineFireResult.swift; sourceTree = "<group>"; };
+		A8C2791C8A0B30139275E509 /* ProviderSetupSectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderSetupSectionView.swift; sourceTree = "<group>"; };
+		A8CFEB54F927587C82CF5287 /* WakebarApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WakebarApp.swift; sourceTree = "<group>"; };
+		A9CF96C95DFB73E3655C7A9B /* PhoneAlarmCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneAlarmCoordinator.swift; sourceTree = "<group>"; };
+		AA85E3C9BD6590E9EEFCFBE0 /* PhoneAlarmScheduleValidationError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneAlarmScheduleValidationError.swift; sourceTree = "<group>"; };
+		AAB6DC89E20B60ED7F45EF30 /* Weekday.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Weekday.swift; sourceTree = "<group>"; };
+		AAD75C3F9BF9282F8934AEB8 /* SchedulePlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchedulePlanner.swift; sourceTree = "<group>"; };
+		ADA614A3D8A5CD22FC24EDF2 /* PhoneAlarmReconciliationResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneAlarmReconciliationResult.swift; sourceTree = "<group>"; };
+		AEEFA0C8092D422A9BA482D6 /* UnavailablePhoneAlarmClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnavailablePhoneAlarmClient.swift; sourceTree = "<group>"; };
+		AEF6E6BB78A6CF71460CC8B0 /* NextWakeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NextWakeView.swift; sourceTree = "<group>"; };
+		B08B2821A346957377D39D61 /* AlarmKitPhoneAlarmClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlarmKitPhoneAlarmClient.swift; sourceTree = "<group>"; };
+		B42F5EEC6D1AA8B7B0D0D970 /* PhoneAlarmInstallationStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneAlarmInstallationStore.swift; sourceTree = "<group>"; };
+		B46AD11E7DFB1E90257782BC /* PhoneAlarmCloudKitRecordCodecTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneAlarmCloudKitRecordCodecTests.swift; sourceTree = "<group>"; };
+		B4FBC9C248CA9ACFB3708747 /* PhoneAlarmInstallation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneAlarmInstallation.swift; sourceTree = "<group>"; };
+		B59BCBD1337B89B4D6024A24 /* CodexSchedulingCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexSchedulingCatalog.swift; sourceTree = "<group>"; };
+		B74D7086142571A3345DAB6A /* ClaudeRoutineCapability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeRoutineCapability.swift; sourceTree = "<group>"; };
+		B81647F51367E0BF60DE262A /* WakebarCoreTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = WakebarCoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B9F5BF9FCA06FCCEE57FAB68 /* PhoneAlarmPayloadStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneAlarmPayloadStore.swift; sourceTree = "<group>"; };
+		BA05BFDE35A3489DF67E331C /* ProviderDeliveryState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderDeliveryState.swift; sourceTree = "<group>"; };
+		BB6FA09102774D1D707B9AA2 /* TriggerRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerRequest.swift; sourceTree = "<group>"; };
+		BB9784B156261D382FB5C774 /* PhoneAlarmOverview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneAlarmOverview.swift; sourceTree = "<group>"; };
+		BD178673F28FE942B31C0CEE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		BDAAA7F16F470649C961DA9C /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
+		BED3F1FF8A6BE18F751FD77A /* PhoneAppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneAppDelegate.swift; sourceTree = "<group>"; };
+		C149D2E4F803C269EBDDEADB /* WakeSchedule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WakeSchedule.swift; sourceTree = "<group>"; };
+		C1846F014A0E34486C90B0E8 /* CloudKitPhoneAlarmScheduleRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudKitPhoneAlarmScheduleRepository.swift; sourceTree = "<group>"; };
+		C2219799908B6A3C83B7C142 /* ClaudeRoutineWakePrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeRoutineWakePrompt.swift; sourceTree = "<group>"; };
+		C34C044C571FC955202C6A1F /* ClaudeRoutineTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeRoutineTransport.swift; sourceTree = "<group>"; };
+		C4005835E41289E972333009 /* UnavailablePhoneAlarmScheduleRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnavailablePhoneAlarmScheduleRepository.swift; sourceTree = "<group>"; };
+		C5619C5D3AF8EAC9378959B7 /* Wakebar.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Wakebar.entitlements; sourceTree = "<group>"; };
+		C809991E280F5A1C4AD835A0 /* ClaudeRoutineScheduleCompilerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeRoutineScheduleCompilerTests.swift; sourceTree = "<group>"; };
+		C8634F46849ED86E7244FD03 /* WakebarPhone.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = WakebarPhone.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C93F963B8DDA868367DB980C /* CodexSchedulingCatalogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexSchedulingCatalogTests.swift; sourceTree = "<group>"; };
+		CDEAEFC91BFEF198B3A9960D /* CodexScheduleManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexScheduleManager.swift; sourceTree = "<group>"; };
+		CF8B9D9D30DD74B0A2F8AF4F /* ProviderSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderSnapshot.swift; sourceTree = "<group>"; };
+		D0EC5ED205BF55E535A53023 /* PhoneAlarmInstallationPersisting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneAlarmInstallationPersisting.swift; sourceTree = "<group>"; };
+		D3088BFF5C9E7B73E55FA531 /* ClaudeRoutineCredentialReference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeRoutineCredentialReference.swift; sourceTree = "<group>"; };
+		D639ABF417B3E7AE93102872 /* ClaudeRoutineError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeRoutineError.swift; sourceTree = "<group>"; };
+		D7AA2E081A416CDB7DB1527A /* RecurringSessionSlotCompilerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringSessionSlotCompilerTests.swift; sourceTree = "<group>"; };
+		D81E72A5E1E83231B9ED5255 /* IndeterminateProviderAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndeterminateProviderAdapter.swift; sourceTree = "<group>"; };
+		DBB2238F7A572FFD643174A9 /* ProviderConfirmationButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderConfirmationButton.swift; sourceTree = "<group>"; };
+		DD50CDBAE2E37441534E7D46 /* PhoneAlarmAcknowledgement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneAlarmAcknowledgement.swift; sourceTree = "<group>"; };
+		DFB68BDD2F55FFACA1993E15 /* PhoneScheduleWriterState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneScheduleWriterState.swift; sourceTree = "<group>"; };
+		E0C8A4244EEB93ED3E59B55E /* DryRunProviderAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DryRunProviderAdapter.swift; sourceTree = "<group>"; };
+		E19A512CE59DEE8C60A0C1D8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		E2757278882C5F9B942BCCDF /* ClaudeRoutineCredentialStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeRoutineCredentialStore.swift; sourceTree = "<group>"; };
+		E5AA081163B4AD8F3EF37CFB /* ExecutionBackend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionBackend.swift; sourceTree = "<group>"; };
+		E5E954EC2BDA9FB0787F52B1 /* ProviderAvailability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderAvailability.swift; sourceTree = "<group>"; };
+		E694474ABE1F7AB3C0C8C583 /* ExecutionDeliveryState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionDeliveryState.swift; sourceTree = "<group>"; };
+		E8192C4E54224465E2A35670 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		EC637CEE46C6580A3D1BC495 /* CodexCLIPreviewPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexCLIPreviewPlan.swift; sourceTree = "<group>"; };
+		ED33FB3CCEC6409BDF93F674 /* PhoneCompanionModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneCompanionModel.swift; sourceTree = "<group>"; };
+		EF601E9B61A1620C25E3C3BE /* PhoneBackgroundRefreshResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneBackgroundRefreshResult.swift; sourceTree = "<group>"; };
+		F1D536C00D73457BB75B3110 /* ScheduleEventRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleEventRow.swift; sourceTree = "<group>"; };
+		F56F9C67047ED591165EA7D5 /* ClaudeRoutineHTTPResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeRoutineHTTPResponse.swift; sourceTree = "<group>"; };
+		FE0BFDEF32E41263F54947CC /* CodexCLIPreviewError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexCLIPreviewError.swift; sourceTree = "<group>"; };
+		FF752CC6A624542668AF1171 /* ProviderExecutionCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderExecutionCoordinatorTests.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		19783BD94716552F9EFEE91B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				887A32C9F195D15AD1EADDD7 /* WakebarCore.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B22F4260C6A054C132421854 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				89C09EE1A12885C6D8D05128 /* WakebarCore.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D67E8ABBDE0A246948BD11AE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5E7410C025B77552BF9D6BD4 /* WakebarCore.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		03474711E3CF70939A5A1698 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				E19A512CE59DEE8C60A0C1D8 /* Info.plist */,
+				43827D6813E1352AD9EA24B2 /* WakebarMac */,
+				C2B97B4F0FE96F98467809CE /* WakebarPhone */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		08E5948429492213BBB105C9 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				7A17408794414CD093A18399 /* ActivityStripView.swift */,
+				6A5F230D29AD5B15BA59F4FB /* LaunchAtLoginSectionView.swift */,
+				15C0C9609345F02F2CCF8185 /* MenuBarContentView.swift */,
+				AEF6E6BB78A6CF71460CC8B0 /* NextWakeView.swift */,
+				8F9E40D39FC773AF3128D681 /* PausedScheduleView.swift */,
+				DBB2238F7A572FFD643174A9 /* ProviderConfirmationButton.swift */,
+				6FBC9BEDC124E4136540B0F7 /* ProviderSelectionRow.swift */,
+				A8C2791C8A0B30139275E509 /* ProviderSetupSectionView.swift */,
+				97A89DA20EFA40C320C82060 /* ScheduleEditorView.swift */,
+				68F7E1A498A80C84B99782CD /* ScheduleEventReadiness.swift */,
+				F1D536C00D73457BB75B3110 /* ScheduleEventRow.swift */,
+				30B5BBDF2FDDD28ADABB7C6C /* ScheduleSettingsView.swift */,
+				06865EF7A87058059E9C6BE4 /* WakebarDesign.swift */,
+				219DCDE35EB8F0EDDF550539 /* WakebarHeaderView.swift */,
+				74E290EC8FCFBAB0134993C5 /* WakeSummaryView.swift */,
+				0A03F2E7C0B76BB68E318898 /* WeekdayPicker.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		169C88D4E904F969D3657F7A /* Alarm */ = {
+			isa = PBXGroup;
+			children = (
+				BB9784B156261D382FB5C774 /* PhoneAlarmOverview.swift */,
+				266EC4C3F1E085E4DAE58E62 /* PhoneAlarmPermissionSection.swift */,
+				0E573007AD95607E766C1E7B /* PhoneAlarmStatusSection.swift */,
+				03C39068666625FC1B5B4538 /* PhoneAlarmSyncSection.swift */,
+				88F8E2E4AF060B723A4FDEFB /* PhoneCompanionView.swift */,
+			);
+			path = Alarm;
+			sourceTree = "<group>";
+		};
+		1C94CBB69D3BF150539E4735 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				23A83BFD02769C142231AA60 /* WakebarApp */,
+				4688F60C96B105821E85F9AF /* WakebarCore */,
+				51CF0CC443E97B74FB24195B /* WakebarPhone */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		1EE2159E7DB0DCD071E0C224 /* System */ = {
+			isa = PBXGroup;
+			children = (
+				29AA880F4E31394C1A80643E /* LaunchAtLoginService.swift */,
+				6B517468EFB76B12DBC565FA /* LaunchAtLoginState.swift */,
+				6AF642D39D46E3B7CCB613EE /* MacPhoneSchedulePublisher.swift */,
+				09FA64DBEC3818D24E71E081 /* PasteboardService.swift */,
+				5E7F291324B1B9DFDCD88A7D /* PhoneAlarmPublishReceipt.swift */,
+				99C3F587397C0980045C9F3E /* PhoneAlarmPublishState.swift */,
+				25C9BCF6C6FA71FB326F931B /* PhoneScheduleRevisionStore.swift */,
+				DFB68BDD2F55FFACA1993E15 /* PhoneScheduleWriterState.swift */,
+			);
+			path = System;
+			sourceTree = "<group>";
+		};
+		23A83BFD02769C142231AA60 /* WakebarApp */ = {
+			isa = PBXGroup;
+			children = (
+				CBED2189FCC45069E095085F /* App */,
+				1EE2159E7DB0DCD071E0C224 /* System */,
+				08E5948429492213BBB105C9 /* Views */,
+			);
+			path = WakebarApp;
+			sourceTree = "<group>";
+		};
+		346284F0649C26F429F898C3 /* WakebarTests */ = {
+			isa = PBXGroup;
+			children = (
+				265890BFDF3C85C20978BDD2 /* ExecutionLedgerTests.swift */,
+				5A6EBEC82C463D9807D5B23F /* ProviderDeliveryStoreTests.swift */,
+				FF752CC6A624542668AF1171 /* ProviderExecutionCoordinatorTests.swift */,
+				D7AA2E081A416CDB7DB1527A /* RecurringSessionSlotCompilerTests.swift */,
+				74D86960FEE286DCEBD1AD84 /* ScheduleCalculatorTests.swift */,
+				90394D1C6F8A8667A3646A66 /* SchedulePlannerTests.swift */,
+				5105C4CA14AC76307425C711 /* WakeScheduleTests.swift */,
+				5612B84505A9121E59A3195C /* Alarm */,
+				625D6D8492A3386D96C38517 /* Claude */,
+				740D4E613D7C4C753C3847B4 /* Codex */,
+				9CCDB4B5DE5BF9FF22C41274 /* Support */,
+			);
+			path = WakebarTests;
+			sourceTree = "<group>";
+		};
+		39C2D4AC5AF2C2A3C76D8DF2 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				169C88D4E904F969D3657F7A /* Alarm */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		43827D6813E1352AD9EA24B2 /* WakebarMac */ = {
+			isa = PBXGroup;
+			children = (
+				E8192C4E54224465E2A35670 /* Info.plist */,
+				C5619C5D3AF8EAC9378959B7 /* Wakebar.entitlements */,
+			);
+			path = WakebarMac;
+			sourceTree = "<group>";
+		};
+		4688F60C96B105821E85F9AF /* WakebarCore */ = {
+			isa = PBXGroup;
+			children = (
+				FC3E6B43A204650D76ED57E4 /* Alarm */,
+				E455311AA0374FDC2B90F5B7 /* Domain */,
+				F4A471DF1B4117922FF380C5 /* Providers */,
+				E1CBD0AC05D473CD5504BA89 /* Scheduling */,
+			);
+			path = WakebarCore;
+			sourceTree = "<group>";
+		};
+		51CF0CC443E97B74FB24195B /* WakebarPhone */ = {
+			isa = PBXGroup;
+			children = (
+				7B493DC6F12B67EE360C4E27 /* App */,
+				CFE2F4F30409D46409324D5F /* Design */,
+				39C2D4AC5AF2C2A3C76D8DF2 /* Features */,
+			);
+			path = WakebarPhone;
+			sourceTree = "<group>";
+		};
+		5612B84505A9121E59A3195C /* Alarm */ = {
+			isa = PBXGroup;
+			children = (
+				0F4B40B4A7D65F31B04CC014 /* PhoneAlarmAcknowledgementTests.swift */,
+				B46AD11E7DFB1E90257782BC /* PhoneAlarmCloudKitRecordCodecTests.swift */,
+				A05EB0B15AC7EA376D2FAA98 /* PhoneAlarmCoordinatorTests.swift */,
+				9810015B9B50C6833672C9BD /* PhoneAlarmSchedulePayloadTests.swift */,
+				1A87D10D736170A139CFD5DE /* TestPhoneAlarmClient.swift */,
+				99619341F91C329A4CFD0CC9 /* TestPhoneAlarmClientError.swift */,
+				60D9EDE3BCC632DAD04CB563 /* TestPhoneAlarmInstallationStore.swift */,
+				7849445E586D9746F6E61389 /* TestPhoneAlarmInstallationStoreError.swift */,
+			);
+			path = Alarm;
+			sourceTree = "<group>";
+		};
+		5AC097DFA0086F6E11B9CCA2 = {
+			isa = PBXGroup;
+			children = (
+				74896D7C1F7BA8E296A86A9E /* Configurations */,
+				03474711E3CF70939A5A1698 /* Resources */,
+				1C94CBB69D3BF150539E4735 /* Sources */,
+				E2776D6B6C00FA3901921454 /* Tests */,
+				8BC607DEF42DD32AF47FB10B /* Products */,
+			);
+			indentWidth = 4;
+			sourceTree = "<group>";
+			tabWidth = 4;
+			usesTabs = 0;
+		};
+		5DF8957D87F8DEDCC836579D /* Codex */ = {
+			isa = PBXGroup;
+			children = (
+				12571F3F593CC9DADE7DB740 /* CodexCapabilityStatus.swift */,
+				4016F97F843FBF6CDDF3448E /* CodexCLIAvailability.swift */,
+				FE0BFDEF32E41263F54947CC /* CodexCLIPreviewError.swift */,
+				EC637CEE46C6580A3D1BC495 /* CodexCLIPreviewPlan.swift */,
+				181150B37857659380D20EED /* CodexHostRequirement.swift */,
+				179B1A42CE0572A6540FC711 /* CodexPreviewProviderAdapter.swift */,
+				CDEAEFC91BFEF198B3A9960D /* CodexScheduleManager.swift */,
+				009C61F8662DC2329C0F13D3 /* CodexSchedulingCapability.swift */,
+				B59BCBD1337B89B4D6024A24 /* CodexSchedulingCatalog.swift */,
+				73494841005A98F0890AFA81 /* CodexSchedulingRoute.swift */,
+				88A44F1F0CD1A22F1CB90DC1 /* CodexUsageWindowEffect.swift */,
+			);
+			path = Codex;
+			sourceTree = "<group>";
+		};
+		625D6D8492A3386D96C38517 /* Claude */ = {
+			isa = PBXGroup;
+			children = (
+				5F480A78074C66B657A38F93 /* ClaudeRoutineAdapterTests.swift */,
+				97D9980F4F83375EF2866150 /* ClaudeRoutineProvisionerTests.swift */,
+				C809991E280F5A1C4AD835A0 /* ClaudeRoutineScheduleCompilerTests.swift */,
+			);
+			path = Claude;
+			sourceTree = "<group>";
+		};
+		740D4E613D7C4C753C3847B4 /* Codex */ = {
+			isa = PBXGroup;
+			children = (
+				2E62B05AA11A54BE9851B371 /* CodexCLIPreviewPlanTests.swift */,
+				7A2E37952D1757B8DEB3EBFC /* CodexPreviewProviderAdapterTests.swift */,
+				C93F963B8DDA868367DB980C /* CodexSchedulingCatalogTests.swift */,
+			);
+			path = Codex;
+			sourceTree = "<group>";
+		};
+		74896D7C1F7BA8E296A86A9E /* Configurations */ = {
+			isa = PBXGroup;
+			children = (
+				98B179641D883D9EAC50E6D1 /* Common.xcconfig */,
+				BDAAA7F16F470649C961DA9C /* Debug.xcconfig */,
+				864302993F9DB734424059BF /* Release.xcconfig */,
+			);
+			path = Configurations;
+			sourceTree = "<group>";
+		};
+		7B493DC6F12B67EE360C4E27 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				BED3F1FF8A6BE18F751FD77A /* PhoneAppDelegate.swift */,
+				EF601E9B61A1620C25E3C3BE /* PhoneBackgroundRefreshResult.swift */,
+				ED33FB3CCEC6409BDF93F674 /* PhoneCompanionModel.swift */,
+				89C78B24B793634074BC4827 /* PhoneCompanionModel+Preview.swift */,
+				1FE389562749DD684D8E0A09 /* PhoneCompanionOperationQueue.swift */,
+				4E0FB4242F71C2E089D229A1 /* PhoneCompanionRuntime.swift */,
+				6B8ABBAF78607841DE662A12 /* PhoneCompanionStatus.swift */,
+				61248A74C7AFA4337D4BF1D9 /* WakebarPhoneApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		8BC607DEF42DD32AF47FB10B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				282B17689F802A30AA1E46CA /* Wakebar.app */,
+				223BFD28DD1C28DF2CE4B413 /* WakebarCore.framework */,
+				B81647F51367E0BF60DE262A /* WakebarCoreTests.xctest */,
+				C8634F46849ED86E7244FD03 /* WakebarPhone.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		9CCDB4B5DE5BF9FF22C41274 /* Support */ = {
+			isa = PBXGroup;
+			children = (
+				D81E72A5E1E83231B9ED5255 /* IndeterminateProviderAdapter.swift */,
+				511C53FF2AEFA8A637F234F2 /* IndeterminateTestError.swift */,
+				872D82DCDF4960B3D4F56DB6 /* SuccessfulProviderAdapter.swift */,
+			);
+			path = Support;
+			sourceTree = "<group>";
+		};
+		C2B97B4F0FE96F98467809CE /* WakebarPhone */ = {
+			isa = PBXGroup;
+			children = (
+				BD178673F28FE942B31C0CEE /* Info.plist */,
+				7C4D194BE8F457B7CCB422BF /* WakebarPhone.entitlements */,
+			);
+			path = WakebarPhone;
+			sourceTree = "<group>";
+		};
+		C2CF805A98FA5252D60EE6BA /* Claude */ = {
+			isa = PBXGroup;
+			children = (
+				931EF5C211164E5ADE936CF9 /* ClaudeRoutineAdapter.swift */,
+				64F168CAF36B2065AA16AAD8 /* ClaudeRoutineAPIConfiguration.swift */,
+				B74D7086142571A3345DAB6A /* ClaudeRoutineCapability.swift */,
+				D3088BFF5C9E7B73E55FA531 /* ClaudeRoutineCredentialReference.swift */,
+				E2757278882C5F9B942BCCDF /* ClaudeRoutineCredentialStore.swift */,
+				D639ABF417B3E7AE93102872 /* ClaudeRoutineError.swift */,
+				005D04E4C89830AC89CEA865 /* ClaudeRoutineFireBody.swift */,
+				642478F114826D2DB7C41DBD /* ClaudeRoutineFireResponse.swift */,
+				A51A90C9048DD9A3A1D73814 /* ClaudeRoutineFireResult.swift */,
+				F56F9C67047ED591165EA7D5 /* ClaudeRoutineHTTPResponse.swift */,
+				A498D00BA02FC7BECD8DCF26 /* ClaudeRoutineProvisioner.swift */,
+				466054CA668B6445F1B71422 /* ClaudeRoutineProvisioningError.swift */,
+				0576AE54B8CB5D60BEA27CD5 /* ClaudeRoutineProvisioningPlan.swift */,
+				92986556E64E808D91FA6E4C /* ClaudeRoutineScheduleCompiler.swift */,
+				4BCC959991ED5E180D12F236 /* ClaudeRoutineScheduleRequest.swift */,
+				C34C044C571FC955202C6A1F /* ClaudeRoutineTransport.swift */,
+				C2219799908B6A3C83B7C142 /* ClaudeRoutineWakePrompt.swift */,
+				9EEC138B82EA1B4F6782CE0D /* URLSessionClaudeRoutineTransport.swift */,
+			);
+			path = Claude;
+			sourceTree = "<group>";
+		};
+		CBED2189FCC45069E095085F /* App */ = {
+			isa = PBXGroup;
+			children = (
+				7FAE88055478865CCA6BF8A8 /* ActivityNotice.swift */,
+				1A6C86FBCBA709FF095F4839 /* ActivityNoticeKind.swift */,
+				94BFE9AD3A7942028433E46C /* AppModel.swift */,
+				A8CFEB54F927587C82CF5287 /* WakebarApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		CFE2F4F30409D46409324D5F /* Design */ = {
+			isa = PBXGroup;
+			children = (
+				8E6E555636A4C10002968719 /* PhoneDesign.swift */,
+			);
+			path = Design;
+			sourceTree = "<group>";
+		};
+		E1CBD0AC05D473CD5504BA89 /* Scheduling */ = {
+			isa = PBXGroup;
+			children = (
+				3F824DF263926E1241BE326C /* ExecutionLedger.swift */,
+				75AF0A9B9201266770BFF8CF /* ExecutionLedgerError.swift */,
+				6AF261C4694BEA67E3F3759A /* RecurringSessionSlotCompiler.swift */,
+				7DA93802DAC79D74C5E7E4AC /* ScheduleCalculator.swift */,
+				AAD75C3F9BF9282F8934AEB8 /* SchedulePlanner.swift */,
+				11761F1B5EB2B45FA0CE4CCC /* ScheduleStore.swift */,
+			);
+			path = Scheduling;
+			sourceTree = "<group>";
+		};
+		E2776D6B6C00FA3901921454 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				346284F0649C26F429F898C3 /* WakebarTests */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		E455311AA0374FDC2B90F5B7 /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				E5AA081163B4AD8F3EF37CFB /* ExecutionBackend.swift */,
+				E694474ABE1F7AB3C0C8C583 /* ExecutionDeliveryState.swift */,
+				17F2D2C5B0A44C51C961754E /* ExecutionRecord.swift */,
+				E5E954EC2BDA9FB0787F52B1 /* ProviderAvailability.swift */,
+				5923CF1C4FAF98D49B4D6B27 /* ProviderDeliveryPhase.swift */,
+				BA05BFDE35A3489DF67E331C /* ProviderDeliveryState.swift */,
+				84FD1B8EB9AA8AE50EB87FD8 /* ProviderID.swift */,
+				7594C76114000DB7251F53FD /* ProviderSessionPhase.swift */,
+				CF8B9D9D30DD74B0A2F8AF4F /* ProviderSnapshot.swift */,
+				7C390CC997C0974C492870DE /* RecurringSessionSlot.swift */,
+				4B8797F205DC7C9D46DE82D7 /* ScheduledEvent.swift */,
+				88ECCAD439FA677A958D7569 /* ScheduledEventKind.swift */,
+				8DEE766B86BF690E0B1E8DB8 /* TriggerOutcome.swift */,
+				836FD85741091B9495B00D03 /* TriggerReceipt.swift */,
+				BB6FA09102774D1D707B9AA2 /* TriggerRequest.swift */,
+				C149D2E4F803C269EBDDEADB /* WakeSchedule.swift */,
+				AAB6DC89E20B60ED7F45EF30 /* Weekday.swift */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		F4A471DF1B4117922FF380C5 /* Providers */ = {
+			isa = PBXGroup;
+			children = (
+				E0C8A4244EEB93ED3E59B55E /* DryRunProviderAdapter.swift */,
+				0077739726B264C77AEF863A /* ExecutionAttemptResult.swift */,
+				A39D9B14D086B7CB09645585 /* ProviderAdapter.swift */,
+				462CD78E872F6647E93DA39E /* ProviderAdapterError.swift */,
+				060EF47C0474F0B9E4BF69ED /* ProviderDeliveryStore.swift */,
+				7D2EBC07281B731082C22037 /* ProviderExecutionCoordinator.swift */,
+				52A5591D00C61C48B2ECD794 /* ProviderExecutionCoordinatorError.swift */,
+				C2CF805A98FA5252D60EE6BA /* Claude */,
+				5DF8957D87F8DEDCC836579D /* Codex */,
+			);
+			path = Providers;
+			sourceTree = "<group>";
+		};
+		FC3E6B43A204650D76ED57E4 /* Alarm */ = {
+			isa = PBXGroup;
+			children = (
+				B08B2821A346957377D39D61 /* AlarmKitPhoneAlarmClient.swift */,
+				508E3890627E7F1F879563C0 /* CachedPhoneAlarmSchedule.swift */,
+				C1846F014A0E34486C90B0E8 /* CloudKitPhoneAlarmScheduleRepository.swift */,
+				04F565E1A19642D6585F2E1F /* CloudKitPhoneScheduleRepositoryError.swift */,
+				DD50CDBAE2E37441534E7D46 /* PhoneAlarmAcknowledgement.swift */,
+				6543206B2581B2E423217BC5 /* PhoneAlarmApplicationResult.swift */,
+				1025A0CC47F5197C1B6AE66A /* PhoneAlarmAuthorizationState.swift */,
+				69C75624F2B781B0CC9FA814 /* PhoneAlarmClient.swift */,
+				135309E0DC9D09E51DFB3726 /* PhoneAlarmClientError.swift */,
+				3909BB84E57279EE673C914C /* PhoneAlarmCloudKitRecordCodec.swift */,
+				4BA4674C7B824AA0AF67C70A /* PhoneAlarmCloudRecord.swift */,
+				638A8AD263B47DD56711099B /* PhoneAlarmCloudRecordError.swift */,
+				A9CF96C95DFB73E3655C7A9B /* PhoneAlarmCoordinator.swift */,
+				9663740F5648B9A380A3C3E2 /* PhoneAlarmCoordinatorError.swift */,
+				B4FBC9C248CA9ACFB3708747 /* PhoneAlarmInstallation.swift */,
+				D0EC5ED205BF55E535A53023 /* PhoneAlarmInstallationPersisting.swift */,
+				B42F5EEC6D1AA8B7B0D0D970 /* PhoneAlarmInstallationStore.swift */,
+				B9F5BF9FCA06FCCEE57FAB68 /* PhoneAlarmPayloadStore.swift */,
+				ADA614A3D8A5CD22FC24EDF2 /* PhoneAlarmReconciliationResult.swift */,
+				5524E566C5343C1907492BC5 /* PhoneAlarmSchedulePayload.swift */,
+				7BF26B0DC48541108D66D5DD /* PhoneAlarmScheduleRepository.swift */,
+				AA85E3C9BD6590E9EEFCFBE0 /* PhoneAlarmScheduleValidationError.swift */,
+				7F6A1B2376AA2C05F95A6006 /* PhoneScheduleDeliveryState.swift */,
+				234138588E171B47649EF542 /* PhoneScheduleRevision.swift */,
+				4C62A4CC3B9CD8F6A858145D /* PhoneScheduleSubscriptionState.swift */,
+				AEEFA0C8092D422A9BA482D6 /* UnavailablePhoneAlarmClient.swift */,
+				C4005835E41289E972333009 /* UnavailablePhoneAlarmScheduleRepository.swift */,
+				674281D5DD1ABA8CF111C2FE /* WakebarAlarmMetadata.swift */,
+			);
+			path = Alarm;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		3275C74156F31BE5ADBFD4BA /* Wakebar */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3D556B1240AD40CF5F51EE25 /* Build configuration list for PBXNativeTarget "Wakebar" */;
+			buildPhases = (
+				1FEC24883A75A3BA989C02B6 /* Sources */,
+				D67E8ABBDE0A246948BD11AE /* Frameworks */,
+				3AEBFEBC5DE49B943DCFB882 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				6F203175BA9BA57EF62CAFAE /* PBXTargetDependency */,
+			);
+			name = Wakebar;
+			packageProductDependencies = (
+			);
+			productName = Wakebar;
+			productReference = 282B17689F802A30AA1E46CA /* Wakebar.app */;
+			productType = "com.apple.product-type.application";
+		};
+		5D676D15C0E4D3048269721E /* WakebarCoreTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 74C7AD263632BDFCBB92E986 /* Build configuration list for PBXNativeTarget "WakebarCoreTests" */;
+			buildPhases = (
+				EC441B072E5852E771725929 /* Sources */,
+				19783BD94716552F9EFEE91B /* Frameworks */,
+				8715F334EA1AF71648E43657 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				33AB47DDBF4C2BFB511B32EB /* PBXTargetDependency */,
+			);
+			name = WakebarCoreTests;
+			packageProductDependencies = (
+			);
+			productName = WakebarCoreTests;
+			productReference = B81647F51367E0BF60DE262A /* WakebarCoreTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		AF1BA5EBA092E295407A25AA /* WakebarCore */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DF643FF84063A8FD80AC6260 /* Build configuration list for PBXNativeTarget "WakebarCore" */;
+			buildPhases = (
+				AC7C5F779F9D1FA201852008 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = WakebarCore;
+			packageProductDependencies = (
+			);
+			productName = WakebarCore;
+			productReference = 223BFD28DD1C28DF2CE4B413 /* WakebarCore.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		BB80A312A0752350DE1904FD /* WakebarPhone */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 69A03209AC756702CD6BF5DA /* Build configuration list for PBXNativeTarget "WakebarPhone" */;
+			buildPhases = (
+				2237EAEC5E7D61D0FB3EEF11 /* Sources */,
+				B22F4260C6A054C132421854 /* Frameworks */,
+				F4ED103A8F1B5CCA6BA61B33 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D2F520950C3A70243D267B3B /* PBXTargetDependency */,
+			);
+			name = WakebarPhone;
+			packageProductDependencies = (
+			);
+			productName = WakebarPhone;
+			productReference = C8634F46849ED86E7244FD03 /* WakebarPhone.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A10BE6EF88DF2938CD32196B /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2600;
+				TargetAttributes = {
+					3275C74156F31BE5ADBFD4BA = {
+						ProvisioningStyle = Automatic;
+					};
+					5D676D15C0E4D3048269721E = {
+						ProvisioningStyle = Automatic;
+					};
+					AF1BA5EBA092E295407A25AA = {
+						ProvisioningStyle = Automatic;
+					};
+					BB80A312A0752350DE1904FD = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 2C0C9602714488130C1A6F9B /* Build configuration list for PBXProject "Wakebar" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 5AC097DFA0086F6E11B9CCA2;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 90;
+			productRefGroup = 8BC607DEF42DD32AF47FB10B /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				AF1BA5EBA092E295407A25AA /* WakebarCore */,
+				3275C74156F31BE5ADBFD4BA /* Wakebar */,
+				BB80A312A0752350DE1904FD /* WakebarPhone */,
+				5D676D15C0E4D3048269721E /* WakebarCoreTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1FEC24883A75A3BA989C02B6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5424BC88622B898BE567CBE1 /* ActivityNotice.swift in Sources */,
+				76C8F86BCC03EB41FDE9EAFD /* ActivityNoticeKind.swift in Sources */,
+				9C6510C9DCA403E3B3915169 /* ActivityStripView.swift in Sources */,
+				D49CB5B919B88C262C9B10D3 /* AppModel.swift in Sources */,
+				702CC5DC27FF82FA110C65AC /* LaunchAtLoginSectionView.swift in Sources */,
+				4C1A82CE856D085C0A05B379 /* LaunchAtLoginService.swift in Sources */,
+				F6A9BAFEF1D6C7446D5E65B0 /* LaunchAtLoginState.swift in Sources */,
+				D6D160F25035A1A06817EACC /* MacPhoneSchedulePublisher.swift in Sources */,
+				B833833D8706C0861D854E13 /* MenuBarContentView.swift in Sources */,
+				3FF7FB02614DD28D1FAB078E /* NextWakeView.swift in Sources */,
+				D1AE572322E609173D56E3A6 /* PasteboardService.swift in Sources */,
+				B62F4C67E10EDF2B404D6439 /* PausedScheduleView.swift in Sources */,
+				1FE718906DDF44B59BBCF89F /* PhoneAlarmPublishReceipt.swift in Sources */,
+				E8EBAE1DF43878D925A9FDBD /* PhoneAlarmPublishState.swift in Sources */,
+				2559B3711FE40BDE40B7FE27 /* PhoneScheduleRevisionStore.swift in Sources */,
+				74B75753A1E1BB46B1FFF711 /* PhoneScheduleWriterState.swift in Sources */,
+				EB99EE4A839DDDE52B800A26 /* ProviderConfirmationButton.swift in Sources */,
+				C0D5396B74D27D243C909FED /* ProviderSelectionRow.swift in Sources */,
+				3AE534E229C8D519061C2D8D /* ProviderSetupSectionView.swift in Sources */,
+				ED402F8B07B85EA14086AFBB /* ScheduleEditorView.swift in Sources */,
+				EF9F66CB166BA15FD7138B09 /* ScheduleEventReadiness.swift in Sources */,
+				E42CD023E2B966B72B926162 /* ScheduleEventRow.swift in Sources */,
+				3E4735222EC626E1F343F48F /* ScheduleSettingsView.swift in Sources */,
+				29869C2452BAFF1CEFD9294D /* WakeSummaryView.swift in Sources */,
+				FBC6622C43E25614D6EDBFA6 /* WakebarApp.swift in Sources */,
+				845037D0987F85C41BE4B6A4 /* WakebarDesign.swift in Sources */,
+				55CCD798BD1722676C854869 /* WakebarHeaderView.swift in Sources */,
+				0FC927E1CA99BAA8BFD5CC92 /* WeekdayPicker.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2237EAEC5E7D61D0FB3EEF11 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4CE5B05FE63B372622A253AE /* PhoneAlarmOverview.swift in Sources */,
+				409BC8EF1239F14BE1524C03 /* PhoneAlarmPermissionSection.swift in Sources */,
+				2008ECAF714BF85DAEF39EB8 /* PhoneAlarmStatusSection.swift in Sources */,
+				E6AE445F38269E80ADF0B6FC /* PhoneAlarmSyncSection.swift in Sources */,
+				6645CC0B908503E04925DD5D /* PhoneAppDelegate.swift in Sources */,
+				B997D5E36250C885B627C8A1 /* PhoneBackgroundRefreshResult.swift in Sources */,
+				B5CA78930A6664BF65ABED66 /* PhoneCompanionModel+Preview.swift in Sources */,
+				4A212CC0D315447BC933880B /* PhoneCompanionModel.swift in Sources */,
+				B0A242119447778B1AD598AA /* PhoneCompanionOperationQueue.swift in Sources */,
+				0B04D1206ECBA8D1AD75EED0 /* PhoneCompanionRuntime.swift in Sources */,
+				0DA9B3DB15872F0FEAEA8BC4 /* PhoneCompanionStatus.swift in Sources */,
+				9506858D42576D32BDEEC954 /* PhoneCompanionView.swift in Sources */,
+				7E9360DBDAC43A93AC3A43C8 /* PhoneDesign.swift in Sources */,
+				31D8D5430807B297E78AEE11 /* WakebarPhoneApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AC7C5F779F9D1FA201852008 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7CB197C7D0B13D710BEBC7EF /* AlarmKitPhoneAlarmClient.swift in Sources */,
+				3FE94FB6114ED6561D90A058 /* CachedPhoneAlarmSchedule.swift in Sources */,
+				9A425DA712B42A5FD7B23580 /* ClaudeRoutineAPIConfiguration.swift in Sources */,
+				A23B7ADB056E1E6C33A7C09C /* ClaudeRoutineAdapter.swift in Sources */,
+				36FE724426033D1F7AE3B0CD /* ClaudeRoutineCapability.swift in Sources */,
+				F590AF01F053D2D95BB2C6F5 /* ClaudeRoutineCredentialReference.swift in Sources */,
+				176E79852F778DEF7A1A92C4 /* ClaudeRoutineCredentialStore.swift in Sources */,
+				56268FB2E5987F427FC15849 /* ClaudeRoutineError.swift in Sources */,
+				831D573EE42552AB1757F441 /* ClaudeRoutineFireBody.swift in Sources */,
+				1FB0C240598D6A378CD2FA10 /* ClaudeRoutineFireResponse.swift in Sources */,
+				321977BD2428D45B23E2129E /* ClaudeRoutineFireResult.swift in Sources */,
+				87000838895157CA4BE8DB17 /* ClaudeRoutineHTTPResponse.swift in Sources */,
+				1E85B176D691DD8DF0A09949 /* ClaudeRoutineProvisioner.swift in Sources */,
+				F139CFF2ADECE294E74831A0 /* ClaudeRoutineProvisioningError.swift in Sources */,
+				38FBD09374C8CBA669332B5D /* ClaudeRoutineProvisioningPlan.swift in Sources */,
+				41C75DF4336AD15BB730B049 /* ClaudeRoutineScheduleCompiler.swift in Sources */,
+				D388F020D20D182905036D10 /* ClaudeRoutineScheduleRequest.swift in Sources */,
+				8C7C0E22F3055F57A0F6B855 /* ClaudeRoutineTransport.swift in Sources */,
+				5B26D840552E17221BCE9EE3 /* ClaudeRoutineWakePrompt.swift in Sources */,
+				21EF05AF8D1466B19FE1507B /* CloudKitPhoneAlarmScheduleRepository.swift in Sources */,
+				7DCD6247B439C5DF385F7807 /* CloudKitPhoneScheduleRepositoryError.swift in Sources */,
+				7376184C6B469722BA844A85 /* CodexCLIAvailability.swift in Sources */,
+				0F8627C02770F41EA43D7834 /* CodexCLIPreviewError.swift in Sources */,
+				359216C6A056C736121451D4 /* CodexCLIPreviewPlan.swift in Sources */,
+				6DD46EC25104B79F06067B75 /* CodexCapabilityStatus.swift in Sources */,
+				06CF4066371E971A3E6C2B10 /* CodexHostRequirement.swift in Sources */,
+				1AFEAF0AB3DB300B43629DD3 /* CodexPreviewProviderAdapter.swift in Sources */,
+				9DC697DF1943EF5C616B3140 /* CodexScheduleManager.swift in Sources */,
+				932CD02B7F768082881441A5 /* CodexSchedulingCapability.swift in Sources */,
+				A9A7228D949557CB77464C59 /* CodexSchedulingCatalog.swift in Sources */,
+				F15704C571C31C9B9F32949E /* CodexSchedulingRoute.swift in Sources */,
+				CB6937CBA71FF7230C5C021D /* CodexUsageWindowEffect.swift in Sources */,
+				37FD5285BCA3303F63EF92C3 /* DryRunProviderAdapter.swift in Sources */,
+				6477CCC1B5008B376254BA75 /* ExecutionAttemptResult.swift in Sources */,
+				7A69E1430939F15FBE1F2B06 /* ExecutionBackend.swift in Sources */,
+				F8F255DB2DD2C96E6BC7F8F9 /* ExecutionDeliveryState.swift in Sources */,
+				494C50FEFE3B176A9946949B /* ExecutionLedger.swift in Sources */,
+				B5444FBD6103ADFB73B251A5 /* ExecutionLedgerError.swift in Sources */,
+				F7F38B94747F5297A4CCD4A2 /* ExecutionRecord.swift in Sources */,
+				40160EA37D375D073D505199 /* PhoneAlarmAcknowledgement.swift in Sources */,
+				D4A4836FDCFFF81F3FFF9370 /* PhoneAlarmApplicationResult.swift in Sources */,
+				B06F527EFCD08921AA02B1F0 /* PhoneAlarmAuthorizationState.swift in Sources */,
+				883552448CEA2D51D2281B36 /* PhoneAlarmClient.swift in Sources */,
+				C0806A5E1474BEA8B8D3F2FA /* PhoneAlarmClientError.swift in Sources */,
+				ABE1280FB0DC8A0C2CFC0ADF /* PhoneAlarmCloudKitRecordCodec.swift in Sources */,
+				8D820F41BED856D770FAA728 /* PhoneAlarmCloudRecord.swift in Sources */,
+				28315B7B438C470BE52607CA /* PhoneAlarmCloudRecordError.swift in Sources */,
+				5643325EA2C1AFEB0433C74C /* PhoneAlarmCoordinator.swift in Sources */,
+				2E2E70E1E2F95EC7466261B8 /* PhoneAlarmCoordinatorError.swift in Sources */,
+				01A8F14200B62BA76F3AE70E /* PhoneAlarmInstallation.swift in Sources */,
+				7F7104C4F337D2E4CB7933A7 /* PhoneAlarmInstallationPersisting.swift in Sources */,
+				D94B1C2F75D00336426BE8CB /* PhoneAlarmInstallationStore.swift in Sources */,
+				844275B35999D82F38CBFABA /* PhoneAlarmPayloadStore.swift in Sources */,
+				A4F49F6368B3F027018D5348 /* PhoneAlarmReconciliationResult.swift in Sources */,
+				BF3E0C46AC2E581A9C454DA2 /* PhoneAlarmSchedulePayload.swift in Sources */,
+				4940F720E0B8BFDF8E202F5E /* PhoneAlarmScheduleRepository.swift in Sources */,
+				0D1F7EE0BD5B39BAC54AFCDB /* PhoneAlarmScheduleValidationError.swift in Sources */,
+				F08EF63050C7EBFBF0892508 /* PhoneScheduleDeliveryState.swift in Sources */,
+				362E5476A905EA2B03357AC2 /* PhoneScheduleRevision.swift in Sources */,
+				3C199EAF4BAA23D82F55AA3B /* PhoneScheduleSubscriptionState.swift in Sources */,
+				49EC55EE0E0CCEDE0B03EC61 /* ProviderAdapter.swift in Sources */,
+				AD076D6048C2AB2342F8CF1D /* ProviderAdapterError.swift in Sources */,
+				378C9BFAE3649E84F2CEA2BA /* ProviderAvailability.swift in Sources */,
+				1C7FE49226882E01A95CB2B0 /* ProviderDeliveryPhase.swift in Sources */,
+				342243734EADBC050667E5D2 /* ProviderDeliveryState.swift in Sources */,
+				FAA4AFC819417FF12CC741A0 /* ProviderDeliveryStore.swift in Sources */,
+				2EFE2D6D17661D49B4DCED74 /* ProviderExecutionCoordinator.swift in Sources */,
+				B5466DA49E3B035189DD5A18 /* ProviderExecutionCoordinatorError.swift in Sources */,
+				3EEF326FE3789C419A8D1176 /* ProviderID.swift in Sources */,
+				FE4B243A9F46C98E85D59DAE /* ProviderSessionPhase.swift in Sources */,
+				677335A13441AC792CC03329 /* ProviderSnapshot.swift in Sources */,
+				C4EE72584F5249E90B184FA9 /* RecurringSessionSlot.swift in Sources */,
+				3E737CB50AA208EAEF37D5EC /* RecurringSessionSlotCompiler.swift in Sources */,
+				BCF9817112D4C297A6BFCB76 /* ScheduleCalculator.swift in Sources */,
+				A4C767579062E9798A2CB8AE /* SchedulePlanner.swift in Sources */,
+				62FD9AEF4F162C96853AF1AD /* ScheduleStore.swift in Sources */,
+				84F949956CC720CF601CB847 /* ScheduledEvent.swift in Sources */,
+				D0371A786B86B061BDA8E738 /* ScheduledEventKind.swift in Sources */,
+				3D3E3341E92A457B2432B3CC /* TriggerOutcome.swift in Sources */,
+				02096DD0144B486A2DC07065 /* TriggerReceipt.swift in Sources */,
+				49E847967011801675D4481C /* TriggerRequest.swift in Sources */,
+				9FD53F8BC8EBA049F4475E3C /* URLSessionClaudeRoutineTransport.swift in Sources */,
+				738D4A1254EEB66EFCCE160D /* UnavailablePhoneAlarmClient.swift in Sources */,
+				8437D09D1FBA401EB4381905 /* UnavailablePhoneAlarmScheduleRepository.swift in Sources */,
+				D66FD63AF781FE172749E6FB /* WakeSchedule.swift in Sources */,
+				A1D732702E3B00D74A27CEB3 /* WakebarAlarmMetadata.swift in Sources */,
+				6B9FD461702A29BE36F659DD /* Weekday.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EC441B072E5852E771725929 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5A5737A9BA3347D93568B73B /* ClaudeRoutineAdapterTests.swift in Sources */,
+				180AECD660B332C65A4D5A8F /* ClaudeRoutineProvisionerTests.swift in Sources */,
+				147C521EAA9CF77F34356EB9 /* ClaudeRoutineScheduleCompilerTests.swift in Sources */,
+				44B2D194ADE18C3BFA663304 /* CodexCLIPreviewPlanTests.swift in Sources */,
+				CB2E75FF600A122C2886B9B8 /* CodexPreviewProviderAdapterTests.swift in Sources */,
+				5C3FEA13BD0CC9433D8DE698 /* CodexSchedulingCatalogTests.swift in Sources */,
+				8FE86D2E564236EC1F09E68A /* ExecutionLedgerTests.swift in Sources */,
+				B3DB82FB9DC518E242E5C834 /* IndeterminateProviderAdapter.swift in Sources */,
+				06FD1E0E88BFFFF13B9958A9 /* IndeterminateTestError.swift in Sources */,
+				A3EFE3326680DD2515BAAEC4 /* PhoneAlarmAcknowledgementTests.swift in Sources */,
+				35588226345340E4B93C5D40 /* PhoneAlarmCloudKitRecordCodecTests.swift in Sources */,
+				F294FE1C2E6BD6DD5E8ED9D3 /* PhoneAlarmCoordinatorTests.swift in Sources */,
+				537467927DBF41CE7ADEF55F /* PhoneAlarmSchedulePayloadTests.swift in Sources */,
+				705386FE1F1AECBD473C391D /* ProviderDeliveryStoreTests.swift in Sources */,
+				313451FF1161636D5F8CF582 /* ProviderExecutionCoordinatorTests.swift in Sources */,
+				8303AEBCD4181E85FEB9BB9D /* RecurringSessionSlotCompilerTests.swift in Sources */,
+				3CB72C78B4D5DB1FAF7B0AD9 /* ScheduleCalculatorTests.swift in Sources */,
+				9CC924F434E97074BED49170 /* SchedulePlannerTests.swift in Sources */,
+				C1715892650BB6A13D820FA3 /* SuccessfulProviderAdapter.swift in Sources */,
+				16354778731D106FF7604E31 /* TestPhoneAlarmClient.swift in Sources */,
+				F26EFF017077F74866668280 /* TestPhoneAlarmClientError.swift in Sources */,
+				FBB705119732D777492E5D26 /* TestPhoneAlarmInstallationStore.swift in Sources */,
+				F8C64E018C3A5ACECC740DE0 /* TestPhoneAlarmInstallationStoreError.swift in Sources */,
+				1A2923FDD221331835FF4327 /* WakeScheduleTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		33AB47DDBF4C2BFB511B32EB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AF1BA5EBA092E295407A25AA /* WakebarCore */;
+			targetProxy = 7D81D618F24259C26A69EB4C /* PBXContainerItemProxy */;
+		};
+		6F203175BA9BA57EF62CAFAE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AF1BA5EBA092E295407A25AA /* WakebarCore */;
+			targetProxy = F6423B5D87058277774FF833 /* PBXContainerItemProxy */;
+		};
+		D2F520950C3A70243D267B3B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AF1BA5EBA092E295407A25AA /* WakebarCore */;
+			targetProxy = B993E4703C47B7A7E36564DC /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		0CF1D9E9E8D21F884636FC12 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GENERATE_INFOPLIST_FILE = YES;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.24gunv.wakebar.core;
+				PRODUCT_NAME = WakebarCore;
+				SDKROOT = auto;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Release;
+		};
+		1C45FF5837D6215698B36E71 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Resources/WakebarMac/Wakebar.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = Resources/WakebarMac/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.24gunv.wakebar;
+				PRODUCT_NAME = Wakebar;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		425D01CB5DB092D24EA6D4DC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.24gunv.wakebar.core-tests";
+				PRODUCT_NAME = WakebarCoreTests;
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		5BECF145C0303F0829A247FE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Resources/WakebarPhone/WakebarPhone.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = Resources/WakebarPhone/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.24gunv.wakebar.phone;
+				PRODUCT_NAME = Wakebar;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		786C944885670C234F00220A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = BDAAA7F16F470649C961DA9C /* Debug.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		956F3971F304C6256E501150 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.24gunv.wakebar.core-tests";
+				PRODUCT_NAME = WakebarCoreTests;
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		98904C871DBFC262DB2B8E55 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Resources/WakebarMac/Wakebar.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = Resources/WakebarMac/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.24gunv.wakebar;
+				PRODUCT_NAME = Wakebar;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		DA45C8B591E9580FC828EEFD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GENERATE_INFOPLIST_FILE = YES;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.24gunv.wakebar.core;
+				PRODUCT_NAME = WakebarCore;
+				SDKROOT = auto;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Debug;
+		};
+		DB2667987C4B994964A438F2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Resources/WakebarPhone/WakebarPhone.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = Resources/WakebarPhone/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.24gunv.wakebar.phone;
+				PRODUCT_NAME = Wakebar;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		F7A5AA5B5381BA3B15BB96D2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 864302993F9DB734424059BF /* Release.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		2C0C9602714488130C1A6F9B /* Build configuration list for PBXProject "Wakebar" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				786C944885670C234F00220A /* Debug */,
+				F7A5AA5B5381BA3B15BB96D2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		3D556B1240AD40CF5F51EE25 /* Build configuration list for PBXNativeTarget "Wakebar" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1C45FF5837D6215698B36E71 /* Debug */,
+				98904C871DBFC262DB2B8E55 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		69A03209AC756702CD6BF5DA /* Build configuration list for PBXNativeTarget "WakebarPhone" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DB2667987C4B994964A438F2 /* Debug */,
+				5BECF145C0303F0829A247FE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		74C7AD263632BDFCBB92E986 /* Build configuration list for PBXNativeTarget "WakebarCoreTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				425D01CB5DB092D24EA6D4DC /* Debug */,
+				956F3971F304C6256E501150 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		DF643FF84063A8FD80AC6260 /* Build configuration list for PBXNativeTarget "WakebarCore" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DA45C8B591E9580FC828EEFD /* Debug */,
+				0CF1D9E9E8D21F884636FC12 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A10BE6EF88DF2938CD32196B /* Project object */;
+}

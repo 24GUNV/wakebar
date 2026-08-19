@@ -1,18 +1,39 @@
 import SwiftUI
 
 struct ActivityStripView: View {
-    let message: String?
+    let notice: ActivityNotice
 
     var body: some View {
-        Label(
-            message ?? "Preview mode · provider connections are not configured",
-            systemImage: message == nil ? "info.circle" : "checkmark.circle"
-        )
+        Label(notice.message, systemImage: systemImage)
         .font(.footnote)
-        .foregroundStyle(.secondary)
+        .foregroundStyle(foregroundStyle)
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, WakebarDesign.horizontalPadding)
         .padding(.vertical, WakebarDesign.compactSpacing)
         .background(.quaternary)
+    }
+
+    private var systemImage: String {
+        switch notice.kind {
+        case .information:
+            "info.circle"
+        case .success:
+            "checkmark.circle"
+        case .warning:
+            "exclamationmark.triangle"
+        case .error:
+            "exclamationmark.circle"
+        }
+    }
+
+    private var foregroundStyle: Color {
+        switch notice.kind {
+        case .information, .success:
+            .secondary
+        case .warning:
+            .orange
+        case .error:
+            .red
+        }
     }
 }

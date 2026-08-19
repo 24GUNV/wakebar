@@ -4,24 +4,23 @@ struct NextWakeView: View {
     let nextWake: Date?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 3) {
+        HStack(alignment: .firstTextBaseline) {
+            Text("Next wake")
+                .foregroundStyle(.secondary)
+
+            Spacer()
+
             if let nextWake {
-                Text(nextWake, format: .dateTime.weekday(.wide))
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                Text(nextWake, format: .dateTime.hour().minute())
-                    .font(.largeTitle)
+                Text(nextWake, format: .dateTime.weekday(.wide).hour().minute())
+                    .font(.headline)
                     .monospacedDigit()
             } else {
-                Text("No wake scheduled")
-                    .font(.title2)
-                Text("Choose at least one day and provider.")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                Text("Not scheduled")
+                    .font(.headline)
             }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, WakebarDesign.horizontalPadding)
-        .padding(.vertical, WakebarDesign.sectionSpacing)
+        .padding(.vertical, WakebarDesign.compactSpacing)
+        .accessibilityElement(children: .combine)
     }
 }

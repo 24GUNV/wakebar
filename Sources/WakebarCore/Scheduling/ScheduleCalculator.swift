@@ -10,16 +10,39 @@ public struct ScheduleCalculator: Sendable {
     public func nextWakeOccurrence(after date: Date, for schedule: WakeSchedule) -> Date? {
         guard !schedule.selectedWeekdays.isEmpty else { return nil }
 
-        let nextDate = candidateWakeDates(after: date, for: schedule).min()
+        let nextDate = candidateWakeDates(after: date, for: schedule, direction: .forward).min()
         guard let nextDate else { return nil }
 
         if let skippedWakeDate = schedule.skippedWakeDate,
            abs(nextDate.timeIntervalSince(skippedWakeDate)) < 60
         {
-            return candidateWakeDates(after: nextDate.addingTimeInterval(60), for: schedule).min()
+            return candidateWakeDates(
+                after: nextDate.addingTimeInterval(60),
+                for: schedule,
+                direction: .forward
+            ).min()
         }
 
         return nextDate
+    }
+
+    public func previousWakeOccurrence(before date: Date, for schedule: WakeSchedule) -> Date? {
+        guard !schedule.selectedWeekdays.isEmpty else { return nil }
+
+        let previousDate = candidateWakeDates(after: date, for: schedule, direction: .backward).max()
+        guard let previousDate else { return nil }
+
+        if let skippedWakeDate = schedule.skippedWakeDate,
+           abs(previousDate.timeIntervalSince(skippedWakeDate)) < 60
+        {
+            return candidateWakeDates(
+                after: previousDate.addingTimeInterval(-60),
+                for: schedule,
+                direction: .backward
+            ).max()
+        }
+
+        return previousDate
     }
 
     public func nextSessionStart(after date: Date, for schedule: WakeSchedule) -> Date? {
@@ -28,7 +51,11 @@ public struct ScheduleCalculator: Sendable {
         return nextWakeOccurrence(after: wakeSearchDate, for: schedule)?.addingTimeInterval(-leadTime)
     }
 
-    private func candidateWakeDates(after date: Date, for schedule: WakeSchedule) -> [Date] {
+    private func candidateWakeDates(
+        after date: Date,
+        for schedule: WakeSchedule,
+        direction: Calendar.SearchDirection
+    ) -> [Date] {
         var calculationCalendar = calendar
         calculationCalendar.timeZone = schedule.timeZone
 
@@ -43,9 +70,9 @@ public struct ScheduleCalculator: Sendable {
             return calculationCalendar.nextDate(
                 after: date,
                 matching: components,
-                matchingPolicy: .nextTime,
-                repeatedTimePolicy: .first,
-                direction: .forward
+                matchingPolicy: direction == .forward ? .nextTime : .previousTimePreservingSmallerComponents,
+                repeatedTimePolicy: direction == .forward ? .first : .last,
+                direction: direction
             )
         }
     }

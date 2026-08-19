@@ -2,6 +2,7 @@ import SwiftUI
 
 struct WakebarHeaderView: View {
     @Binding var isEnabled: Bool
+    let status: String
     let onEdit: () -> Void
 
     var body: some View {
@@ -10,6 +11,10 @@ struct WakebarHeaderView: View {
                 .font(.headline)
 
             Spacer()
+
+            Text(status)
+                .font(.footnote)
+                .foregroundStyle(.secondary)
 
             Toggle("Wake schedule", isOn: $isEnabled)
                 .labelsHidden()

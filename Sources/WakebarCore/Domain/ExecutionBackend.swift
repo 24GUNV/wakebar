@@ -1,4 +1,4 @@
-public enum ExecutionBackend: String, CaseIterable, Codable, Identifiable, Sendable {
+public enum ExecutionBackend: String, CaseIterable, Codable, Hashable, Identifiable, Sendable {
     case providerCloud
     case thisMac
     case alwaysOnRunner

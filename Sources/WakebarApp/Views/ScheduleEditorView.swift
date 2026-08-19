@@ -24,6 +24,7 @@ struct ScheduleEditorView: View {
             HStack {
                 Button("Cancel", action: onCancel)
                     .buttonStyle(.link)
+                    .keyboardShortcut(.cancelAction)
 
                 Spacer()
 
@@ -35,6 +36,7 @@ struct ScheduleEditorView: View {
                 Button("Done", action: save)
                     .buttonStyle(.link)
                     .disabled(!draft.isValid)
+                    .keyboardShortcut(.defaultAction)
             }
             .padding(.horizontal, WakebarDesign.horizontalPadding)
             .padding(.vertical, WakebarDesign.compactSpacing)
@@ -70,15 +72,29 @@ struct ScheduleEditorView: View {
 
                 Divider()
 
-                Toggle("Alarm on iPhone", isOn: $draft.alarmOnIPhone)
-                    .toggleStyle(.switch)
-                    .padding(.vertical, WakebarDesign.compactSpacing)
+                Toggle(isOn: $draft.alarmOnIPhone) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Wake alarm on iPhone")
+                        Text("Requires the companion app")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .toggleStyle(.switch)
+                .padding(.vertical, WakebarDesign.compactSpacing)
 
                 Divider()
 
-                Toggle("Repeat sessions every 5 hours", isOn: $draft.repeatEveryFiveHours)
-                    .toggleStyle(.switch)
-                    .padding(.vertical, WakebarDesign.compactSpacing)
+                Toggle(isOn: $draft.repeatEveryFiveHours) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Refresh every five hours")
+                        Text("Sends the same minimal prompt in a fresh session")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .toggleStyle(.switch)
+                .padding(.vertical, WakebarDesign.compactSpacing)
 
                 if draft.repeatEveryFiveHours {
                     Picker("Stop after", selection: $draft.repeatUntilHour) {
@@ -100,13 +116,13 @@ struct ScheduleEditorView: View {
 
                 ProviderSelectionRow(
                     provider: .claude,
-                    detail: "Fresh temporary chat · “hi”",
+                    detail: "Cloud Routine · setup required · “hi”",
                     isSelected: $draft.includeClaude
                 )
 
                 ProviderSelectionRow(
                     provider: .codex,
-                    detail: "Fresh scheduled task · “hi”",
+                    detail: "\(draft.codexRoute.displayName) · setup required · “hi”",
                     isSelected: $draft.includeCodex
                 )
 
@@ -124,15 +140,18 @@ struct ScheduleEditorView: View {
     }
 
     private func save() {
-        let components = Calendar.current.dateComponents([.hour, .minute], from: wakeTime)
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = draft.timeZone
+        let components = calendar.dateComponents([.hour, .minute], from: wakeTime)
         draft.hour = components.hour ?? draft.hour
         draft.minute = components.minute ?? draft.minute
-        draft.skippedWakeDate = nil
         onSave(draft)
     }
 
     private static func date(for schedule: WakeSchedule) -> Date {
-        Calendar.current.date(
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = schedule.timeZone
+        return calendar.date(
             bySettingHour: schedule.hour,
             minute: schedule.minute,
             second: 0,

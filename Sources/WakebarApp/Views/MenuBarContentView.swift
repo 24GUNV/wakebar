@@ -18,10 +18,11 @@ struct MenuBarContentView: View {
             }
         }
         .frame(
-            minWidth: WakebarDesign.popoverWidth,
+            minWidth: WakebarDesign.minimumPopoverWidth,
             idealWidth: WakebarDesign.popoverWidth,
-            maxWidth: WakebarDesign.popoverWidth
+            maxWidth: WakebarDesign.maximumPopoverWidth
         )
+        .environment(\.timeZone, model.schedule.timeZone)
         .task {
             await model.load()
         }

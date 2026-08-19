@@ -1,0 +1,112 @@
+name: Wakebar
+minimumXcodeGenVersion: 2.46.0
+
+options:
+  bundleIdPrefix: com.24gunv
+  createIntermediateGroups: true
+  defaultConfig: Debug
+  deploymentTarget:
+    macOS: "14.0"
+    iOS: "26.0"
+  developmentLanguage: en
+  indentWidth: 4
+  tabWidth: 4
+  usesTabs: false
+  xcodeVersion: "26.0"
+  projectFormat: xcode16_3
+
+configs:
+  Debug: debug
+  Release: release
+
+configFiles:
+  Debug: Configurations/Debug.xcconfig
+  Release: Configurations/Release.xcconfig
+
+fileGroups:
+  - Configurations
+  - Resources
+
+settings:
+  base:
+    DEAD_CODE_STRIPPING: true
+    LOCALIZATION_PREFERS_STRING_CATALOGS: true
+
+targets:
+  WakebarCore:
+    type: framework
+    supportedDestinations:
+      - macOS
+      - iOS
+    deploymentTarget:
+      macOS: "14.0"
+      iOS: "26.0"
+    sources:
+      - path: Sources/WakebarCore
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: true
+        PRODUCT_BUNDLE_IDENTIFIER: com.24gunv.wakebar.core
+        PRODUCT_NAME: WakebarCore
+        SKIP_INSTALL: true
+        DEFINES_MODULE: true
+
+  Wakebar:
+    type: application
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: Sources/WakebarApp
+    dependencies:
+      - target: WakebarCore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.24gunv.wakebar
+        PRODUCT_NAME: Wakebar
+        INFOPLIST_FILE: Resources/WakebarMac/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Resources/WakebarMac/Wakebar.entitlements
+        ENABLE_HARDENED_RUNTIME: true
+    scheme:
+      testTargets:
+        - WakebarCoreTests
+      gatherCoverageData: true
+
+  WakebarPhone:
+    type: application
+    platform: iOS
+    deploymentTarget: "26.0"
+    sources:
+      - path: Sources/WakebarPhone
+    dependencies:
+      - target: WakebarCore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.24gunv.wakebar.phone
+        PRODUCT_NAME: Wakebar
+        INFOPLIST_FILE: Resources/WakebarPhone/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Resources/WakebarPhone/WakebarPhone.entitlements
+        TARGETED_DEVICE_FAMILY: 1
+        SUPPORTS_MACCATALYST: false
+        SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD: false
+    scheme:
+      testTargets:
+        - WakebarCoreTests
+      gatherCoverageData: true
+
+  WakebarCoreTests:
+    type: bundle.unit-test
+    supportedDestinations:
+      - macOS
+      - iOS
+    deploymentTarget:
+      macOS: "14.0"
+      iOS: "26.0"
+    sources:
+      - path: Tests/WakebarTests
+    dependencies:
+      - target: WakebarCore
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: true
+        PRODUCT_BUNDLE_IDENTIFIER: com.24gunv.wakebar.core-tests
+        PRODUCT_NAME: WakebarCoreTests

@@ -6,6 +6,8 @@ struct ScheduleSettingsView: View {
 
     var body: some View {
         Form {
+            LaunchAtLoginSectionView(model: model)
+
             Section("Schedule") {
                 Toggle("Schedule enabled", isOn: $model.schedule.isEnabled)
 
@@ -55,13 +57,33 @@ struct ScheduleSettingsView: View {
 
             Section("Alarm") {
                 Toggle("Sound an alarm on iPhone", isOn: $model.schedule.alarmOnIPhone)
-                Text("An iPhone companion app will be required before this can alert.")
+                    .disabled(
+                        !model.schedule.followsSystemTimeZone && !model.schedule.alarmOnIPhone
+                    )
+                LabeledContent("Delivery") {
+                    Text(model.phoneAlarmPublishState.displayName)
+                }
+                Text(alarmHelpText)
                     .foregroundStyle(.secondary)
             }
 
             Section("Providers") {
                 Toggle("Claude Code", isOn: $model.schedule.includeClaude)
                 Toggle("Codex", isOn: $model.schedule.includeCodex)
+
+                ForEach(model.snapshots) { snapshot in
+                    LabeledContent(snapshot.provider.displayName) {
+                        let delivery = model.providerDeliveryStates[snapshot.provider]
+                        Text(delivery?.phase.displayName ?? "Draft")
+                            .foregroundStyle(.secondary)
+                    }
+
+                    if let configurationStatus = snapshot.availability.exceptionalMenuText {
+                        Text(configurationStatus)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+                }
             }
 
             Section("Session refresh") {
@@ -86,9 +108,9 @@ struct ScheduleSettingsView: View {
                 }
 
                 if model.schedule.includeCodex {
-                    Picker("Codex", selection: $model.schedule.codexBackend) {
-                        ForEach(model.supportedBackends(for: .codex)) { backend in
-                            Text(backend.displayName).tag(backend)
+                    Picker("Codex route", selection: $model.schedule.codexRoute) {
+                        ForEach(CodexSchedulingRoute.allCases) { route in
+                            Text(route.displayName).tag(route)
                         }
                     }
                 }
@@ -98,13 +120,15 @@ struct ScheduleSettingsView: View {
                         .foregroundStyle(.secondary)
                 }
 
-                Text("Provider actions remain in preview mode in this build.")
+                Text("Provider setup and session starts remain in preview mode in this build.")
                     .foregroundStyle(.secondary)
             }
 
-            if let activityMessage = model.activityMessage {
+            ProviderSetupSectionView(model: model)
+
+            if let activityNotice = model.activityNotice {
                 Section {
-                    Text(activityMessage)
+                    Text(activityNotice.message)
                         .foregroundStyle(.secondary)
                 }
             }
@@ -114,5 +138,13 @@ struct ScheduleSettingsView: View {
         .task {
             await model.load()
         }
+    }
+
+    private var alarmHelpText: String {
+        if !model.schedule.followsSystemTimeZone {
+            return "iPhone alarms currently require Follow the system time zone."
+        }
+
+        return "The iPhone confirms the alarm after it receives and applies the iCloud schedule."
     }
 }

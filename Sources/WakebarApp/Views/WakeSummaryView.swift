@@ -10,51 +10,58 @@ struct WakeSummaryView: View {
         VStack(spacing: 0) {
             WakebarHeaderView(
                 isEnabled: $model.schedule.isEnabled,
+                status: model.scheduleStatusText,
                 onEdit: onEdit
             )
 
             Divider()
                 .padding(.leading, WakebarDesign.horizontalPadding)
 
-            NextWakeView(nextWake: model.nextWake)
+            if model.schedule.isEnabled {
+                NextWakeView(nextWake: model.nextWake)
 
-            Divider()
-                .padding(.leading, WakebarDesign.horizontalPadding)
+                Divider()
+                    .padding(.leading, WakebarDesign.horizontalPadding)
 
-            VStack(spacing: 0) {
-                ScheduleEventRow(
-                    date: model.nextSessionStart,
-                    title: "Start \(model.selectedProviderSummary)",
-                    detail: "Cloud schedule · sends “hi”",
-                    systemImage: "sparkles",
-                    readiness: .setupRequired
-                )
+                VStack(spacing: 0) {
+                    if let nextInitialSessionStart = model.nextInitialSessionStart {
+                        ScheduleEventRow(
+                            date: nextInitialSessionStart,
+                            title: "Start \(model.selectedProviderSummary)",
+                            detail: model.sessionExecutionDetail,
+                            systemImage: "sparkles",
+                            readiness: model.providerReadiness
+                        )
+                    }
 
-                if model.schedule.alarmOnIPhone {
-                    ScheduleEventRow(
-                        date: model.nextWake,
-                        title: "Sound alarm on iPhone",
-                        detail: "Companion app not connected",
-                        systemImage: "alarm",
-                        readiness: .setupRequired
-                    )
-                }
+                    if let nextPhoneAlarm = model.nextPlannedPhoneAlarm {
+                        ScheduleEventRow(
+                            date: nextPhoneAlarm,
+                            title: "Wake alarm",
+                            detail: model.phoneAlarmDetail,
+                            systemImage: "alarm",
+                            readiness: model.phoneAlarmReadiness
+                        )
+                    }
 
-                Toggle(isOn: $model.schedule.repeatEveryFiveHours) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("During the day")
-                        Text("Repeat every five hours until 7 PM")
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
+                    if !model.refreshSessionDates.isEmpty {
+                        ScheduleEventRow(
+                            date: model.refreshSessionDates.first,
+                            title: "Session refreshes",
+                            detail: refreshDetail,
+                            systemImage: "arrow.clockwise",
+                            readiness: model.providerReadiness
+                        )
                     }
                 }
-                .toggleStyle(.switch)
-                .padding(.vertical, WakebarDesign.compactSpacing)
-                .accessibilityHint("Starts another minimal provider session every five hours")
+                .padding(.horizontal, WakebarDesign.horizontalPadding)
+            } else {
+                PausedScheduleView()
             }
-            .padding(.horizontal, WakebarDesign.horizontalPadding)
 
-            ActivityStripView(message: model.activityMessage)
+            if let activityNotice = model.activityNotice {
+                ActivityStripView(notice: activityNotice)
+            }
 
             Divider()
 
@@ -69,7 +76,10 @@ struct WakeSummaryView: View {
                 Button("Settings", systemImage: "gearshape", action: showSettings)
                     .labelStyle(.iconOnly)
 
-                Button("Test session start", systemImage: "play.fill", action: testSessionStart)
+                Button("Quit Wakebar", systemImage: "power", action: quitWakebar)
+                    .labelStyle(.iconOnly)
+
+                Button("Preview", systemImage: "play.fill", action: testSessionStart)
                     .disabled(model.isRunning)
             }
             .buttonStyle(.borderless)
@@ -86,5 +96,22 @@ struct WakeSummaryView: View {
         Task {
             await model.runNow()
         }
+    }
+
+    private func quitWakebar() {
+        NSApplication.shared.terminate(nil)
+    }
+
+    private var refreshDetail: String {
+        guard model.schedule.repeatEveryFiveHours else {
+            return "Off"
+        }
+
+        let count = model.refreshSessionDates.count
+        if count > 0 {
+            return count == 1 ? "1 refresh planned" : "\(count) refreshes planned"
+        }
+
+        return "No additional refreshes before the cutoff"
     }
 }

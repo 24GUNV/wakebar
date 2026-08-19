@@ -11,15 +11,16 @@ struct WeekdayPicker: View {
                     toggle(weekday)
                 }
                 .buttonStyle(.plain)
-                .frame(maxWidth: .infinity, minHeight: 28)
-                .foregroundStyle(selection.contains(weekday) ? Color.white : Color.primary)
+                .frame(maxWidth: .infinity, minHeight: 32)
+                .foregroundStyle(.primary)
                 .background {
                     RoundedRectangle(cornerRadius: 6)
-                        .fill(selection.contains(weekday) ? Color.accentColor : Color.clear)
-                        .stroke(selection.contains(weekday) ? Color.accentColor : Color.secondary, lineWidth: 1)
+                        .fill(selection.contains(weekday) ? Color.primary.opacity(0.10) : Color.clear)
+                        .stroke(selection.contains(weekday) ? Color.primary.opacity(0.30) : Color.secondary.opacity(0.35), lineWidth: 1)
                 }
                 .accessibilityLabel(weekday.fullLabel)
                 .accessibilityValue(selection.contains(weekday) ? "Selected" : "Not selected")
+                .accessibilityAddTraits(selection.contains(weekday) ? .isSelected : [])
             }
         }
         .accessibilityElement(children: .contain)

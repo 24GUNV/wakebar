@@ -27,11 +27,11 @@ struct ScheduleEventRow: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .lineLimit(1)
+                    .lineLimit(2)
                 Text(detail)
                     .font(.footnote)
                     .foregroundStyle(.secondary)
-                    .lineLimit(1)
+                    .lineLimit(2)
             }
 
             Spacer(minLength: 0)
@@ -41,5 +41,6 @@ struct ScheduleEventRow: View {
                 .accessibilityLabel(readiness == .ready ? "Ready" : "Setup required")
         }
         .frame(minHeight: WakebarDesign.eventRowHeight)
+        .accessibilityElement(children: .combine)
     }
 }

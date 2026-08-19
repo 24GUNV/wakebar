@@ -2,6 +2,7 @@ import Foundation
 
 public struct WakeSchedule: Identifiable, Codable, Equatable, Sendable {
     public let id: UUID
+    public var revision: UUID
     public var isEnabled: Bool
     public var hour: Int
     public var minute: Int
@@ -14,12 +15,14 @@ public struct WakeSchedule: Identifiable, Codable, Equatable, Sendable {
     public var includeCodex: Bool
     public var claudeBackend: ExecutionBackend
     public var codexBackend: ExecutionBackend
+    public var codexRoute: CodexSchedulingRoute
     public var followsSystemTimeZone: Bool
     public var timeZoneIdentifier: String
     public var skippedWakeDate: Date?
 
     public init(
         id: UUID,
+        revision: UUID = UUID(),
         isEnabled: Bool,
         hour: Int,
         minute: Int,
@@ -32,11 +35,13 @@ public struct WakeSchedule: Identifiable, Codable, Equatable, Sendable {
         includeCodex: Bool,
         claudeBackend: ExecutionBackend,
         codexBackend: ExecutionBackend,
+        codexRoute: CodexSchedulingRoute = .chatGPTWebTask,
         followsSystemTimeZone: Bool,
         timeZoneIdentifier: String,
         skippedWakeDate: Date? = nil
     ) {
         self.id = id
+        self.revision = revision
         self.isEnabled = isEnabled
         self.hour = hour
         self.minute = minute
@@ -49,6 +54,7 @@ public struct WakeSchedule: Identifiable, Codable, Equatable, Sendable {
         self.includeCodex = includeCodex
         self.claudeBackend = claudeBackend
         self.codexBackend = codexBackend
+        self.codexRoute = codexRoute
         self.followsSystemTimeZone = followsSystemTimeZone
         self.timeZoneIdentifier = timeZoneIdentifier
         self.skippedWakeDate = skippedWakeDate
@@ -82,13 +88,14 @@ public struct WakeSchedule: Identifiable, Codable, Equatable, Sendable {
         case .claude:
             claudeBackend
         case .codex:
-            codexBackend
+            codexRoute.executionBackend
         }
     }
 
     public static var `default`: Self {
         Self(
             id: UUID(),
+            revision: UUID(),
             isEnabled: true,
             hour: 7,
             minute: 0,
@@ -101,6 +108,7 @@ public struct WakeSchedule: Identifiable, Codable, Equatable, Sendable {
             includeCodex: true,
             claudeBackend: .providerCloud,
             codexBackend: .providerCloud,
+            codexRoute: .chatGPTWebTask,
             followsSystemTimeZone: true,
             timeZoneIdentifier: TimeZone.autoupdatingCurrent.identifier
         )
@@ -108,6 +116,7 @@ public struct WakeSchedule: Identifiable, Codable, Equatable, Sendable {
 
     private enum CodingKeys: String, CodingKey {
         case id
+        case revision
         case isEnabled
         case hour
         case minute
@@ -120,6 +129,7 @@ public struct WakeSchedule: Identifiable, Codable, Equatable, Sendable {
         case includeCodex
         case claudeBackend
         case codexBackend
+        case codexRoute
         case followsSystemTimeZone
         case timeZoneIdentifier
         case skippedWakeDate
@@ -131,6 +141,7 @@ public struct WakeSchedule: Identifiable, Codable, Equatable, Sendable {
         let legacyWeekdaysOnly = try values.decodeIfPresent(Bool.self, forKey: .weekdaysOnly) ?? true
 
         id = try values.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
+        revision = try values.decodeIfPresent(UUID.self, forKey: .revision) ?? UUID()
         isEnabled = try values.decodeIfPresent(Bool.self, forKey: .isEnabled) ?? false
         hour = try values.decodeIfPresent(Int.self, forKey: .hour) ?? 7
         minute = try values.decodeIfPresent(Int.self, forKey: .minute) ?? 0
@@ -144,6 +155,8 @@ public struct WakeSchedule: Identifiable, Codable, Equatable, Sendable {
         includeCodex = try values.decodeIfPresent(Bool.self, forKey: .includeCodex) ?? true
         claudeBackend = try values.decodeIfPresent(ExecutionBackend.self, forKey: .claudeBackend) ?? .providerCloud
         codexBackend = try values.decodeIfPresent(ExecutionBackend.self, forKey: .codexBackend) ?? .providerCloud
+        codexRoute = try values.decodeIfPresent(CodexSchedulingRoute.self, forKey: .codexRoute)
+            ?? Self.legacyCodexRoute(for: codexBackend)
         followsSystemTimeZone = try values.decodeIfPresent(Bool.self, forKey: .followsSystemTimeZone) ?? true
         timeZoneIdentifier = try values.decodeIfPresent(String.self, forKey: .timeZoneIdentifier)
             ?? TimeZone.autoupdatingCurrent.identifier
@@ -153,6 +166,7 @@ public struct WakeSchedule: Identifiable, Codable, Equatable, Sendable {
     public func encode(to encoder: any Encoder) throws {
         var values = encoder.container(keyedBy: CodingKeys.self)
         try values.encode(id, forKey: .id)
+        try values.encode(revision, forKey: .revision)
         try values.encode(isEnabled, forKey: .isEnabled)
         try values.encode(hour, forKey: .hour)
         try values.encode(minute, forKey: .minute)
@@ -165,8 +179,20 @@ public struct WakeSchedule: Identifiable, Codable, Equatable, Sendable {
         try values.encode(includeCodex, forKey: .includeCodex)
         try values.encode(claudeBackend, forKey: .claudeBackend)
         try values.encode(codexBackend, forKey: .codexBackend)
+        try values.encode(codexRoute, forKey: .codexRoute)
         try values.encode(followsSystemTimeZone, forKey: .followsSystemTimeZone)
         try values.encode(timeZoneIdentifier, forKey: .timeZoneIdentifier)
         try values.encodeIfPresent(skippedWakeDate, forKey: .skippedWakeDate)
+    }
+
+    private static func legacyCodexRoute(for backend: ExecutionBackend) -> CodexSchedulingRoute {
+        switch backend {
+        case .providerCloud:
+            .chatGPTWebTask
+        case .thisMac:
+            .localCLI
+        case .alwaysOnRunner:
+            .alwaysOnRunner
+        }
     }
 }

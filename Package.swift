@@ -9,11 +9,17 @@ let package = Package(
     ],
     products: [
         .library(name: "WakebarCore", targets: ["WakebarCore"]),
-        .executable(name: "Wakebar", targets: ["WakebarApp"])
+        .executable(name: "Wakebar", targets: ["WakebarApp"]),
+        .executable(name: "WakebarVerification", targets: ["WakebarVerification"])
     ],
     targets: [
         .target(name: "WakebarCore"),
         .executableTarget(name: "WakebarApp", dependencies: ["WakebarCore"]),
+        .executableTarget(
+            name: "WakebarVerification",
+            dependencies: ["WakebarCore"],
+            path: "Verification"
+        ),
         .testTarget(name: "WakebarTests", dependencies: ["WakebarCore"])
     ]
 )
