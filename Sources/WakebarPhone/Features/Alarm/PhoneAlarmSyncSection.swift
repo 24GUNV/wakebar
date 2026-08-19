@@ -6,7 +6,7 @@ struct PhoneAlarmSyncSection: View {
     let payload: PhoneAlarmSchedulePayload
 
     var body: some View {
-        Section("Schedule source") {
+        Section {
             LabeledContent("From", value: "Wakebar on Mac")
             LabeledContent("iCloud", value: deliveryLabel)
             LabeledContent("Background updates", value: subscriptionLabel)
@@ -28,6 +28,8 @@ struct PhoneAlarmSyncSection: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
+        } header: {
+            Text("Schedule source")
         } footer: {
             Text(footerText)
         }
