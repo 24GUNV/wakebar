@@ -8,14 +8,17 @@ final class ClaudeRoutineProvisionerTests: XCTestCase {
             name: "Wake Claude before work",
             hour: 6,
             minute: 50,
-            weekdays: .workweek,
+            weekdays: Weekday.workweek,
             timeZoneIdentifier: "Asia/Bangkok"
         )
 
         let plan = try ClaudeRoutineProvisioner().makePlan(for: request)
 
         XCTAssertTrue(plan.capability.runsWhenMacIsOff)
-        XCTAssertEqual(plan.capability.provisioningControl, .userManaged)
+        XCTAssertEqual(
+            plan.capability.provisioningControl,
+            ClaudeRoutineCapability.ProvisioningControl.userManaged
+        )
         XCTAssertEqual(plan.managementURL.host, "claude.ai")
         XCTAssertTrue(plan.savedPrompt.contains("Reply with exactly \"yes\""))
         XCTAssertTrue(plan.savedPrompt.contains("Do not inspect repositories"))
@@ -27,7 +30,7 @@ final class ClaudeRoutineProvisionerTests: XCTestCase {
             name: "Wake Claude",
             hour: 24,
             minute: 0,
-            weekdays: .workweek,
+            weekdays: Weekday.workweek,
             timeZoneIdentifier: "UTC"
         )
 

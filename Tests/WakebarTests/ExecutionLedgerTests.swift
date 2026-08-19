@@ -9,12 +9,16 @@ final class ExecutionLedgerTests: XCTestCase {
         let fileURL = directory.appending(path: "ledger.json")
         let firstLedger = ExecutionLedger(fileURL: fileURL)
 
-        XCTAssertTrue(try await firstLedger.claim(eventID: "event-1"))
-        XCTAssertFalse(try await firstLedger.claim(eventID: "event-1"))
+        let firstClaim = try await firstLedger.claim(eventID: "event-1")
+        let duplicateClaim = try await firstLedger.claim(eventID: "event-1")
+        XCTAssertTrue(firstClaim)
+        XCTAssertFalse(duplicateClaim)
 
         let reloadedLedger = ExecutionLedger(fileURL: fileURL)
-        XCTAssertTrue(try await reloadedLedger.contains(eventID: "event-1"))
-        XCTAssertEqual(try await reloadedLedger.record(for: "event-1")?.state, .claimed)
+        let containsEvent = try await reloadedLedger.contains(eventID: "event-1")
+        let record = try await reloadedLedger.record(for: "event-1")
+        XCTAssertTrue(containsEvent)
+        XCTAssertEqual(record?.state, .claimed)
     }
 
     func testRemovesOnlyExpiredRecords() async throws {
@@ -23,13 +27,17 @@ final class ExecutionLedgerTests: XCTestCase {
         let ledger = ExecutionLedger(fileURL: directory.appending(path: "ledger.json"))
         let now = Date.now
 
-        XCTAssertTrue(try await ledger.claim(eventID: "old", at: now.addingTimeInterval(-100)))
-        XCTAssertTrue(try await ledger.claim(eventID: "new", at: now))
+        let oldClaim = try await ledger.claim(eventID: "old", at: now.addingTimeInterval(-100))
+        let newClaim = try await ledger.claim(eventID: "new", at: now)
+        XCTAssertTrue(oldClaim)
+        XCTAssertTrue(newClaim)
 
         try await ledger.removeRecords(before: now.addingTimeInterval(-50))
 
-        XCTAssertFalse(try await ledger.contains(eventID: "old"))
-        XCTAssertTrue(try await ledger.contains(eventID: "new"))
+        let containsOld = try await ledger.contains(eventID: "old")
+        let containsNew = try await ledger.contains(eventID: "new")
+        XCTAssertFalse(containsOld)
+        XCTAssertTrue(containsNew)
     }
 
     func testTracksConfirmedAndUnknownDeliverySeparately() async throws {
@@ -37,14 +45,19 @@ final class ExecutionLedgerTests: XCTestCase {
             .appending(path: UUID().uuidString, directoryHint: .isDirectory)
         let ledger = ExecutionLedger(fileURL: directory.appending(path: "ledger.json"))
 
-        XCTAssertTrue(try await ledger.claim(eventID: "confirmed"))
+        let confirmedClaim = try await ledger.claim(eventID: "confirmed")
+        XCTAssertTrue(confirmedClaim)
         try await ledger.markConfirmed(eventID: "confirmed")
-        XCTAssertEqual(try await ledger.record(for: "confirmed")?.state, .confirmed)
+        let confirmedRecord = try await ledger.record(for: "confirmed")
+        XCTAssertEqual(confirmedRecord?.state, .confirmed)
 
-        XCTAssertTrue(try await ledger.claim(eventID: "unknown"))
+        let unknownClaim = try await ledger.claim(eventID: "unknown")
+        XCTAssertTrue(unknownClaim)
         try await ledger.markDeliveryUnknown(eventID: "unknown")
-        XCTAssertEqual(try await ledger.record(for: "unknown")?.state, .deliveryUnknown)
-        XCTAssertFalse(try await ledger.resetFailedBeforeSendForRetry(eventID: "unknown"))
+        let unknownRecord = try await ledger.record(for: "unknown")
+        let didResetUnknown = try await ledger.resetFailedBeforeSendForRetry(eventID: "unknown")
+        XCTAssertEqual(unknownRecord?.state, .deliveryUnknown)
+        XCTAssertFalse(didResetUnknown)
     }
 
     func testOnlyFailureBeforeSendCanBeResetForRetry() async throws {
@@ -52,10 +65,14 @@ final class ExecutionLedgerTests: XCTestCase {
             .appending(path: UUID().uuidString, directoryHint: .isDirectory)
         let ledger = ExecutionLedger(fileURL: directory.appending(path: "ledger.json"))
 
-        XCTAssertTrue(try await ledger.claim(eventID: "retryable"))
+        let firstClaim = try await ledger.claim(eventID: "retryable")
+        XCTAssertTrue(firstClaim)
         try await ledger.markFailedBeforeSend(eventID: "retryable")
-        XCTAssertTrue(try await ledger.resetFailedBeforeSendForRetry(eventID: "retryable"))
-        XCTAssertFalse(try await ledger.contains(eventID: "retryable"))
-        XCTAssertTrue(try await ledger.claim(eventID: "retryable"))
+        let didReset = try await ledger.resetFailedBeforeSendForRetry(eventID: "retryable")
+        let containsAfterReset = try await ledger.contains(eventID: "retryable")
+        let secondClaim = try await ledger.claim(eventID: "retryable")
+        XCTAssertTrue(didReset)
+        XCTAssertFalse(containsAfterReset)
+        XCTAssertTrue(secondClaim)
     }
 }

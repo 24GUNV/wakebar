@@ -39,8 +39,10 @@ final class ProviderExecutionCoordinatorTests: XCTestCase {
         guard case .deliveryUnknown = result else {
             return XCTFail("Expected an unknown-delivery result")
         }
-        XCTAssertEqual(try await ledger.record(for: event.id)?.state, .deliveryUnknown)
-        XCTAssertFalse(try await ledger.resetFailedBeforeSendForRetry(eventID: event.id))
+        let record = try await ledger.record(for: event.id)
+        let didReset = try await ledger.resetFailedBeforeSendForRetry(eventID: event.id)
+        XCTAssertEqual(record?.state, .deliveryUnknown)
+        XCTAssertFalse(didReset)
     }
 
     func testUnconfiguredAdapterCanBeResetForRetry() async throws {
@@ -56,7 +58,8 @@ final class ProviderExecutionCoordinatorTests: XCTestCase {
         guard case .failedBeforeSend = result else {
             return XCTFail("Expected a failure before send")
         }
-        XCTAssertTrue(try await ledger.resetFailedBeforeSendForRetry(eventID: event.id))
+        let didReset = try await ledger.resetFailedBeforeSendForRetry(eventID: event.id)
+        XCTAssertTrue(didReset)
     }
 
     private func makeEvent() -> ScheduledEvent {
