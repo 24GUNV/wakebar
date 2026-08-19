@@ -55,7 +55,10 @@ struct WakeSummaryView: View {
                 }
                 .padding(.horizontal, WakebarDesign.horizontalPadding)
             } else {
-                DraftScheduleView(onFinishSetup: onEdit)
+                DraftScheduleView(
+                    phoneStatus: model.draftPhoneStatus,
+                    onFinishSetup: onEdit
+                )
             }
 
             if let activityNotice = model.activityNotice {

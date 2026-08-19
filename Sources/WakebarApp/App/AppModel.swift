@@ -8,6 +8,11 @@ final class AppModel {
     var schedule: WakeSchedule {
         didSet {
             guard isLoaded, schedule != oldValue else { return }
+            let wasActive = oldValue.isEnabled
+            if schedule.isEnabled && !schedule.isValid {
+                schedule.isEnabled = false
+                activityNotice = .error("Choose at least one day and provider before saving.")
+            }
             if schedule.revision == oldValue.revision {
                 schedule.revision = UUID()
             }
@@ -18,7 +23,8 @@ final class AppModel {
                 }
             )
             saveProviderDeliveryStates()
-            phoneAlarmPublishState = .draft
+            let shouldPublishPhoneUpdate = schedule.isEnabled || wasActive
+            phoneAlarmPublishState = shouldPublishPhoneUpdate ? .publishing : .draft
             phoneAcknowledgementTask?.cancel()
             scheduleSaveTask?.cancel()
             let scheduleToSave = schedule
@@ -27,7 +33,7 @@ final class AppModel {
                 try? await Task.sleep(for: .milliseconds(250))
                 guard !Task.isCancelled else { return }
                 await persist(scheduleToSave)
-                if scheduleToSave.isEnabled {
+                if shouldPublishPhoneUpdate {
                     await publishPhoneSchedule(scheduleToSave)
                 } else {
                     phoneAlarmPublishState = .draft
@@ -43,6 +49,7 @@ final class AppModel {
     var desiredRevision: UUID
     var providerDeliveryStates: [ProviderID: ProviderDeliveryState]
     var phoneAlarmPublishState: PhoneAlarmPublishState
+    var lastConfirmedPhoneAlarm: PhoneAlarmAcknowledgement?
     var launchAtLoginState: LaunchAtLoginState
 
     @ObservationIgnored private let scheduleStore: ScheduleStore
@@ -85,6 +92,7 @@ final class AppModel {
             }
         )
         phoneAlarmPublishState = .draft
+        lastConfirmedPhoneAlarm = nil
         launchAtLoginState = launchAtLoginService.state
     }
 
@@ -167,13 +175,39 @@ final class AppModel {
         case .draft:
             "Not synced to iPhone"
         case .publishing:
-            "Updating iCloud"
+            lastConfirmedPhoneAlarm == nil
+                ? "Updating iCloud"
+                : "Updating iCloud · previous alarm remains active"
         case .published:
-            "iCloud updated · awaiting iPhone"
+            lastConfirmedPhoneAlarm == nil
+                ? "iCloud updated · awaiting iPhone"
+                : "Awaiting iPhone · previous alarm may still ring"
         case let .confirmed(acknowledgement):
-            "Confirmed on iPhone · revision \(acknowledgement.revision.sequence)"
+            if schedule.isEnabled && schedule.alarmOnIPhone {
+                "Confirmed on iPhone · revision \(acknowledgement.revision.sequence)"
+            } else {
+                "iPhone confirmed the previous alarm is off"
+            }
         case let .failed(message):
-            message
+            lastConfirmedPhoneAlarm == nil
+                ? message
+                : "\(message) · previous alarm may still ring"
+        }
+    }
+
+    var draftPhoneStatus: String? {
+        guard !schedule.isEnabled else { return nil }
+        switch phoneAlarmPublishState {
+        case .draft:
+            nil
+        case .publishing:
+            "Turning off the previous iPhone alarm…"
+        case .published:
+            "Waiting for the iPhone to turn off the previous alarm."
+        case .confirmed:
+            "The iPhone confirmed the previous alarm is off."
+        case .failed:
+            "Wakebar could not turn off the previous iPhone alarm. It may still ring."
         }
     }
 
@@ -197,16 +231,18 @@ final class AppModel {
         isLoading = true
         defer { isLoading = false }
 
+        var shouldPublishDisabledSchedule = false
         do {
             var loadedSchedule = try await scheduleStore.load() ?? .default
             loadedSchedule.skippedWakeDate = nil
             loadedSchedule.claudeBackend = .providerCloud
             loadedSchedule.codexBackend = .providerCloud
             loadedSchedule.codexRoute = .chatGPTWebTask
-            schedule = loadedSchedule
-            if !schedule.isValid {
-                schedule.isEnabled = false
+            if loadedSchedule.isEnabled && !loadedSchedule.isValid {
+                loadedSchedule.isEnabled = false
+                shouldPublishDisabledSchedule = true
             }
+            schedule = loadedSchedule
         } catch {
             activityNotice = .error("Could not load the saved schedule.")
         }
@@ -226,12 +262,27 @@ final class AppModel {
         isLoaded = true
         launchAtLoginState = launchAtLoginService.state
         await refreshProviders()
-        if schedule.isEnabled {
+        if let acknowledgement = try? await phoneSchedulePublisher.acknowledgement(
+            for: schedule.id
+        ) {
+            lastConfirmedPhoneAlarm = acknowledgement
+            if !schedule.isEnabled {
+                shouldPublishDisabledSchedule = true
+            }
+        }
+        if shouldPublishDisabledSchedule {
+            await persist(schedule)
+        }
+        if schedule.isEnabled || shouldPublishDisabledSchedule {
             await publishPhoneSchedule(schedule)
         }
     }
 
     func saveSchedule(_ updatedSchedule: WakeSchedule) {
+        guard updatedSchedule.isValid else {
+            activityNotice = .error("Choose at least one day and provider before saving.")
+            return
+        }
         var scheduleToActivate = updatedSchedule
         scheduleToActivate.isEnabled = true
         scheduleToActivate.skippedWakeDate = nil
@@ -425,6 +476,7 @@ final class AppModel {
         else { return false }
 
         phoneAlarmPublishState = .confirmed(acknowledgement)
+        lastConfirmedPhoneAlarm = acknowledgement
         return true
     }
 

@@ -21,6 +21,12 @@ final class PhoneAlarmSchedulePayloadTests: XCTestCase {
         }
     }
 
+    func testDisabledPayloadAllowsMissingWeekdaysForSafetyCancellation() throws {
+        let payload = makePhoneAlarmPayload(isEnabled: false, weekdays: [])
+
+        XCTAssertEqual(try payload.validated(), payload)
+    }
+
     func testRevisionUsesStableTieBreakOrder() {
         let date = Date(timeIntervalSince1970: 1_800_000_000)
         let first = PhoneScheduleRevision(sequence: 3, modifiedAt: date, writerID: "mac-a")

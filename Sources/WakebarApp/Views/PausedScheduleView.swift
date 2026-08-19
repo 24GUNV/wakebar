@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct DraftScheduleView: View {
+    let phoneStatus: String?
     let onFinishSetup: () -> Void
 
     var body: some View {
@@ -13,6 +14,13 @@ struct DraftScheduleView: View {
 
             Button("Finish setup", action: onFinishSetup)
                 .buttonStyle(.borderedProminent)
+
+            if let phoneStatus {
+                Label(phoneStatus, systemImage: "iphone.and.arrow.forward")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, WakebarDesign.horizontalPadding)
+            }
         }
         .padding(.vertical, WakebarDesign.sectionSpacing)
     }

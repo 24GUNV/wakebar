@@ -21,6 +21,7 @@ struct WeekdayPicker: View {
                 .accessibilityLabel(weekday.fullLabel)
                 .accessibilityValue(selection.contains(weekday) ? "Selected" : "Not selected")
                 .accessibilityAddTraits(selection.contains(weekday) ? .isSelected : [])
+                .disabled(selection.contains(weekday) && selection.count == 1)
             }
         }
         .accessibilityElement(children: .contain)

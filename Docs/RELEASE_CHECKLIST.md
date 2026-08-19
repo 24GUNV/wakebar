@@ -40,6 +40,10 @@ Complete this checklist with the same Apple development team on the Mac and iPho
 
 - Remove the system alarm and confirm that Wakebar offers to set it again.
 
+- Confirm that Settings blocks saving without a weekday or provider and keeps the applied alarm visible.
+
+- Force an iCloud update failure and confirm that Wakebar warns that the previous alarm may still ring.
+
 - Change the iCloud account and confirm that Wakebar removes the old schedule and alarm.
 
 - Change the system time zone and confirm that the alarm follows the device.

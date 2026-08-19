@@ -3,48 +3,46 @@ import WakebarCore
 
 struct ScheduleSettingsView: View {
     @Bindable var model: AppModel
+    @State private var draft: WakeSchedule
+
+    init(model: AppModel) {
+        self.model = model
+        _draft = State(initialValue: model.schedule)
+    }
 
     var body: some View {
         Form {
             LaunchAtLoginSectionView(model: model)
 
             Section("Schedule") {
-                if !model.schedule.isEnabled {
-                    Button("Save and sync schedule") {
-                        model.saveSchedule(model.schedule)
-                    }
-                    Text("Nothing is published until you save this draft.")
-                        .foregroundStyle(.secondary)
-                }
-
-                Picker("Hour", selection: $model.schedule.hour) {
+                Picker("Hour", selection: $draft.hour) {
                     ForEach(0..<24, id: \.self) { hour in
                         Text(hour, format: .number.precision(.integerLength(2))).tag(hour)
                     }
                 }
 
-                Picker("Minute", selection: $model.schedule.minute) {
+                Picker("Minute", selection: $draft.minute) {
                     ForEach(0..<60, id: \.self) { minute in
                         Text(minute, format: .number.precision(.integerLength(2))).tag(minute)
                     }
                 }
 
                 LabeledContent("Repeat days") {
-                    WeekdayPicker(selection: $model.schedule.selectedWeekdays)
+                    WeekdayPicker(selection: $draft.selectedWeekdays)
                         .frame(maxWidth: 260)
                 }
 
-                Picker("Start sessions", selection: $model.schedule.sessionLeadMinutes) {
+                Picker("Start sessions", selection: $draft.sessionLeadMinutes) {
                     Text("5 minutes before").tag(5)
                     Text("10 minutes before").tag(10)
                     Text("15 minutes before").tag(15)
                     Text("30 minutes before").tag(30)
                 }
 
-                Toggle("Follow the system time zone", isOn: $model.schedule.followsSystemTimeZone)
+                Toggle("Follow the system time zone", isOn: $draft.followsSystemTimeZone)
 
-                if !model.schedule.followsSystemTimeZone {
-                    Picker("Time zone", selection: $model.schedule.timeZoneIdentifier) {
+                if !draft.followsSystemTimeZone {
+                    Picker("Time zone", selection: $draft.timeZoneIdentifier) {
                         ForEach(TimeZone.knownTimeZoneIdentifiers, id: \.self) { identifier in
                             Text(identifier.replacing("_", with: " ")).tag(identifier)
                         }
@@ -52,20 +50,26 @@ struct ScheduleSettingsView: View {
                 }
 
                 LabeledContent("Next wake") {
-                    if let nextWake = model.nextWake {
+                    if let nextWake = draftNextWake {
                         Text(nextWake, format: .dateTime.weekday(.wide).month().day().hour().minute())
-                            .environment(\.timeZone, model.schedule.timeZone)
+                            .environment(\.timeZone, draft.timeZone)
                     } else {
-                        Text("Not scheduled")
+                        Text("Choose a day and provider")
                     }
                 }
+
+                Button(model.schedule.isEnabled ? "Save changes" : "Save and sync schedule") {
+                    saveDraft()
+                }
+                .disabled(!draft.isValid || (model.schedule.isEnabled && draft == model.schedule))
+
+                Text(saveHelpText)
+                    .foregroundStyle(.secondary)
             }
 
             Section("Alarm") {
-                Toggle("Sound an alarm on iPhone", isOn: $model.schedule.alarmOnIPhone)
-                    .disabled(
-                        !model.schedule.followsSystemTimeZone && !model.schedule.alarmOnIPhone
-                    )
+                Toggle("Sound an alarm on iPhone", isOn: $draft.alarmOnIPhone)
+                    .disabled(!draft.followsSystemTimeZone && !draft.alarmOnIPhone)
                 LabeledContent("Delivery") {
                     Text(model.phoneAlarmPublishState.displayName)
                 }
@@ -82,8 +86,8 @@ struct ScheduleSettingsView: View {
             }
 
             Section("Providers") {
-                Toggle("Claude Code", isOn: $model.schedule.includeClaude)
-                Toggle("Codex", isOn: $model.schedule.includeCodex)
+                Toggle("Claude Code", isOn: $draft.includeClaude)
+                Toggle("Codex", isOn: $draft.includeCodex)
 
                 ForEach(model.snapshots) { snapshot in
                     LabeledContent(snapshot.provider.displayName) {
@@ -98,13 +102,18 @@ struct ScheduleSettingsView: View {
                             .foregroundStyle(.secondary)
                     }
                 }
+
+                if draft.providerIDs.isEmpty {
+                    Label("Choose at least one provider.", systemImage: "exclamationmark.circle")
+                        .foregroundStyle(.red)
+                }
             }
 
             Section("Session refresh") {
-                Toggle("Repeat every five hours", isOn: $model.schedule.repeatEveryFiveHours)
+                Toggle("Repeat every five hours", isOn: $draft.repeatEveryFiveHours)
 
-                if model.schedule.repeatEveryFiveHours {
-                    Picker("Stop after", selection: $model.schedule.repeatUntilHour) {
+                if draft.repeatEveryFiveHours {
+                    Picker("Stop after", selection: $draft.repeatUntilHour) {
                         ForEach(12..<24, id: \.self) { hour in
                             Text(hour, format: .number).tag(hour)
                         }
@@ -113,17 +122,12 @@ struct ScheduleSettingsView: View {
             }
 
             Section("Execution") {
-                if model.schedule.includeClaude {
+                if draft.includeClaude {
                     LabeledContent("Claude Code", value: "Cloud Routine")
                 }
 
-                if model.schedule.includeCodex {
+                if draft.includeCodex {
                     LabeledContent("Codex", value: "ChatGPT scheduled task")
-                }
-
-                ForEach(model.executionSummaries, id: \.self) { summary in
-                    Text(summary)
-                        .foregroundStyle(.secondary)
                 }
 
                 Text("Create these cloud tasks in each provider, then confirm the saved times in Wakebar.")
@@ -140,17 +144,45 @@ struct ScheduleSettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(minWidth: 520, minHeight: 520)
+        .frame(minWidth: 520, minHeight: 560)
         .task {
             await model.load()
+            draft = model.schedule
+        }
+        .onChange(of: model.schedule) { oldSchedule, newSchedule in
+            if draft == oldSchedule {
+                draft = newSchedule
+            }
         }
     }
 
+    private var draftNextWake: Date? {
+        guard draft.isValid else { return nil }
+        var activeDraft = draft
+        activeDraft.isEnabled = true
+        return ScheduleCalculator().nextWakeOccurrence(after: .now, for: activeDraft)
+    }
+
+    private var saveHelpText: String {
+        if !model.schedule.isEnabled {
+            return "Nothing is published until you save this draft."
+        }
+        if draft != model.schedule {
+            return "Wakebar keeps the current phone alarm until you save and the iPhone confirms the update."
+        }
+        return "Provider tasks remain managed in Claude and ChatGPT."
+    }
+
     private var alarmHelpText: String {
-        if !model.schedule.followsSystemTimeZone {
+        if !draft.followsSystemTimeZone {
             return "iPhone alarms currently require Follow the system time zone."
         }
 
         return "The iPhone confirms the alarm after it receives and applies the iCloud schedule."
+    }
+
+    private func saveDraft() {
+        model.saveSchedule(draft)
+        draft = model.schedule
     }
 }

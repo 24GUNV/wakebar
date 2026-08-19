@@ -19,7 +19,7 @@ actor MacPhoneSchedulePublisher {
             scheduleID: schedule.id,
             alarmID: schedule.id,
             revision: revision,
-            isEnabled: schedule.isEnabled && schedule.alarmOnIPhone,
+            isEnabled: schedule.isEnabled && schedule.isValid && schedule.alarmOnIPhone,
             title: "Wakebar",
             hour: schedule.hour,
             minute: schedule.minute,
