@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 import WakebarCore
 
@@ -161,6 +162,9 @@ struct ScheduleSettingsView: View {
             }
             .formStyle(.grouped)
             .frame(minWidth: 520, minHeight: 560)
+            .onAppear {
+                NSApplication.shared.activate()
+            }
             .task {
                 await model.load()
                 draft = model.schedule

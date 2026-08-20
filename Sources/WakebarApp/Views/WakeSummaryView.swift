@@ -3,7 +3,6 @@ import WakebarCore
 
 struct WakeSummaryView: View {
     @Bindable var model: AppModel
-    @Environment(\.openSettings) private var openSettings
 
     var body: some View {
         VStack(spacing: 0) {
@@ -54,12 +53,22 @@ struct WakeSummaryView: View {
             Divider()
 
             HStack(spacing: WakebarDesign.compactSpacing) {
-                Button(primaryActionTitle, systemImage: "calendar", action: showRelevantSettings)
+                SettingsLink {
+                    Label(primaryActionTitle, systemImage: "calendar")
+                }
+                .simultaneousGesture(
+                    TapGesture().onEnded { prepareRelevantSettings() }
+                )
 
                 Spacer(minLength: WakebarDesign.sectionSpacing)
 
                 Menu("More", systemImage: "ellipsis.circle") {
-                    Button("Settings…", systemImage: "gearshape", action: showGeneralSettings)
+                    SettingsLink {
+                        Label("Settings…", systemImage: "gearshape")
+                    }
+                    .simultaneousGesture(
+                        TapGesture().onEnded { prepareGeneralSettings() }
+                    )
                         .keyboardShortcut(",", modifiers: .command)
 
                     Button("Preview setup", systemImage: "play", action: testSessionStart)
@@ -79,14 +88,12 @@ struct WakeSummaryView: View {
         }
     }
 
-    private func showRelevantSettings() {
+    private func prepareRelevantSettings() {
         model.settingsDestination = model.relevantSettingsDestination
-        openSettings()
     }
 
-    private func showGeneralSettings() {
+    private func prepareGeneralSettings() {
         model.settingsDestination = .general
-        openSettings()
     }
 
     private func testSessionStart() {
