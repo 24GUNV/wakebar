@@ -69,8 +69,8 @@ This Mac has Xcode 26.6 and the iOS 26.5 Simulator runtime. The global developer
 
 The current local verification results are:
 
-- 69 shared XCTest tests passed on macOS;
-- 69 shared XCTest tests and one first-launch UI test passed on the iOS 26.5 Simulator;
+- 71 shared XCTest tests passed on macOS;
+- 71 shared XCTest tests and one first-launch UI test passed on the iOS 26.5 Simulator;
 - the unsigned macOS and iPhone Simulator Release builds passed;
 - the unsigned generic iPhoneOS arm64 Release build passed.
 

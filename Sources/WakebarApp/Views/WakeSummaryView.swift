@@ -3,62 +3,48 @@ import WakebarCore
 
 struct WakeSummaryView: View {
     @Bindable var model: AppModel
-    let onEdit: () -> Void
     @Environment(\.openSettings) private var openSettings
 
     var body: some View {
         VStack(spacing: 0) {
-            WakebarHeaderView(
-                status: model.scheduleStatusText,
-                onEdit: onEdit
-            )
-
-            Divider()
-                .padding(.leading, WakebarDesign.horizontalPadding)
-
             if model.schedule.isEnabled {
-                NextWakeView(nextWake: model.nextWake)
+                WakeOverviewHeaderView(
+                    nextWake: model.nextWake,
+                    nextSessionStart: model.nextInitialSessionStart,
+                    status: model.scheduleStatusText,
+                    menuState: model.scheduleMenuState
+                )
 
                 Divider()
                     .padding(.leading, WakebarDesign.horizontalPadding)
 
                 VStack(spacing: 0) {
-                    if let nextInitialSessionStart = model.nextInitialSessionStart {
-                        ScheduleEventRow(
-                            date: nextInitialSessionStart,
-                            title: "Start \(model.selectedProviderSummary)",
-                            detail: model.sessionExecutionDetail,
-                            systemImage: "sparkles",
-                            readiness: model.providerReadiness
+                    ForEach(model.schedule.providerIDs) { provider in
+                        ServiceStatusRow(
+                            title: provider.displayName,
+                            status: model.providerMenuStatus(for: provider),
+                            kind: model.isProviderReady(provider) ? .ready : .actionRequired
                         )
                     }
 
-                    if let nextPhoneAlarm = model.nextPlannedPhoneAlarm {
-                        ScheduleEventRow(
-                            date: nextPhoneAlarm,
-                            title: "Wake alarm",
-                            detail: model.phoneAlarmDetail,
-                            systemImage: "alarm",
-                            readiness: model.phoneAlarmReadiness
-                        )
-                    }
-
-                    if !model.refreshSessionDates.isEmpty {
-                        ScheduleEventRow(
-                            date: model.refreshSessionDates.first,
-                            title: "Session refreshes",
-                            detail: refreshDetail,
-                            systemImage: "arrow.clockwise",
-                            readiness: model.providerReadiness
+                    if model.schedule.alarmOnIPhone {
+                        ServiceStatusRow(
+                            title: "iPhone alarm",
+                            status: model.phoneAlarmMenuStatus,
+                            kind: model.phoneAlarmServiceStatusKind
                         )
                     }
                 }
                 .padding(.horizontal, WakebarDesign.horizontalPadding)
+
+                if model.schedule.repeatEveryFiveHours {
+                    Divider()
+                        .padding(.leading, WakebarDesign.horizontalPadding)
+
+                    RefreshSummaryView(nextRefresh: model.refreshSessionDates.first)
+                }
             } else {
-                DraftScheduleView(
-                    phoneStatus: model.draftPhoneStatus,
-                    onFinishSetup: onEdit
-                )
+                DraftScheduleView(phoneStatus: model.draftPhoneStatus)
             }
 
             if let activityNotice = model.activityNotice {
@@ -68,16 +54,24 @@ struct WakeSummaryView: View {
             Divider()
 
             HStack(spacing: WakebarDesign.compactSpacing) {
-                Spacer()
+                Button(primaryActionTitle, systemImage: "calendar", action: showRelevantSettings)
 
-                Button("Settings", systemImage: "gearshape", action: showSettings)
-                    .labelStyle(.iconOnly)
+                Spacer(minLength: WakebarDesign.sectionSpacing)
 
-                Button("Quit Wakebar", systemImage: "power", action: quitWakebar)
-                    .labelStyle(.iconOnly)
+                Menu("More", systemImage: "ellipsis.circle") {
+                    Button("Settings…", systemImage: "gearshape", action: showGeneralSettings)
+                        .keyboardShortcut(",", modifiers: .command)
 
-                Button("Preview", systemImage: "play.fill", action: testSessionStart)
-                    .disabled(model.isRunning)
+                    Button("Preview setup", systemImage: "play", action: testSessionStart)
+                        .disabled(model.isRunning)
+
+                    Divider()
+
+                    Button("Quit Wakebar", systemImage: "power", action: quitWakebar)
+                        .keyboardShortcut("q", modifiers: .command)
+                }
+                .menuStyle(.borderlessButton)
+                .fixedSize()
             }
             .buttonStyle(.borderless)
             .padding(.horizontal, WakebarDesign.horizontalPadding)
@@ -85,7 +79,13 @@ struct WakeSummaryView: View {
         }
     }
 
-    private func showSettings() {
+    private func showRelevantSettings() {
+        model.settingsDestination = model.relevantSettingsDestination
+        openSettings()
+    }
+
+    private func showGeneralSettings() {
+        model.settingsDestination = .general
         openSettings()
     }
 
@@ -99,16 +99,7 @@ struct WakeSummaryView: View {
         NSApplication.shared.terminate(nil)
     }
 
-    private var refreshDetail: String {
-        guard model.schedule.repeatEveryFiveHours else {
-            return "Off"
-        }
-
-        let count = model.refreshSessionDates.count
-        if count > 0 {
-            return count == 1 ? "1 refresh planned" : "\(count) refreshes planned"
-        }
-
-        return "No additional refreshes before the cutoff"
+    private var primaryActionTitle: String {
+        model.primaryMenuActionTitle
     }
 }

@@ -5,7 +5,7 @@ enum WakebarDesign {
     static let popoverWidth: CGFloat = 360
     static let maximumPopoverWidth: CGFloat = 400
     static let horizontalPadding: CGFloat = 18
-    static let compactSpacing: CGFloat = 6
+    static let compactSpacing: CGFloat = 8
     static let sectionSpacing: CGFloat = 14
-    static let eventRowHeight: CGFloat = 52
+    static let statusRowHeight: CGFloat = 36
 }

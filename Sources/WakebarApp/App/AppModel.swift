@@ -51,6 +51,7 @@ final class AppModel {
     var phoneAlarmPublishState: PhoneAlarmPublishState
     var lastConfirmedPhoneAlarm: PhoneAlarmAcknowledgement?
     var launchAtLoginState: LaunchAtLoginState
+    var settingsDestination: SettingsDestination
 
     @ObservationIgnored private let scheduleStore: ScheduleStore
     @ObservationIgnored private let scheduleCalculator: ScheduleCalculator
@@ -68,15 +69,16 @@ final class AppModel {
         schedulePlanner: SchedulePlanner? = nil,
         phoneSchedulePublisher: MacPhoneSchedulePublisher = MacPhoneSchedulePublisher(),
         providerDeliveryStore: ProviderDeliveryStore = ProviderDeliveryStore(),
-        launchAtLoginService: LaunchAtLoginService = LaunchAtLoginService(),
+        launchAtLoginService: LaunchAtLoginService? = nil,
         providerAdapters: [ProviderID: any ProviderAdapter]? = nil
     ) {
+        let resolvedLaunchAtLoginService = launchAtLoginService ?? LaunchAtLoginService()
         self.scheduleStore = scheduleStore
         self.scheduleCalculator = scheduleCalculator
         self.schedulePlanner = schedulePlanner ?? SchedulePlanner(calculator: scheduleCalculator)
         self.phoneSchedulePublisher = phoneSchedulePublisher
         self.providerDeliveryStore = providerDeliveryStore
-        self.launchAtLoginService = launchAtLoginService
+        self.launchAtLoginService = resolvedLaunchAtLoginService
         self.providerAdapters = providerAdapters ?? [
             .claude: DryRunProviderAdapter(id: .claude) as any ProviderAdapter,
             .codex: CodexPreviewProviderAdapter() as any ProviderAdapter,
@@ -93,7 +95,8 @@ final class AppModel {
         )
         phoneAlarmPublishState = .draft
         lastConfirmedPhoneAlarm = nil
-        launchAtLoginState = launchAtLoginService.state
+        launchAtLoginState = resolvedLaunchAtLoginService.state
+        settingsDestination = .schedule
     }
 
     var nextWake: Date? {
@@ -152,6 +155,15 @@ final class AppModel {
             }
         )
         return selectedProviders.isSubset(of: confirmedProviders) ? .ready : .setupRequired
+    }
+
+    func isProviderReady(_ provider: ProviderID) -> Bool {
+        providerDeliveryStates[provider]?.isCurrentRevisionConfirmed == true
+    }
+
+    func providerMenuStatus(for provider: ProviderID) -> String {
+        guard isProviderReady(provider) else { return "Setup required" }
+        return "Confirmed by you"
     }
 
     var sessionExecutionDetail: String {
@@ -226,11 +238,56 @@ final class AppModel {
         }
     }
 
+    var phoneAlarmMenuStatus: String {
+        scheduleMenuPresentation.phoneStatusText
+    }
+
+    var phoneAlarmServiceStatusKind: ServiceStatusKind {
+        scheduleMenuPresentation.phoneStatusKind
+    }
+
+    var isScheduleReady: Bool {
+        scheduleMenuState == .ready
+    }
+
+    var scheduleMenuState: ScheduleMenuState {
+        scheduleMenuPresentation.state
+    }
+
+    var relevantSettingsDestination: SettingsDestination {
+        SettingsDestination(scheduleMenuPresentation.destination)
+    }
+
     var scheduleStatusText: String {
-        guard schedule.isEnabled else { return "Draft" }
-        let providersAreReady = providerReadiness == .ready
-        let alarmIsReady = !schedule.alarmOnIPhone || phoneAlarmReadiness == .ready
-        return providersAreReady && alarmIsReady ? "Ready" : "Setup required"
+        scheduleMenuPresentation.statusText
+    }
+
+    var primaryMenuActionTitle: String {
+        scheduleMenuPresentation.primaryActionTitle
+    }
+
+    private var scheduleMenuPresentation: ScheduleMenuPresentation {
+        ScheduleMenuPresentation.resolve(
+            isEnabled: schedule.isEnabled,
+            providersReady: providerReadiness == .ready,
+            alarmEnabled: schedule.alarmOnIPhone,
+            phonePhase: phoneAlarmMenuPhase
+        )
+    }
+
+    private var phoneAlarmMenuPhase: PhoneAlarmMenuPhase {
+        switch phoneAlarmPublishState {
+        case .draft:
+            .draft
+        case .publishing:
+            .publishing
+        case .published:
+            .published
+        case .confirmed:
+            .confirmed
+        case .failed:
+            .failed
+        }
     }
 
     func load() async {
@@ -418,6 +475,11 @@ final class AppModel {
         } else {
             showTransientMessage("Still waiting for the iPhone.")
         }
+    }
+
+    func retryPhoneSchedule() async {
+        guard schedule.isEnabled, schedule.alarmOnIPhone else { return }
+        await publishPhoneSchedule(schedule)
     }
 
     func enableLaunchAtLogin() {

@@ -6,11 +6,22 @@ actor MacPhoneSchedulePublisher {
     private let revisionStore: PhoneScheduleRevisionStore
 
     init(
-        repository: any PhoneAlarmScheduleRepository = CloudKitPhoneAlarmScheduleRepository(),
+        repository: (any PhoneAlarmScheduleRepository)? = nil,
         revisionStore: PhoneScheduleRevisionStore = PhoneScheduleRevisionStore()
     ) {
-        self.repository = repository
+        self.repository = repository ?? Self.defaultRepository()
         self.revisionStore = revisionStore
+    }
+
+    private static func defaultRepository() -> any PhoneAlarmScheduleRepository {
+#if DEBUG
+        if ProcessInfo.processInfo.environment["WAKEBAR_DISABLE_CLOUDKIT"] == "1" {
+            return UnavailablePhoneAlarmScheduleRepository(
+                reason: "Phone sync is unavailable in local UI review mode."
+            )
+        }
+#endif
+        return CloudKitPhoneAlarmScheduleRepository()
     }
 
     func publish(_ schedule: WakeSchedule) async throws -> PhoneAlarmPublishReceipt {

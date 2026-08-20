@@ -59,8 +59,8 @@ Wakebar reports each stage separately. A schedule is not a sent prompt. A sent p
 
 | Check | Result |
 | --- | --- |
-| Shared XCTest suite on macOS | 69 passed |
-| Shared XCTest suite on iOS Simulator | 69 passed |
+| Shared XCTest suite on macOS | 71 passed |
+| Shared XCTest suite on iOS Simulator | 71 passed |
 | iPhone first-launch UI test | Passed |
 | macOS and iPhone Release builds | Passed |
 | Signed physical-iPhone acceptance | Pending |
