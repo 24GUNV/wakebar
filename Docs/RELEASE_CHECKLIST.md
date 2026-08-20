@@ -58,6 +58,8 @@ Complete this checklist with the same Apple development team on the Mac and iPho
 
 - Confirm the saved provider times in Wakebar.
 
-- Verify that Claude replies with only `yes` and Codex sends only `hi`, each in a fresh session.
+- Verify that Claude replies only with `yes` and the ChatGPT task replies only with `hi`.
+
+- Record whether the Codex usage window changes.
 
 - Do not describe a successful prompt as proof that a five-hour or weekly usage window reset.

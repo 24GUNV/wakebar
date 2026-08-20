@@ -69,6 +69,8 @@ struct WakeOverviewHeaderView: View {
         switch menuState {
         case .ready:
             "checkmark.circle.fill"
+        case .experimental:
+            "flask.fill"
         case .inProgress:
             "clock"
         case .actionRequired:
@@ -82,6 +84,8 @@ struct WakeOverviewHeaderView: View {
         switch menuState {
         case .ready:
             .green
+        case .experimental:
+            .orange
         case .inProgress, .draft:
             .secondary
         case .actionRequired:

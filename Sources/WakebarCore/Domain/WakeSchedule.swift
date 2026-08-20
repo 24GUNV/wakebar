@@ -92,6 +92,36 @@ public struct WakeSchedule: Identifiable, Codable, Equatable, Sendable {
         }
     }
 
+    public func hasSameHostedSetup(as other: Self, for provider: ProviderID) -> Bool {
+        guard isEnabled == other.isEnabled,
+              hour == other.hour,
+              minute == other.minute,
+              selectedWeekdays == other.selectedWeekdays,
+              sessionLeadMinutes == other.sessionLeadMinutes,
+              repeatEveryFiveHours == other.repeatEveryFiveHours,
+              repeatUntilHour == other.repeatUntilHour,
+              followsSystemTimeZone == other.followsSystemTimeZone,
+              timeZoneIdentifier == other.timeZoneIdentifier
+        else { return false }
+
+        switch provider {
+        case .claude:
+            return includeClaude == other.includeClaude
+                && claudeBackend == other.claudeBackend
+        case .codex:
+            return includeCodex == other.includeCodex
+                && codexBackend == other.codexBackend
+                && codexRoute == other.codexRoute
+        }
+    }
+
+    public func providersRemoved(from activeSchedule: Self) -> [ProviderID] {
+        guard activeSchedule.isEnabled else { return [] }
+        return activeSchedule.providerIDs.filter { provider in
+            !providerIDs.contains(provider)
+        }
+    }
+
     public static var `default`: Self {
         Self(
             id: UUID(),

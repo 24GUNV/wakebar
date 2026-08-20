@@ -6,15 +6,7 @@ struct ProviderConfirmationButton: View {
     let provider: ProviderID
 
     var body: some View {
-        if model.providerDeliveryStates[provider]?.isCurrentRevisionConfirmed == true {
-            Button("Mark \(provider.displayName) unconfirmed", action: clearConfirmation)
-        } else {
-            Button("I confirmed the \(provider.displayName) schedule", action: confirmSchedule)
-        }
-    }
-
-    private func clearConfirmation() {
-        model.clearProviderConfirmation(provider)
+        Button("I've finished setup", action: confirmSchedule)
     }
 
     private func confirmSchedule() {

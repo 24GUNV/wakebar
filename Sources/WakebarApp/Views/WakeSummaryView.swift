@@ -3,6 +3,7 @@ import WakebarCore
 
 struct WakeSummaryView: View {
     @Bindable var model: AppModel
+    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         VStack(spacing: 0) {
@@ -22,7 +23,7 @@ struct WakeSummaryView: View {
                         ServiceStatusRow(
                             title: provider.displayName,
                             status: model.providerMenuStatus(for: provider),
-                            kind: model.isProviderReady(provider) ? .ready : .actionRequired
+                            kind: model.providerMenuStatusKind(for: provider)
                         )
                     }
 
@@ -53,22 +54,12 @@ struct WakeSummaryView: View {
             Divider()
 
             HStack(spacing: WakebarDesign.compactSpacing) {
-                SettingsLink {
-                    Label(primaryActionTitle, systemImage: "calendar")
-                }
-                .simultaneousGesture(
-                    TapGesture().onEnded { prepareRelevantSettings() }
-                )
+                Button(primaryActionTitle, systemImage: "calendar", action: showRelevantSettings)
 
                 Spacer(minLength: WakebarDesign.sectionSpacing)
 
                 Menu("More", systemImage: "ellipsis.circle") {
-                    SettingsLink {
-                        Label("Settings…", systemImage: "gearshape")
-                    }
-                    .simultaneousGesture(
-                        TapGesture().onEnded { prepareGeneralSettings() }
-                    )
+                    Button("Settings…", systemImage: "gearshape", action: showGeneralSettings)
                         .keyboardShortcut(",", modifiers: .command)
 
                     Button("Preview setup", systemImage: "play", action: testSessionStart)
@@ -88,12 +79,19 @@ struct WakeSummaryView: View {
         }
     }
 
-    private func prepareRelevantSettings() {
-        model.settingsDestination = model.relevantSettingsDestination
+    private func showRelevantSettings() {
+        model.requestSettings(model.relevantSettingsDestination)
+        showSettingsWindow()
     }
 
-    private func prepareGeneralSettings() {
-        model.settingsDestination = .general
+    private func showGeneralSettings() {
+        model.requestSettings(.general)
+        showSettingsWindow()
+    }
+
+    private func showSettingsWindow() {
+        NSApplication.shared.activate()
+        openWindow(id: "settings")
     }
 
     private func testSessionStart() {

@@ -10,8 +10,9 @@ struct WakebarApp: App {
         }
         .menuBarExtraStyle(.window)
 
-        Settings {
+        Window("Wakebar", id: "settings") {
             ScheduleSettingsView(model: model)
         }
+        .defaultSize(width: 560, height: 620)
     }
 }

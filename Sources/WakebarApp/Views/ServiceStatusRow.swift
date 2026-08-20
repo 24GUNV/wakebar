@@ -24,6 +24,8 @@ struct ServiceStatusRow: View {
         switch kind {
         case .ready:
             "checkmark.circle.fill"
+        case .experimental:
+            "flask.fill"
         case .inProgress:
             "clock"
         case .actionRequired:
@@ -32,6 +34,11 @@ struct ServiceStatusRow: View {
     }
 
     private var foregroundStyle: Color {
-        kind == .actionRequired ? .orange : .secondary
+        switch kind {
+        case .experimental, .actionRequired:
+            .orange
+        case .ready, .inProgress:
+            .secondary
+        }
     }
 }

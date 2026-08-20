@@ -3,6 +3,52 @@ import XCTest
 @testable import WakebarCore
 
 final class WakeScheduleTests: XCTestCase {
+    func testHostedSetupIgnoresIPhoneOnlyChanges() {
+        let original = WakeSchedule.default
+        var updated = original
+        updated.alarmOnIPhone.toggle()
+        updated.revision = UUID()
+
+        XCTAssertTrue(updated.hasSameHostedSetup(as: original, for: .claude))
+        XCTAssertTrue(updated.hasSameHostedSetup(as: original, for: .codex))
+    }
+
+    func testHostedSetupChangesWhenProviderTimingChanges() {
+        let original = WakeSchedule.default
+        var updated = original
+        updated.sessionLeadMinutes = 30
+
+        XCTAssertFalse(updated.hasSameHostedSetup(as: original, for: .claude))
+        XCTAssertFalse(updated.hasSameHostedSetup(as: original, for: .codex))
+    }
+
+    func testHostedSetupTracksOnlyTheAffectedProviderSelection() {
+        let original = WakeSchedule.default
+        var updated = original
+        updated.includeCodex = false
+
+        XCTAssertTrue(updated.hasSameHostedSetup(as: original, for: .claude))
+        XCTAssertFalse(updated.hasSameHostedSetup(as: original, for: .codex))
+    }
+
+    func testRemovedProvidersAreReportedInStableProviderOrder() {
+        var active = WakeSchedule.default
+        active.isEnabled = true
+        var updated = active
+        updated.includeClaude = false
+        updated.includeCodex = false
+
+        XCTAssertEqual(updated.providersRemoved(from: active), [.claude, .codex])
+    }
+
+    func testUnpublishedDraftDoesNotRequireProviderCleanup() {
+        let unpublishedDraft = WakeSchedule.default
+        var updated = unpublishedDraft
+        updated.includeCodex = false
+
+        XCTAssertTrue(updated.providersRemoved(from: unpublishedDraft).isEmpty)
+    }
+
     func testDefaultScheduleIsAnUnpublishedDraft() {
         XCTAssertFalse(WakeSchedule.default.isEnabled)
     }

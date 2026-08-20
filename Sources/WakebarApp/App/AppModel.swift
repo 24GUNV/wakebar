@@ -17,9 +17,30 @@ final class AppModel {
                 schedule.revision = UUID()
             }
             desiredRevision = schedule.revision
+            let previousDeliveryStates = providerDeliveryStates
             providerDeliveryStates = Dictionary(
                 uniqueKeysWithValues: ProviderID.allCases.map { provider in
-                    (provider, .draft(provider: provider, revision: desiredRevision))
+                    let previousState = previousDeliveryStates[provider]
+                    let preservesConfirmation = schedule.hasSameHostedSetup(
+                        as: oldValue,
+                        for: provider
+                    ) && previousState?.isCurrentRevisionConfirmed == true
+                    let state = if preservesConfirmation {
+                        ProviderDeliveryState(
+                            provider: provider,
+                            desiredRevision: desiredRevision,
+                            appliedRevision: desiredRevision,
+                            phase: .confirmed,
+                            lastConfirmedAt: previousState?.lastConfirmedAt,
+                            detail: previousState?.detail
+                        )
+                    } else {
+                        ProviderDeliveryState.draft(
+                            provider: provider,
+                            revision: desiredRevision
+                        )
+                    }
+                    return (provider, state)
                 }
             )
             saveProviderDeliveryStates()
@@ -52,6 +73,7 @@ final class AppModel {
     var lastConfirmedPhoneAlarm: PhoneAlarmAcknowledgement?
     var launchAtLoginState: LaunchAtLoginState
     var settingsDestination: SettingsDestination
+    var settingsNavigationRequestID: UUID
 
     @ObservationIgnored private let scheduleStore: ScheduleStore
     @ObservationIgnored private let scheduleCalculator: ScheduleCalculator
@@ -97,6 +119,7 @@ final class AppModel {
         lastConfirmedPhoneAlarm = nil
         launchAtLoginState = resolvedLaunchAtLoginService.state
         settingsDestination = .schedule
+        settingsNavigationRequestID = UUID()
     }
 
     var nextWake: Date? {
@@ -163,7 +186,14 @@ final class AppModel {
 
     func providerMenuStatus(for provider: ProviderID) -> String {
         guard isProviderReady(provider) else { return "Setup required" }
-        return "Confirmed by you"
+        return provider == .codex
+            ? "Confirmed by you · effect unverified"
+            : "Confirmed by you"
+    }
+
+    func providerMenuStatusKind(for provider: ProviderID) -> ServiceStatusKind {
+        guard isProviderReady(provider) else { return .actionRequired }
+        return provider == .codex ? .experimental : .ready
     }
 
     var sessionExecutionDetail: String {
@@ -251,7 +281,10 @@ final class AppModel {
     }
 
     var scheduleMenuState: ScheduleMenuState {
-        scheduleMenuPresentation.state
+        if scheduleMenuPresentation.state == .ready, schedule.includeCodex {
+            return .experimental
+        }
+        return scheduleMenuPresentation.state
     }
 
     var relevantSettingsDestination: SettingsDestination {
@@ -259,11 +292,18 @@ final class AppModel {
     }
 
     var scheduleStatusText: String {
-        scheduleMenuPresentation.statusText
+        scheduleMenuState == .experimental
+            ? "Experimental"
+            : scheduleMenuPresentation.statusText
     }
 
     var primaryMenuActionTitle: String {
         scheduleMenuPresentation.primaryActionTitle
+    }
+
+    func requestSettings(_ destination: SettingsDestination) {
+        settingsDestination = destination
+        settingsNavigationRequestID = UUID()
     }
 
     private var scheduleMenuPresentation: ScheduleMenuPresentation {
@@ -398,48 +438,12 @@ final class AppModel {
         }
     }
 
-    func claudeSetupInstructions() throws -> String {
-        let plans = try ClaudeRoutineScheduleCompiler().plans(for: schedule)
-        let planText = plans.enumerated().map { index, plan in
-            """
-            \(index + 1). \(plan.routineName)
-               Time: \(twoDigit(plan.hour)):\(twoDigit(plan.minute))
-               Days: \(weekdayNames(plan.weekdays))
-               Time zone: \(plan.timeZoneIdentifier)
-               Prompt:
-            \(plan.savedPrompt)
-            """
-        }.joined(separator: "\n\n")
-
-        return """
-        Wakebar Claude Code Routine setup
-
-        Create these Routines at https://claude.ai/code/routines.
-        Keep repositories and connectors disabled.
-
-        \(planText)
-
-        Scheduled starts can be delayed by a few minutes. Confirm the saved times in Wakebar after setup.
-        """
+    func claudeSetupInstructions() -> String {
+        ProviderSetupPromptCompiler().claudeRoutineInstructions(for: schedule)
     }
 
     func codexSetupInstructions() -> String {
-        let slots = RecurringSessionSlotCompiler().slots(for: schedule)
-        let slotText = slots.enumerated().map { index, slot in
-            "\(index + 1). \(twoDigit(slot.hour)):\(twoDigit(slot.minute)) on \(weekdayNames(slot.weekdays))"
-        }.joined(separator: "\n")
-
-        return """
-        Wakebar Codex setup
-
-        Route: \(schedule.codexRoute.displayName)
-        Prompt: hi
-        Time zone: \(schedule.timeZone.identifier)
-
-        \(slotText)
-
-        A completed scheduled prompt does not prove that a Codex usage window started or reset.
-        """
+        ProviderSetupPromptCompiler().chatGPTTaskPrompt(for: schedule)
     }
 
     func reportCopyResult(_ succeeded: Bool, successMessage: String) {
@@ -460,7 +464,7 @@ final class AppModel {
             detail: "Confirmed manually"
         )
         saveProviderDeliveryStates()
-        showTransientMessage("\(provider.displayName) schedule confirmed.")
+        showTransientMessage("\(provider.displayName) marked as set up.")
     }
 
     func clearProviderConfirmation(_ provider: ProviderID) {
@@ -578,14 +582,4 @@ final class AppModel {
         }
     }
 
-    private func twoDigit(_ value: Int) -> String {
-        value < 10 ? "0\(value)" : "\(value)"
-    }
-
-    private func weekdayNames(_ weekdays: Set<Weekday>) -> String {
-        Weekday.displayOrder
-            .filter(weekdays.contains)
-            .map(\.fullLabel)
-            .formatted()
-    }
 }

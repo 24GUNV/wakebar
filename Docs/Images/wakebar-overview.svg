@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="680" height="500" viewBox="0 0 680 500" role="img" aria-labelledby="title description">
   <title id="title">Wakebar compact macOS menu</title>
-  <desc id="description">A compact ready-state menu showing the next wake time, manually confirmed Claude and Codex schedules, an iPhone alarm, the next five-hour refresh, and safe schedule and More actions.</desc>
+  <desc id="description">A compact menu showing the next wake time, confirmed Claude setup, an experimental Codex proxy with an unverified usage effect, a confirmed iPhone alarm, the next five-hour refresh, and safe schedule and More actions.</desc>
   <defs>
     <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%">
       <feDropShadow dx="0" dy="12" stdDeviation="20" flood-color="#111118" flood-opacity="0.11"/>
@@ -10,6 +10,7 @@
       .secondary { fill: #6e6e73; }
       .hairline { stroke: #dedee3; stroke-width: 1; }
       .success { fill: #248a3d; }
+      .warning { fill: #b45309; }
       .accent { fill: #5757d9; }
     </style>
   </defs>
@@ -24,10 +25,10 @@
     <text x="64" y="112" font-size="31" font-weight="700">7:00 AM</text>
     <text x="64" y="140" font-size="18" class="secondary">Sessions start at 6:50 AM</text>
 
-    <g aria-label="Ready">
-      <circle cx="535" cy="91" r="10" class="success"/>
-      <path d="M530 91l3 3 7-8" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      <text x="558" y="97" font-size="18" class="success">Ready</text>
+    <g aria-label="Experimental">
+      <circle cx="501" cy="91" r="10" class="warning"/>
+      <text x="501" y="97" font-size="15" font-weight="700" fill="#fff" text-anchor="middle">?</text>
+      <text x="524" y="97" font-size="18" class="warning">Experimental</text>
     </g>
 
     <line x1="64" y1="164" x2="648" y2="164" class="hairline"/>
@@ -38,9 +39,9 @@
     <path d="M610 198l3 3 6-7" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
 
     <text x="64" y="247" font-size="20">Codex</text>
-    <text x="579" y="247" font-size="17" class="secondary" text-anchor="end">Confirmed by you</text>
-    <circle cx="614" cy="241" r="9" fill="#8e8e93"/>
-    <path d="M610 241l3 3 6-7" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="579" y="247" font-size="17" class="warning" text-anchor="end">Effect unverified</text>
+    <circle cx="614" cy="241" r="9" class="warning"/>
+    <text x="614" y="246" font-size="13" font-weight="700" fill="#fff" text-anchor="middle">?</text>
 
     <text x="64" y="290" font-size="20">iPhone alarm</text>
     <text x="579" y="290" font-size="17" class="secondary" text-anchor="end">Alarm confirmed</text>

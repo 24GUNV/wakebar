@@ -4,7 +4,7 @@ struct LaunchAtLoginSectionView: View {
     @Bindable var model: AppModel
 
     var body: some View {
-        Section("General") {
+        VStack(alignment: .leading, spacing: WakebarDesign.compactSpacing) {
             LabeledContent("Launch at login") {
                 Text(model.launchAtLoginState.displayName)
                     .foregroundStyle(.secondary)

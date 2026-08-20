@@ -5,7 +5,7 @@
 <h1 align="center">Wakebar</h1>
 
 <p align="center">
-  Schedule minimal Claude Code and Codex prompts before you wake up.<br>
+  Schedule a Claude Code wake-up and test an experimental Codex proxy before you wake up.<br>
   After provider setup, the Mac can stay off. The optional alarm also needs iPhone confirmation.
 </p>
 
@@ -15,13 +15,13 @@
 
 <p align="center">
   <a href="Docs/Images/wakebar-overview.svg">
-    <img src="Docs/Images/wakebar-overview.svg" width="680" alt="Wakebar menu-bar view with confirmed providers, an iPhone alarm, and session refreshes">
+    <img src="Docs/Images/wakebar-overview.svg" width="680" alt="Wakebar menu with Claude, an experimental Codex proxy, an iPhone alarm, and session refreshes">
   </a>
 </p>
 
-<p align="center"><sub>Example of a manually confirmed schedule. Open the image for a full-size view.</sub></p>
+<p align="center"><sub>Example with confirmed Claude setup and the experimental Codex route enabled. Open the image for a full-size view.</sub></p>
 
-Wakebar turns one wake time into provider-hosted prompts and an optional iPhone alarm. Wakebar generates setup text; you create the tasks in Claude and ChatGPT, then confirm their saved times. The default Claude Routine asks for `yes`, while the Codex task uses `hi`. The iPhone companion receives the alarm schedule through iCloud and registers it with AlarmKit.
+Wakebar turns one wake time into provider-hosted prompts and an optional iPhone alarm. Wakebar generates setup details; you create the tasks in Claude and ChatGPT, then confirm their saved times. The default Claude Routine asks for `yes`. The experimental ChatGPT task sends `hi`. OpenAI has not documented whether this changes Codex usage limits. The iPhone companion receives the alarm schedule through iCloud and registers it with AlarmKit.
 
 > [!IMPORTANT]
 > The macOS tests, iOS Simulator tests, and unsigned Release builds pass. Signed CloudKit, push-notification, and AlarmKit behavior still needs acceptance testing on a physical iPhone.
@@ -39,7 +39,7 @@ Wakebar guides provider setup; it does not create provider tasks. Paste the gene
 | At the scheduled time | One-time setup | Works with the Mac off |
 | --- | --- | :---: |
 | Start Claude Code | Create the generated Claude Code Routines and confirm their times | Yes |
-| Start Codex | Create the generated ChatGPT scheduled tasks and confirm their times | Yes |
+| Test the Codex wake-up proxy | Create the generated ChatGPT scheduled task and confirm its times | Task: Yes; Codex effect: Unverified |
 | Ring the wake alarm | Let the iPhone receive the schedule and confirm AlarmKit | After iPhone confirmation |
 | Refresh sessions every five hours | Create all generated recurring provider tasks | Yes |
 
@@ -59,8 +59,8 @@ Wakebar reports each stage separately. A schedule is not a sent prompt. A sent p
 
 | Check | Result |
 | --- | --- |
-| Shared XCTest suite on macOS | 71 passed |
-| Shared XCTest suite on iOS Simulator | 71 passed |
+| Shared XCTest suite on macOS | 78 passed |
+| Shared XCTest suite on iOS Simulator | 78 passed |
 | iPhone first-launch UI test | Passed |
 | macOS and iPhone Release builds | Passed |
 | Signed physical-iPhone acceptance | Pending |
@@ -119,6 +119,7 @@ Docs                  Integration boundaries and release checks
 - Consumer subscription credentials stay with their provider.
 - The **Preview** control does not send a provider prompt.
 - Wakebar records occurrence identifiers before execution to suppress duplicates.
+- Before Wakebar removes a service, you confirm that you paused or deleted its hosted task.
 - The UI distinguishes scheduled, sent, accepted, and confirmed states.
 - Wakebar does not claim that a minimal prompt resets a five-hour or weekly limit.
 

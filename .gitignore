@@ -4,3 +4,5 @@
 Wakebar.app/
 DerivedData/
 *.xcuserstate
+xcuserdata/
+*.profraw
