@@ -13,7 +13,7 @@ final class ClaudeRoutineScheduleCompilerTests: XCTestCase {
 
         XCTAssertEqual(plans.count, 3)
         XCTAssertEqual(plans.map(\.hour), [6, 11, 16])
-        XCTAssertTrue(plans.allSatisfy { $0.savedPrompt.contains("exactly \"hi\"") })
+        XCTAssertTrue(plans.allSatisfy { $0.savedPrompt.contains("exactly \"yes\"") })
         XCTAssertTrue(plans.allSatisfy { $0.timeZoneIdentifier == "Asia/Bangkok" })
     }
 }

@@ -23,4 +23,13 @@ public enum ProviderID: String, CaseIterable, Codable, Hashable, Identifiable, S
     }
 
     public var minimalPrompt: String { "hi" }
+
+    public var hostedPromptDescription: String {
+        switch self {
+        case .claude:
+            "asks for “yes”"
+        case .codex:
+            "sends “hi”"
+        }
+    }
 }

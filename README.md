@@ -1,62 +1,97 @@
-# Wakebar
+<p align="center">
+  <img src="Resources/AppIconSource.svg" width="96" alt="Wakebar app icon">
+</p>
 
-Wakebar is a native macOS menu-bar app for starting AI coding sessions before a scheduled wake time.
+<h1 align="center">Wakebar</h1>
 
-Set one wake time. Wakebar prepares Claude Code and Codex a few minutes earlier, then coordinates an optional alarm on an iPhone. A minimal provider prompt uses `hi` in a fresh temporary session.
+<p align="center">
+  Schedule minimal Claude Code and Codex prompts before you wake up.<br>
+  After provider setup, the Mac can stay off. The optional alarm also needs iPhone confirmation.
+</p>
 
-## Current status
+<p align="center">
+  <strong>Native SwiftUI</strong> · macOS 14+ · iOS 26+
+</p>
 
-This repository contains native macOS and iPhone applications with shared scheduling logic.
+<p align="center">
+  <a href="Docs/Images/wakebar-overview.svg">
+    <img src="Docs/Images/wakebar-overview.svg" width="680" alt="Wakebar menu-bar view with confirmed providers, an iPhone alarm, and session refreshes">
+  </a>
+</p>
 
-- SwiftUI provides the menu-bar summary and schedule editor.
+<p align="center"><sub>Example of a manually confirmed schedule. Open the image for a full-size view.</sub></p>
 
-- Schedules persist as version-tolerant JSON in Application Support.
+Wakebar turns one wake time into provider-hosted prompts and an optional iPhone alarm. Wakebar generates setup text; you create the tasks in Claude and ChatGPT, then confirm their saved times. The default Claude Routine asks for `yes`, while the Codex task uses `hi`. The iPhone companion receives the alarm schedule through iCloud and registers it with AlarmKit.
 
-- The schedule compiler produces the initial prompt, phone alarm, and five-hour refresh events.
+> [!IMPORTANT]
+> The macOS tests, iOS Simulator tests, and unsigned Release builds pass. Signed CloudKit, push-notification, and AlarmKit behavior still needs acceptance testing on a physical iPhone.
 
-- An execution ledger prevents the same compiled event from running twice.
+## How it works
 
-- Provider-specific preview adapters model Claude Routine and Codex scheduling capabilities.
+<p align="center">
+  <a href="Docs/Images/wakebar-flow.svg">
+    <img src="Docs/Images/wakebar-flow.svg" width="680" alt="Wakebar flow with manual provider setup and a separate iCloud path for the iPhone alarm">
+  </a>
+</p>
 
-- Provider actions remain in preview mode and do not send live prompts by default.
+Wakebar guides provider setup; it does not create provider tasks. Paste the generated instructions into Claude Code Routines and ChatGPT scheduled tasks. Then confirm the saved times in Wakebar.
 
-- The iPhone companion receives schedules through the user’s private CloudKit database and registers them with AlarmKit.
+| At the scheduled time | One-time setup | Works with the Mac off |
+| --- | --- | :---: |
+| Start Claude Code | Create the generated Claude Code Routines and confirm their times | Yes |
+| Start Codex | Create the generated ChatGPT scheduled tasks and confirm their times | Yes |
+| Ring the wake alarm | Let the iPhone receive the schedule and confirm AlarmKit | After iPhone confirmation |
+| Refresh sessions every five hours | Create all generated recurring provider tasks | Yes |
 
-- The iPhone confirms accepted or disabled revisions back to the Mac through a separate CloudKit acknowledgement.
+Wakebar reports each stage separately. A schedule is not a sent prompt. A sent prompt is not proof that a provider reset a usage window.
 
-- AlarmKit and cross-device delivery still require an iOS 26 physical-device test before release.
+## Included
 
-## Intended execution paths
+- A compact macOS menu-bar schedule editor and status view.
+- A native iPhone companion for AlarmKit authorization and alarm confirmation.
+- Shared schedule compilation for wake, alarm, and five-hour refresh events.
+- Versioned local persistence and duplicate-execution protection.
+- Conditional CloudKit writes, offline recovery, and phone acknowledgements.
+- Provider previews that do not send prompts, plus fixed minimal prompts for hosted tasks.
+- Wakebar does not request or upload consumer subscription credentials.
 
-- **Claude Code:** Use a Claude Routine so the Mac can be off.
-- **Codex:** Use a hosted ChatGPT scheduled task so the Mac can be off.
-- **Alarm:** Use an iPhone companion app with AlarmKit.
+## Verification
 
-The app must verify each step independently. A scheduled event is not the same as a sent prompt, and a sent prompt is not proof that a usage window reset.
+| Check | Result |
+| --- | --- |
+| Shared XCTest suite on macOS | 69 passed |
+| Shared XCTest suite on iOS Simulator | 69 passed |
+| iPhone first-launch UI test | Passed |
+| macOS and iPhone Release builds | Passed |
+| Signed physical-iPhone acceptance | Pending |
 
-See [provider and alarm integrations](Docs/INTEGRATIONS.md) for the current capability boundaries.
-
-## Project structure
-
-- `Sources/WakebarCore`: schedule, provider, persistence, and execution logic.
-- `Sources/WakebarApp`: menu-bar application and SwiftUI views.
-- `Sources/WakebarPhone`: iPhone companion, AlarmKit status, and CloudKit delivery interface.
-- `Tests/WakebarTests`: deterministic schedule tests.
-- `project.yml`: macOS and iOS Xcode target definitions.
-- `Scripts`: local packaging and launch scripts.
+The latest [GitHub Actions workflow](https://github.com/24GUNV/wakebar/actions/workflows/ci.yml) uses Xcode 26.6. Simulator tests cannot certify real background CloudKit delivery or system alarm presentation.
 
 ## Build
 
-Requirements:
+You need:
 
-- macOS 14 or later
-- Xcode 26 or later
-- An Apple development team with the Wakebar CloudKit container enabled
+- macOS 14 or later;
+- Xcode 26 or later;
+- an Apple development team with access to `iCloud.com.24gunv.wakebar`.
 
-Run the tests:
+Generate the Xcode project and run the test suite:
 
 ```sh
-swift test
+brew install xcodegen
+xcodegen generate
+xcodebuild \
+  -project Wakebar.xcodeproj \
+  -scheme Wakebar \
+  -destination 'platform=macOS' \
+  CODE_SIGNING_ALLOWED=NO \
+  test
+```
+
+Build and open the signed debug app:
+
+```sh
+WAKEBAR_DEVELOPMENT_TEAM=YOUR_TEAM_ID ./Scripts/compile_and_run.sh
 ```
 
 Create a signed macOS archive:
@@ -65,24 +100,30 @@ Create a signed macOS archive:
 WAKEBAR_DEVELOPMENT_TEAM=YOUR_TEAM_ID ./Scripts/package_app.sh release
 ```
 
-Build and launch the debug app:
+Before distribution, complete the [physical-device release checklist](Docs/RELEASE_CHECKLIST.md).
 
-```sh
-WAKEBAR_DEVELOPMENT_TEAM=YOUR_TEAM_ID ./Scripts/compile_and_run.sh
+## Project map
+
+```text
+Sources/WakebarCore   Scheduling, providers, persistence, and alarm coordination
+Sources/WakebarApp    macOS menu-bar app
+Sources/WakebarPhone  iPhone companion
+Tests/WakebarTests    Shared deterministic tests
+UITests               iPhone launch coverage
+Docs                  Integration boundaries and release checks
 ```
 
-GitHub Actions builds the macOS and iPhone Debug and Release configurations with Xcode 26.6. The same 69 shared XCTest tests run on macOS and iOS Simulator. One iPhone UI test also checks the first-launch, no-schedule screen without access to iCloud or AlarmKit. The local Command Line Tools installation can build `WakebarCore`, but it does not include the iOS 26 SDK.
+## Design and safety decisions
 
-Before distributing the apps, complete the signed physical-device checks in the [release checklist](Docs/RELEASE_CHECKLIST.md).
+- Confirmed provider tasks run on provider-hosted infrastructure, so the Mac can be off.
+- Consumer subscription credentials stay with their provider.
+- The **Preview** control does not send a provider prompt.
+- Wakebar records occurrence identifiers before execution to suppress duplicates.
+- The UI distinguishes scheduled, sent, accepted, and confirmed states.
+- Wakebar does not claim that a minimal prompt resets a five-hour or weekly limit.
 
-## Safety boundaries
+Read the [integration notes](Docs/INTEGRATIONS.md) and [iPhone reliability model](Docs/IPHONE_COMPANION.md) for the exact capability boundaries.
 
-- Store provider secrets in Keychain.
-- Never run provider commands through a shell string.
-- Record occurrence identifiers before live execution to prevent duplicate prompts.
-- Keep new provider connections in preview mode until the user confirms them.
-- Do not upload consumer subscription credentials to a hosted Wakebar service.
+## Acknowledgements
 
-## Reference project
-
-The interface takes structural inspiration from the MIT-licensed [CodexBar](https://github.com/steipete/CodexBar). See [REFERENCES.md](REFERENCES.md).
+The menu-bar structure takes inspiration from the MIT-licensed [CodexBar](https://github.com/steipete/CodexBar). See [REFERENCES.md](REFERENCES.md) for attribution details.

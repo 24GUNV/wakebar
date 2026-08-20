@@ -65,11 +65,18 @@ The Mac and iPhone targets use the same iCloud container. Silent CloudKit subscr
 
 ## Verification status
 
-The `WakebarCore` target builds when the command selects the matching macOS 15.4 Command Line Tools SDK. GitHub Actions uses Xcode 26.6 to run the same 69 shared XCTest tests on macOS and iOS Simulator. One iPhone UI test also checks the first-launch, no-schedule screen without access to iCloud or AlarmKit.
+This Mac has Xcode 26.6 and the iOS 26.5 Simulator runtime. The global developer directory still points to Command Line Tools. Local Xcode commands therefore set `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer`.
 
-The available local command-line tools do not include XCTest or the iOS 26 SDK. Signed CloudKit delivery and AlarmKit behavior still require a physical iPhone.
+The current local verification results are:
 
-The adapter uses the current iOS 26.1 alert initializer and an iOS 26.0 fallback. Run the iPhone target and tests with an Xcode installation that includes the iOS 26 SDK before release.
+- 69 shared XCTest tests passed on macOS;
+- 69 shared XCTest tests and one first-launch UI test passed on the iOS 26.5 Simulator;
+- the unsigned macOS and iPhone Simulator Release builds passed;
+- the unsigned generic iPhoneOS arm64 Release build passed.
+
+The adapter uses the current iOS 26.1 alert initializer and an iOS 26.0 fallback. These checks verify compilation, shared behavior, and the simulator interface. They do not verify code signing, CloudKit account access, background push delivery, or system alarm presentation on a physical iPhone.
+
+Signed CloudKit, push-notification, and AlarmKit acceptance testing on a physical iPhone is still pending.
 
 ## Apple references
 

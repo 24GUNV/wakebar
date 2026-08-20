@@ -18,8 +18,7 @@ public struct ClaudeRoutineScheduleCompiler: Sendable {
                     hour: slot.hour,
                     minute: slot.minute,
                     weekdays: slot.weekdays,
-                    timeZoneIdentifier: schedule.timeZone.identifier,
-                    prompt: .sayHi
+                    timeZoneIdentifier: schedule.timeZone.identifier
                 )
             )
         }

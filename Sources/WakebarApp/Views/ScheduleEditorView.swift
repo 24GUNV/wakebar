@@ -116,13 +116,13 @@ struct ScheduleEditorView: View {
 
                 ProviderSelectionRow(
                     provider: .claude,
-                    detail: "Cloud Routine · setup required · “hi”",
+                    detail: "Cloud Routine · setup required · \(ProviderID.claude.hostedPromptDescription)",
                     isSelected: $draft.includeClaude
                 )
 
                 ProviderSelectionRow(
                     provider: .codex,
-                    detail: "\(draft.codexRoute.displayName) · setup required · “hi”",
+                    detail: "\(draft.codexRoute.displayName) · setup required · \(ProviderID.codex.hostedPromptDescription)",
                     isSelected: $draft.includeCodex
                 )
 

@@ -58,6 +58,6 @@ Complete this checklist with the same Apple development team on the Mac and iPho
 
 - Confirm the saved provider times in Wakebar.
 
-- Verify that each provider creates only a fresh minimal `hi` session.
+- Verify that Claude replies with only `yes` and Codex sends only `hi`, each in a fresh session.
 
 - Do not describe a successful prompt as proof that a five-hour or weekly usage window reset.

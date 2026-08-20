@@ -167,7 +167,14 @@ final class AppModel {
             "Mixed execution"
         }
 
-        return "\(location) · prompt “hi”"
+        let promptDetail = if schedule.providerIDs.count == 1,
+                              let provider = schedule.providerIDs.first {
+            "\(provider.displayName) \(provider.hostedPromptDescription)"
+        } else {
+            "provider-specific minimal prompts"
+        }
+
+        return "\(location) · \(promptDetail)"
     }
 
     var phoneAlarmDetail: String {
