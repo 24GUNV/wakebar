@@ -11,6 +11,9 @@ import WakebarCore
 struct WakeCountdownView: View {
     let nextFire: Date?
     let cadence: SessionCadence
+    /// Set only when the chained providers have drifted apart and the hero has
+    /// to say whose session it is counting down to.
+    let nextFireProvider: ProviderID?
     let wakeTimeText: String
     let weekdaySummary: String
     @Binding var isActive: Bool
@@ -89,7 +92,11 @@ struct WakeCountdownView: View {
         }
 
         let clock = nextFire.formatted(.dateTime.hour().minute())
-        let noun = cadence == .continuous ? "Session" : "Wake"
+        let noun = if let nextFireProvider {
+            nextFireProvider.displayName
+        } else {
+            cadence == .continuous ? "Session" : "Wake"
+        }
 
         // The day is already the hero out here, so repeating it would be the
         // same word twice in two sizes.

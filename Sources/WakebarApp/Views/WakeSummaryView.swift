@@ -11,6 +11,7 @@ struct WakeSummaryView: View {
                 WakeCountdownView(
                     nextFire: model.nextFire,
                     cadence: model.sessionCadence,
+                    nextFireProvider: model.nextFireProvider,
                     wakeTimeText: model.wakeTimeText,
                     weekdaySummary: model.weekdaySummary,
                     isActive: $model.isScheduleActive,

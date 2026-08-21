@@ -61,9 +61,28 @@ public struct ChainedSessionPlanner: Sendable {
     /// The window a user would call "current": the open session window closing
     /// soonest, which is the one that gates the next session.
     public func governingWindow(windows: [UsageWindow], now: Date) -> UsageWindow? {
+        openSessionWindows(windows, now: now).min { $0.resetsAt < $1.resetsAt }
+    }
+
+    /// The window that gates one provider's next session.
+    ///
+    /// Providers keep independent windows and they drift apart the moment the
+    /// user works in one and not the other. Chaining both off the soonest reset
+    /// fires a session into a window that is still open, which does nothing and
+    /// costs that provider its place in the chain.
+    public func governingWindow(
+        windows: [UsageWindow],
+        now: Date,
+        provider: ProviderID
+    ) -> UsageWindow? {
+        openSessionWindows(windows, now: now)
+            .filter { $0.provider == provider }
+            .min { $0.resetsAt < $1.resetsAt }
+    }
+
+    private func openSessionWindows(_ windows: [UsageWindow], now: Date) -> [UsageWindow] {
         windows
             .filter(\.isSessionWindow)
             .filter { $0.isOpen(at: now) }
-            .min { $0.resetsAt < $1.resetsAt }
     }
 }

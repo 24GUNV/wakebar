@@ -43,14 +43,17 @@ public struct SchedulePlanner: Sendable {
         for schedule: WakeSchedule,
         windows: [UsageWindow]
     ) -> [ScheduledEvent] {
-        let governing = chain.governingWindow(windows: windows, now: date)
-
         if let activeWake = calculator.previousWakeOccurrence(
             before: date.addingTimeInterval(1),
             for: schedule
         ) {
-            let remainingActiveEvents = events(for: activeWake, schedule: schedule, window: governing)
-                .filter { $0.date > date }
+            let remainingActiveEvents = events(
+                for: activeWake,
+                schedule: schedule,
+                windows: windows,
+                now: date
+            )
+            .filter { $0.date > date }
             if !remainingActiveEvents.isEmpty {
                 return remainingActiveEvents
             }
@@ -60,7 +63,8 @@ public struct SchedulePlanner: Sendable {
             return []
         }
 
-        return events(for: nextWake, schedule: schedule, window: governing).filter { $0.date > date }
+        return events(for: nextWake, schedule: schedule, windows: windows, now: date)
+            .filter { $0.date > date }
     }
 
     /// How many chained sessions to publish ahead. The popover shows one and the
@@ -79,26 +83,28 @@ public struct SchedulePlanner: Sendable {
         for schedule: WakeSchedule,
         windows: [UsageWindow]
     ) -> [ScheduledEvent] {
-        let governing = chain.governingWindow(windows: windows, now: date)
-        let step = governing?.duration ?? ChainedSessionPlanner.assumedWindowDuration
-
-        // With a window open the chain waits for its reset. With none open there
-        // is nothing to wait for — the next session is the one that opens the
-        // window, so it goes now rather than a notional five hours from now.
-        let firstStart = chain.nextSession(windows: windows, now: date, cutoff: nil)?.firesAt
-            ?? date.addingTimeInterval(chain.buffer)
-
         let nextWake = calculator.nextWakeOccurrence(after: date, for: schedule)
 
-        var events: [ScheduledEvent] = (0 ..< Self.continuousHorizon).flatMap { index -> [ScheduledEvent] in
-            let start = firstStart.addingTimeInterval(step * Double(index))
-            let phase: ProviderSessionPhase = index == 0 ? .initial : .refresh(index: index)
-            return schedule.providerIDs.map { provider in
+        var events: [ScheduledEvent] = schedule.providerIDs.flatMap { provider -> [ScheduledEvent] in
+            let window = chain.governingWindow(windows: windows, now: date, provider: provider)
+            let step = window?.duration ?? ChainedSessionPlanner.assumedWindowDuration
+
+            // With a window open the chain waits for that provider's reset. With
+            // none open there is nothing to wait for — the next session is the
+            // one that opens the window, so it goes now rather than a notional
+            // five hours from now.
+            let firstStart = window.map { $0.resetsAt.addingTimeInterval(chain.buffer) }
+                ?? date.addingTimeInterval(chain.buffer)
+
+            return (0 ..< Self.continuousHorizon).map { index in
                 ScheduledEvent(
                     scheduleID: schedule.id,
-                    date: start,
-                    wakeDate: nextWake ?? start,
-                    kind: .providerSession(provider, phase: phase)
+                    date: firstStart.addingTimeInterval(step * Double(index)),
+                    wakeDate: nextWake ?? firstStart,
+                    kind: .providerSession(
+                        provider,
+                        phase: index == 0 ? .initial : .refresh(index: index)
+                    )
                 )
             }
         }
@@ -122,25 +128,33 @@ public struct SchedulePlanner: Sendable {
     private func events(
         for wakeDate: Date,
         schedule: WakeSchedule,
-        window: UsageWindow?
+        windows: [UsageWindow],
+        now: Date
     ) -> [ScheduledEvent] {
         let leadTime = TimeInterval(schedule.sessionLeadMinutes * 60)
         let plannedStart = wakeDate.addingTimeInterval(-leadTime)
-        let sessionStarts = sessionStartDates(
-            beginningAt: firstSessionStart(plannedStart: plannedStart, window: window),
-            wakeDate: wakeDate,
-            schedule: schedule,
-            window: window
-        )
 
-        var events = sessionStarts.enumerated().flatMap { index, sessionStart in
-            let phase: ProviderSessionPhase = index == 0 ? .initial : .refresh(index: index)
-            return schedule.providerIDs.map { provider in
+        // Each provider is clamped against its own open window. Two providers
+        // whose windows have drifted apart get two different start times, which
+        // is the only way both actually open a fresh window.
+        var events = schedule.providerIDs.flatMap { provider -> [ScheduledEvent] in
+            let window = chain.governingWindow(windows: windows, now: now, provider: provider)
+            let sessionStarts = sessionStartDates(
+                beginningAt: firstSessionStart(plannedStart: plannedStart, window: window),
+                wakeDate: wakeDate,
+                schedule: schedule,
+                window: window
+            )
+
+            return sessionStarts.enumerated().map { index, sessionStart in
                 ScheduledEvent(
                     scheduleID: schedule.id,
                     date: sessionStart,
                     wakeDate: wakeDate,
-                    kind: .providerSession(provider, phase: phase)
+                    kind: .providerSession(
+                        provider,
+                        phase: index == 0 ? .initial : .refresh(index: index)
+                    )
                 )
             }
         }

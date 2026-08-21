@@ -24,6 +24,7 @@ final class PopoverSnapshotTests: XCTestCase {
             try render(model: chainedModel(), name: "chained-\(suffix)", scheme: scheme, in: root)
             try render(model: assumedModel(), name: "assumed-\(suffix)", scheme: scheme, in: root)
             try render(model: continuousModel(), name: "continuous-\(suffix)", scheme: scheme, in: root)
+            try render(model: divergedModel(), name: "diverged-\(suffix)", scheme: scheme, in: root)
         }
     }
 
@@ -120,6 +121,31 @@ final class PopoverSnapshotTests: XCTestCase {
     /// The same band with nothing to chain to, which is what a machine that has
     /// never run either CLI will show.
     private func assumedModel() -> AppModel { repeatingModel() }
+
+    /// Both providers holding open windows that have drifted apart, which is the
+    /// normal case once the user has worked in one and not the other.
+    private func divergedModel() -> AppModel {
+        let model = continuousModel()
+        model.usageWindows = [
+            UsageWindow(
+                provider: .claude,
+                duration: 5 * 60 * 60,
+                resetsAt: .now.addingTimeInterval(3 * 60 * 60),
+                usedFraction: 0.41,
+                observedAt: .now,
+                confidence: .reported
+            ),
+            UsageWindow(
+                provider: .codex,
+                duration: 5 * 60 * 60,
+                resetsAt: .now.addingTimeInterval(70 * 60),
+                usedFraction: 0.62,
+                observedAt: .now,
+                confidence: .reported
+            ),
+        ]
+        return model
+    }
 
     /// Sessions chained to the window rather than the calendar, which is the
     /// state where the hero counts down hours instead of naming a day.

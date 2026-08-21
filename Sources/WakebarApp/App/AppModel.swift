@@ -265,7 +265,25 @@ final class AppModel {
         case .schedule:
             return nextWake
         case .continuous:
-            return nextInitialSessionStart ?? refreshSessionDates.first
+            return nextSession?.date
+        }
+    }
+
+    /// Whose session lands next. Two providers hold independent windows, so a
+    /// chained plan usually has two different next times and the hero has to say
+    /// which one it is counting down to.
+    var nextFireProvider: ProviderID? {
+        guard schedule.cadence == .continuous else { return nil }
+        guard schedule.providerIDs.count > 1 else { return nil }
+        guard case .providerSession(let provider, _)? = nextSession?.kind else { return nil }
+        return provider
+    }
+
+    /// The soonest session of any provider. `plannedEvents` is already sorted,
+    /// so the first session in it is the next thing Wakebar sends.
+    private var nextSession: ScheduledEvent? {
+        plannedEvents.first { event in
+            if case .providerSession = event.kind { true } else { false }
         }
     }
 

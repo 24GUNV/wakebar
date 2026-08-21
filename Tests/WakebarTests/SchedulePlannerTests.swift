@@ -268,13 +268,83 @@ final class SchedulePlannerTests: XCTestCase {
         XCTAssertTrue(schedule.isValid)
     }
 
+    /// The whole point of chaining, and the thing a single shared "soonest
+    /// window" got wrong: a session fired into a window that is still open does
+    /// not reopen it, so a provider chained off someone else's reset silently
+    /// loses its place.
+    func testEachProviderChainsOffItsOwnWindow() throws {
+        let calendar = try utcCalendar()
+        let planner = SchedulePlanner(
+            calculator: ScheduleCalculator(calendar: calendar),
+            calendar: calendar
+        )
+        let now = try XCTUnwrap(
+            calendar.date(from: DateComponents(year: 2026, month: 8, day: 20, hour: 9))
+        )
+        var schedule = makeSchedule()
+        schedule.cadence = .continuous
+        schedule.alarmOnIPhone = false
+
+        let claudeReset = now.addingTimeInterval(60 * 60)
+        let codexReset = now.addingTimeInterval(4 * 60 * 60)
+        let events = planner.nextEvents(
+            after: now,
+            for: schedule,
+            windows: [
+                openWindow(resetsAt: claudeReset, observedAt: now),
+                openWindow(resetsAt: codexReset, observedAt: now, provider: .codex),
+            ]
+        )
+
+        let buffer = ChainedSessionPlanner.resetBuffer
+        XCTAssertEqual(firstStart(for: .claude, in: events), claudeReset.addingTimeInterval(buffer))
+        XCTAssertEqual(firstStart(for: .codex, in: events), codexReset.addingTimeInterval(buffer))
+    }
+
+    /// The same drift under the schedule cadence, where the clamp used to be
+    /// applied once for every provider.
+    func testScheduledSessionsClampPerProvider() throws {
+        let calendar = try utcCalendar()
+        let planner = SchedulePlanner(
+            calculator: ScheduleCalculator(calendar: calendar),
+            calendar: calendar
+        )
+        let now = try XCTUnwrap(
+            calendar.date(from: DateComponents(year: 2026, month: 8, day: 20, hour: 5))
+        )
+        var schedule = makeSchedule()
+        schedule.alarmOnIPhone = false
+
+        // Claude's window is still open past the planned start, so its session
+        // waits. Codex has nothing open, so its session keeps the planned time.
+        let claudeReset = now.addingTimeInterval(3 * 60 * 60)
+        let events = planner.nextEvents(
+            after: now,
+            for: schedule,
+            windows: [openWindow(resetsAt: claudeReset, observedAt: now)]
+        )
+
+        let claude = try XCTUnwrap(firstStart(for: .claude, in: events))
+        let codex = try XCTUnwrap(firstStart(for: .codex, in: events))
+        XCTAssertEqual(claude, claudeReset.addingTimeInterval(ChainedSessionPlanner.resetBuffer))
+        XCTAssertLessThan(codex, claude)
+        XCTAssertEqual(calendar.dateComponents([.hour, .minute], from: codex).hour, 6)
+    }
+
+    private func firstStart(for provider: ProviderID, in events: [ScheduledEvent]) -> Date? {
+        events.first { event in
+            if case .providerSession(provider, _) = event.kind { true } else { false }
+        }?.date
+    }
+
     private func openWindow(
         resetsAt: Date,
         observedAt: Date,
-        duration: TimeInterval = 5 * 60 * 60
+        duration: TimeInterval = 5 * 60 * 60,
+        provider: ProviderID = .claude
     ) -> UsageWindow {
         UsageWindow(
-            provider: .claude,
+            provider: provider,
             duration: duration,
             resetsAt: resetsAt,
             observedAt: observedAt,
