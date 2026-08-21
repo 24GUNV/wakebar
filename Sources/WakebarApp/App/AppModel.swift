@@ -208,7 +208,20 @@ final class AppModel {
     }
 
     var plannedEvents: [ScheduledEvent] {
-        schedulePlanner.nextEvents(after: .now, for: schedule, windows: usageWindows)
+        schedulePlanner.nextEvents(
+            after: .now,
+            for: schedule,
+            windows: usageWindows,
+            readyProviders: readyProviders
+        )
+    }
+
+    /// The providers whose setup Wakebar has confirmed. A session sent anywhere
+    /// else does nothing, so counting down to one states an event that cannot
+    /// happen — the row already says "Needs setup" and the footer already offers
+    /// to fix it.
+    private var readyProviders: Set<ProviderID> {
+        Set(ProviderID.allCases.filter(isProviderReady))
     }
 
     /// The open window the next session is waiting on, if any.

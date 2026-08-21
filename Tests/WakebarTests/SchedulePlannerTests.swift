@@ -452,4 +452,116 @@ final class SchedulePlannerTests: XCTestCase {
         calendar.timeZone = try XCTUnwrap(TimeZone(secondsFromGMT: 0))
         return calendar
     }
+
+    /// Codex on a weekly-only plan reports a limit but never a session window.
+    /// Assuming five hours for it would march sessions at a reset that never
+    /// arrives, so it gets no chained sessions at all.
+    func testContinuousSkipsAProviderThatReportsNoSessionWindow() throws {
+        let calendar = try utcCalendar()
+        let planner = SchedulePlanner(
+            calculator: ScheduleCalculator(calendar: calendar),
+            calendar: calendar
+        )
+        let now = try XCTUnwrap(
+            calendar.date(from: DateComponents(year: 2026, month: 8, day: 20, hour: 9))
+        )
+        var schedule = makeSchedule()
+        schedule.cadence = .continuous
+        schedule.alarmOnIPhone = false
+
+        let events = planner.nextEvents(
+            after: now,
+            for: schedule,
+            windows: [
+                openWindow(
+                    resetsAt: now.addingTimeInterval(3 * 24 * 60 * 60),
+                    observedAt: now,
+                    duration: 7 * 24 * 60 * 60,
+                    provider: .codex
+                ),
+                openWindow(resetsAt: now.addingTimeInterval(90 * 60), observedAt: now),
+            ]
+        )
+
+        let providers = events.compactMap { event -> ProviderID? in
+            guard case .providerSession(let provider, _) = event.kind else { return nil }
+            return provider
+        }
+        XCTAssertFalse(providers.contains(.codex), "A weekly cap is not a reset to chain to.")
+        XCTAssertTrue(providers.contains(.claude))
+    }
+
+    /// A provider Wakebar has heard nothing from is a different case: the five
+    /// hour assumption is the only plan available, so it still gets one.
+    func testContinuousStillAssumesFiveHoursForAProviderThatReportedNothing() throws {
+        let calendar = try utcCalendar()
+        let planner = SchedulePlanner(
+            calculator: ScheduleCalculator(calendar: calendar),
+            calendar: calendar
+        )
+        let now = try XCTUnwrap(
+            calendar.date(from: DateComponents(year: 2026, month: 8, day: 20, hour: 9))
+        )
+        var schedule = makeSchedule()
+        schedule.cadence = .continuous
+        schedule.includeClaude = false
+        schedule.alarmOnIPhone = false
+
+        let events = planner.nextEvents(after: now, for: schedule, windows: [])
+
+        XCTAssertFalse(events.isEmpty)
+    }
+
+    /// A session sent to a provider that was never set up does nothing, so the
+    /// popover must not count down to it. The provider row already says "Needs
+    /// setup" and the footer already offers to fix it.
+    func testSessionsAreNotPlannedForProvidersThatAreNotSetUp() throws {
+        let calendar = try utcCalendar()
+        let planner = SchedulePlanner(
+            calculator: ScheduleCalculator(calendar: calendar),
+            calendar: calendar
+        )
+        let now = try XCTUnwrap(
+            calendar.date(from: DateComponents(year: 2026, month: 8, day: 20, hour: 9))
+        )
+        let schedule = makeSchedule()
+
+        let events = planner.nextEvents(
+            after: now,
+            for: schedule,
+            windows: [],
+            readyProviders: [.claude]
+        )
+
+        let providers = events.compactMap { event -> ProviderID? in
+            guard case .providerSession(let provider, _) = event.kind else { return nil }
+            return provider
+        }
+        XCTAssertFalse(providers.isEmpty)
+        XCTAssertFalse(providers.contains(.codex))
+        XCTAssertTrue(providers.contains(.claude))
+    }
+
+    /// The alarm is Wakebar's own to fire and owes nothing to a provider, so an
+    /// unconfigured pair silences the sessions and not the wake.
+    func testTheAlarmStillPlansWhenNoProviderIsSetUp() throws {
+        let calendar = try utcCalendar()
+        let planner = SchedulePlanner(
+            calculator: ScheduleCalculator(calendar: calendar),
+            calendar: calendar
+        )
+        let now = try XCTUnwrap(
+            calendar.date(from: DateComponents(year: 2026, month: 8, day: 20, hour: 9))
+        )
+        let schedule = makeSchedule()
+
+        let events = planner.nextEvents(
+            after: now,
+            for: schedule,
+            windows: [],
+            readyProviders: []
+        )
+
+        XCTAssertEqual(events.map(\.kind), [.phoneAlarm])
+    }
 }

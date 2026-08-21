@@ -19,20 +19,31 @@ public struct SchedulePlanner: Sendable {
     ///   are open right now. When one is, sessions are spaced by the window the
     ///   provider actually reports and the first one waits for it to close;
     ///   with none, the plan falls back to the assumed five hours.
+    /// - Parameter readyProviders: which providers have a confirmed setup and can
+    ///   actually receive a session. Nil means readiness is unknown — the planner
+    ///   then plans for everything the schedule selects, which is what the pure
+    ///   scheduling tests want. Passing a set narrows the plan: a session sent to
+    ///   a provider that was never set up does nothing, and publishing it anyway
+    ///   makes the popover count down to an event that cannot happen.
     public func nextEvents(
         after date: Date,
         for schedule: WakeSchedule,
-        windows: [UsageWindow] = []
+        windows: [UsageWindow] = [],
+        readyProviders: Set<ProviderID>? = nil
     ) -> [ScheduledEvent] {
         guard schedule.isEnabled, schedule.isValid else {
             return []
         }
 
+        let providers = readyProviders.map { ready in
+            schedule.providerIDs.filter(ready.contains)
+        } ?? schedule.providerIDs
+
         switch schedule.cadence {
         case .continuous:
-            return continuousEvents(after: date, for: schedule, windows: windows)
+            return continuousEvents(after: date, for: schedule, providers: providers, windows: windows)
         case .schedule:
-            return scheduledEvents(after: date, for: schedule, windows: windows)
+            return scheduledEvents(after: date, for: schedule, providers: providers, windows: windows)
         }
     }
 
@@ -41,6 +52,7 @@ public struct SchedulePlanner: Sendable {
     private func scheduledEvents(
         after date: Date,
         for schedule: WakeSchedule,
+        providers: [ProviderID],
         windows: [UsageWindow]
     ) -> [ScheduledEvent] {
         if let activeWake = calculator.previousWakeOccurrence(
@@ -50,6 +62,7 @@ public struct SchedulePlanner: Sendable {
             let remainingActiveEvents = events(
                 for: activeWake,
                 schedule: schedule,
+                providers: providers,
                 windows: windows,
                 now: date
             )
@@ -63,7 +76,7 @@ public struct SchedulePlanner: Sendable {
             return []
         }
 
-        return events(for: nextWake, schedule: schedule, windows: windows, now: date)
+        return events(for: nextWake, schedule: schedule, providers: providers, windows: windows, now: date)
             .filter { $0.date > date }
     }
 
@@ -81,11 +94,22 @@ public struct SchedulePlanner: Sendable {
     private func continuousEvents(
         after date: Date,
         for schedule: WakeSchedule,
+        providers: [ProviderID],
         windows: [UsageWindow]
     ) -> [ScheduledEvent] {
         let nextWake = calculator.nextWakeOccurrence(after: date, for: schedule)
 
-        var events: [ScheduledEvent] = schedule.providerIDs.flatMap { provider -> [ScheduledEvent] in
+        var events: [ScheduledEvent] = providers.flatMap { provider -> [ScheduledEvent] in
+            // A provider that reports its limits but never a session window has
+            // no reset to chain to — a Codex plan carrying only a weekly cap is
+            // the case. Assuming five hours for it would march sessions at a
+            // window that does not exist. Silence is the honest plan; the
+            // schedule cadence still covers that provider before each wake.
+            let reported = windows.filter { $0.provider == provider }
+            guard reported.isEmpty || reported.contains(where: \.isSessionWindow) else {
+                return []
+            }
+
             let window = chain.governingWindow(windows: windows, now: date, provider: provider)
             let step = window?.duration ?? ChainedSessionPlanner.assumedWindowDuration
 
@@ -128,6 +152,7 @@ public struct SchedulePlanner: Sendable {
     private func events(
         for wakeDate: Date,
         schedule: WakeSchedule,
+        providers: [ProviderID],
         windows: [UsageWindow],
         now: Date
     ) -> [ScheduledEvent] {
@@ -137,7 +162,7 @@ public struct SchedulePlanner: Sendable {
         // Each provider is clamped against its own open window. Two providers
         // whose windows have drifted apart get two different start times, which
         // is the only way both actually open a fresh window.
-        var events = schedule.providerIDs.flatMap { provider -> [ScheduledEvent] in
+        var events = providers.flatMap { provider -> [ScheduledEvent] in
             let window = chain.governingWindow(windows: windows, now: now, provider: provider)
             let sessionStarts = sessionStartDates(
                 beginningAt: firstSessionStart(plannedStart: plannedStart, window: window),
