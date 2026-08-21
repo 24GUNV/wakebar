@@ -308,7 +308,9 @@ struct ScheduleSettingsView: View {
             return ("Unsaved changes", .inProgress)
         }
         if !model.schedule.isEnabled {
-            return ("Not set up", .actionRequired)
+            // A saved schedule that is switched off is off, not absent. Calling
+            // it "Not set up" sends the user to redo work they already did.
+            return model.hasSchedule ? ("Off", .inProgress) : ("Not set up", .actionRequired)
         }
         return ("Saved", .ready)
     }
