@@ -5,14 +5,26 @@ final class ScheduleMenuPresentationTests: XCTestCase {
     func testPresentationMatrix() {
         let cases: [ScheduleMenuPresentationTestCase] = [
             ScheduleMenuPresentationTestCase(
-                name: "disabled draft",
+                name: "never set up",
                 isEnabled: false,
+                hasSchedule: false,
                 providersReady: false,
                 alarmEnabled: true,
                 phonePhase: .draft,
                 state: .draft,
-                status: "Draft",
-                action: "Set Up Wake Schedule…",
+                status: "Not set up",
+                action: "Set Up Schedule…",
+                destination: .schedule
+            ),
+            ScheduleMenuPresentationTestCase(
+                name: "set up but switched off",
+                isEnabled: false,
+                providersReady: true,
+                alarmEnabled: true,
+                phonePhase: .confirmed,
+                state: .draft,
+                status: "Off",
+                action: "Edit Schedule…",
                 destination: .schedule
             ),
             ScheduleMenuPresentationTestCase(
@@ -22,7 +34,7 @@ final class ScheduleMenuPresentationTests: XCTestCase {
                 alarmEnabled: true,
                 phonePhase: .confirmed,
                 state: .actionRequired,
-                status: "Setup required",
+                status: "Needs setup",
                 action: "Finish Setup…",
                 destination: .providers
             ),
@@ -44,7 +56,7 @@ final class ScheduleMenuPresentationTests: XCTestCase {
                 alarmEnabled: true,
                 phonePhase: .draft,
                 state: .actionRequired,
-                status: "Setup required",
+                status: "Needs setup",
                 action: "Finish Setup…",
                 destination: .alarm
             ),
@@ -55,8 +67,8 @@ final class ScheduleMenuPresentationTests: XCTestCase {
                 alarmEnabled: true,
                 phonePhase: .publishing,
                 state: .inProgress,
-                status: "Syncing…",
-                action: "View Alarm Status…",
+                status: "Syncing",
+                action: "Alarm Status…",
                 destination: .alarm
             ),
             ScheduleMenuPresentationTestCase(
@@ -67,7 +79,7 @@ final class ScheduleMenuPresentationTests: XCTestCase {
                 phonePhase: .published,
                 state: .inProgress,
                 status: "Waiting for iPhone",
-                action: "View Alarm Status…",
+                action: "Alarm Status…",
                 destination: .alarm
             ),
             ScheduleMenuPresentationTestCase(
@@ -88,7 +100,7 @@ final class ScheduleMenuPresentationTests: XCTestCase {
                 alarmEnabled: true,
                 phonePhase: .failed,
                 state: .actionRequired,
-                status: "Needs attention",
+                status: "Sync failed",
                 action: "Fix Alarm Sync…",
                 destination: .alarm
             ),
@@ -97,6 +109,7 @@ final class ScheduleMenuPresentationTests: XCTestCase {
         for testCase in cases {
             let presentation = ScheduleMenuPresentation.resolve(
                 isEnabled: testCase.isEnabled,
+                hasSchedule: testCase.hasSchedule,
                 providersReady: testCase.providersReady,
                 alarmEnabled: testCase.alarmEnabled,
                 phonePhase: testCase.phonePhase
@@ -111,11 +124,11 @@ final class ScheduleMenuPresentationTests: XCTestCase {
 
     func testPhoneStatusMatrix() {
         let cases: [(PhoneAlarmMenuPhase, String, ServiceStatusKind)] = [
-            (.draft, "Setup required", .actionRequired),
-            (.publishing, "Syncing…", .inProgress),
+            (.draft, "Needs setup", .actionRequired),
+            (.publishing, "Syncing", .inProgress),
             (.published, "Waiting for iPhone", .inProgress),
-            (.confirmed, "Alarm confirmed", .ready),
-            (.failed, "Needs attention", .actionRequired),
+            (.confirmed, "Ready", .ready),
+            (.failed, "Sync failed", .actionRequired),
         ]
 
         for (phase, status, kind) in cases {

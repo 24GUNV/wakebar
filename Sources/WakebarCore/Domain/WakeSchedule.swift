@@ -10,6 +10,7 @@ public struct WakeSchedule: Identifiable, Codable, Equatable, Sendable {
     public var sessionLeadMinutes: Int
     public var alarmOnIPhone: Bool
     public var repeatEveryFiveHours: Bool
+    public var cadence: SessionCadence
     public var repeatUntilHour: Int
     public var includeClaude: Bool
     public var includeCodex: Bool
@@ -31,6 +32,7 @@ public struct WakeSchedule: Identifiable, Codable, Equatable, Sendable {
         alarmOnIPhone: Bool,
         repeatEveryFiveHours: Bool,
         repeatUntilHour: Int,
+        cadence: SessionCadence = .schedule,
         includeClaude: Bool,
         includeCodex: Bool,
         claudeBackend: ExecutionBackend,
@@ -50,6 +52,7 @@ public struct WakeSchedule: Identifiable, Codable, Equatable, Sendable {
         self.alarmOnIPhone = alarmOnIPhone
         self.repeatEveryFiveHours = repeatEveryFiveHours
         self.repeatUntilHour = repeatUntilHour
+        self.cadence = cadence
         self.includeClaude = includeClaude
         self.includeCodex = includeCodex
         self.claudeBackend = claudeBackend
@@ -79,8 +82,13 @@ public struct WakeSchedule: Identifiable, Codable, Equatable, Sendable {
         }
     }
 
+    /// Continuous sessions ride the usage window rather than the calendar, so a
+    /// day selection is only required when the schedule is what drives them.
+    /// The alarm still reads the days either way; it just no longer decides
+    /// whether the schedule is usable at all.
     public var isValid: Bool {
-        !providerIDs.isEmpty && !selectedWeekdays.isEmpty
+        guard !providerIDs.isEmpty else { return false }
+        return cadence == .continuous || !selectedWeekdays.isEmpty
     }
 
     public func backend(for provider: ProviderID) -> ExecutionBackend {
@@ -92,13 +100,18 @@ public struct WakeSchedule: Identifiable, Codable, Equatable, Sendable {
         }
     }
 
+    /// Whether the hosted schedule a provider was set up against still matches.
+    ///
+    /// `isEnabled` is deliberately not compared. Turning Wakebar off does not
+    /// remove the Routine or task already living in the provider's cloud, so a
+    /// confirmation has to survive the switch being flipped off and on again.
     public func hasSameHostedSetup(as other: Self, for provider: ProviderID) -> Bool {
-        guard isEnabled == other.isEnabled,
-              hour == other.hour,
+        guard hour == other.hour,
               minute == other.minute,
               selectedWeekdays == other.selectedWeekdays,
               sessionLeadMinutes == other.sessionLeadMinutes,
               repeatEveryFiveHours == other.repeatEveryFiveHours,
+              cadence == other.cadence,
               repeatUntilHour == other.repeatUntilHour,
               followsSystemTimeZone == other.followsSystemTimeZone,
               timeZoneIdentifier == other.timeZoneIdentifier
@@ -154,6 +167,7 @@ public struct WakeSchedule: Identifiable, Codable, Equatable, Sendable {
         case sessionLeadMinutes
         case alarmOnIPhone
         case repeatEveryFiveHours
+        case cadence
         case repeatUntilHour
         case includeClaude
         case includeCodex
@@ -181,6 +195,11 @@ public struct WakeSchedule: Identifiable, Codable, Equatable, Sendable {
         alarmOnIPhone = try values.decodeIfPresent(Bool.self, forKey: .alarmOnIPhone) ?? true
         repeatEveryFiveHours = try values.decodeIfPresent(Bool.self, forKey: .repeatEveryFiveHours) ?? false
         repeatUntilHour = try values.decodeIfPresent(Int.self, forKey: .repeatUntilHour) ?? 19
+        // Schedules written before cadence existed carry their intent in the
+        // repeat flag: a user who asked to repeat all day wanted the window
+        // kept open, which is what continuous now means.
+        cadence = try values.decodeIfPresent(SessionCadence.self, forKey: .cadence)
+            ?? (repeatEveryFiveHours ? .continuous : .schedule)
         includeClaude = try values.decodeIfPresent(Bool.self, forKey: .includeClaude) ?? true
         includeCodex = try values.decodeIfPresent(Bool.self, forKey: .includeCodex) ?? true
         claudeBackend = try values.decodeIfPresent(ExecutionBackend.self, forKey: .claudeBackend) ?? .providerCloud
@@ -205,6 +224,7 @@ public struct WakeSchedule: Identifiable, Codable, Equatable, Sendable {
         try values.encode(alarmOnIPhone, forKey: .alarmOnIPhone)
         try values.encode(repeatEveryFiveHours, forKey: .repeatEveryFiveHours)
         try values.encode(repeatUntilHour, forKey: .repeatUntilHour)
+        try values.encode(cadence, forKey: .cadence)
         try values.encode(includeClaude, forKey: .includeClaude)
         try values.encode(includeCodex, forKey: .includeCodex)
         try values.encode(claudeBackend, forKey: .claudeBackend)

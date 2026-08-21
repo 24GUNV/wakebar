@@ -1,0 +1,56 @@
+import Foundation
+
+/// What a provider says about the usage window a session opens.
+///
+/// Wakebar's whole reason to fire an early session is to start one of these, so
+/// knowing when the current one ends is what lets the next session be scheduled
+/// against reality instead of against a fixed clock time.
+public struct UsageWindow: Equatable, Sendable {
+    public let provider: ProviderID
+    /// How long the window runs. Providers report this per plan, so it is read
+    /// rather than assumed — a plan with a weekly cap reports 10080.
+    public let duration: TimeInterval
+    /// When the window ends and a new one can be opened.
+    public let resetsAt: Date
+    /// How much of the window is spent, when the provider reports it.
+    public let usedFraction: Double?
+    /// When this reading was taken. A snapshot written by the last session is
+    /// still authoritative about `resetsAt` but stale about `usedFraction`.
+    public let observedAt: Date
+    /// Whether the provider stated this window or Wakebar inferred it.
+    public let confidence: Confidence
+
+    public enum Confidence: Equatable, Sendable {
+        /// Read from a snapshot the provider itself wrote.
+        case reported
+        /// Reconstructed from session timestamps. Right in the normal case, but
+        /// blind to usage from another machine or another client.
+        case inferred
+    }
+
+    public init(
+        provider: ProviderID,
+        duration: TimeInterval,
+        resetsAt: Date,
+        usedFraction: Double? = nil,
+        observedAt: Date,
+        confidence: Confidence
+    ) {
+        self.provider = provider
+        self.duration = duration
+        self.resetsAt = resetsAt
+        self.usedFraction = usedFraction
+        self.observedAt = observedAt
+        self.confidence = confidence
+    }
+
+    public func isOpen(at date: Date) -> Bool {
+        date < resetsAt
+    }
+
+    /// A window long enough to be a plan-level cap is not something a morning
+    /// session can reopen, so it must not drive scheduling.
+    public var isSessionWindow: Bool {
+        duration <= 8 * 60 * 60
+    }
+}

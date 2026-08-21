@@ -34,4 +34,27 @@ final class ProviderSetupPromptCompilerTests: XCTestCase {
         XCTAssertTrue(prompt.contains("exactly \"hi\""))
         XCTAssertTrue(prompt.contains("confirmation before saving"))
     }
+
+    func testClaudeCLICommandReconcilesOwnedRoutinesWithoutDuplicates() {
+        var schedule = WakeSchedule.default
+        schedule.repeatEveryFiveHours = true
+        schedule.repeatUntilHour = 19
+        schedule.followsSystemTimeZone = false
+        schedule.timeZoneIdentifier = "Asia/Bangkok"
+
+        let command = ProviderSetupPromptCompiler().claudeRoutineCLICommand(for: schedule)
+
+        XCTAssertTrue(command.hasPrefix("/schedule"))
+        XCTAssertTrue(command.contains("First list existing matching Routines"))
+        XCTAssertTrue(command.contains("create missing ones"))
+        XCTAssertTrue(command.contains("disable obsolete matching Routines"))
+        XCTAssertTrue(command.contains("06:50"))
+        XCTAssertTrue(command.contains("11:50"))
+        XCTAssertTrue(command.contains("16:50"))
+        XCTAssertTrue(command.contains("Reply with exactly \"yes\""))
+        XCTAssertTrue(command.contains("no repositories"))
+        XCTAssertTrue(command.contains("no connectors"))
+        XCTAssertTrue(command.contains("ask for one confirmation"))
+        XCTAssertTrue(command.contains(schedule.id.uuidString.prefix(8).uppercased()))
+    }
 }

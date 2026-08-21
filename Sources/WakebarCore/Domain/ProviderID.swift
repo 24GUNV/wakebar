@@ -13,15 +13,6 @@ public enum ProviderID: String, CaseIterable, Codable, Hashable, Identifiable, S
         }
     }
 
-    public var systemImage: String {
-        switch self {
-        case .claude:
-            "sparkles"
-        case .codex:
-            "terminal"
-        }
-    }
-
     public var minimalPrompt: String { "hi" }
 
     public var hostedPromptDescription: String {

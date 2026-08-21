@@ -3,6 +3,7 @@
 struct ScheduleMenuPresentationTestCase {
     let name: String
     let isEnabled: Bool
+    var hasSchedule: Bool = true
     let providersReady: Bool
     let alarmEnabled: Bool
     let phonePhase: PhoneAlarmMenuPhase

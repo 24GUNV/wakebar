@@ -17,12 +17,12 @@ final class ClaudeRoutineProvisionerTests: XCTestCase {
         XCTAssertTrue(plan.capability.runsWhenMacIsOff)
         XCTAssertEqual(
             plan.capability.provisioningControl,
-            ClaudeRoutineCapability.ProvisioningControl.userManaged
+            ClaudeRoutineCapability.ProvisioningControl.claudeCLIAssisted
         )
         XCTAssertEqual(plan.managementURL.host, "claude.ai")
         XCTAssertTrue(plan.savedPrompt.contains("Reply with exactly \"yes\""))
         XCTAssertTrue(plan.savedPrompt.contains("Do not inspect repositories"))
-        XCTAssertTrue(plan.limitations.contains { $0.contains("cannot create or edit") })
+        XCTAssertTrue(plan.limitations.contains { $0.contains("does not expose") })
     }
 
     func testPlanRejectsInvalidSchedule() {

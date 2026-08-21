@@ -1,26 +1,26 @@
 import SwiftUI
 
+/// Shown before a schedule exists at all. An empty state is the one place a
+/// sentence earns its keep, so it gets exactly one.
 struct DraftScheduleView: View {
-    let phoneStatus: String?
-
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Label("No wake scheduled", systemImage: "alarm")
-                .font(.headline)
+        VStack(alignment: .leading, spacing: 0) {
+            Text("Schedule")
+                .wakebarEyebrow()
+                .padding(.bottom, 6)
 
-            Text("Choose a wake time and which sessions to start.")
-                .font(.footnote)
+            Text("Not set up")
+                .font(WakebarDesign.hero)
                 .foregroundStyle(.secondary)
 
-            if let phoneStatus {
-                Label(phoneStatus, systemImage: "iphone.and.arrow.forward")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .padding(.top, WakebarDesign.compactSpacing)
-            }
+            Text("Pick a wake time and the sessions that start with it.")
+                .font(WakebarDesign.detail)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, 8)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, WakebarDesign.horizontalPadding)
+        .wakebarInset()
         .padding(.vertical, WakebarDesign.sectionSpacing)
     }
 }

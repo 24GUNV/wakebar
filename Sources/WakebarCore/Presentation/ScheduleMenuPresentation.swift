@@ -1,3 +1,7 @@
+/// The single source of the menu's status vocabulary.
+///
+/// Every surface — menu bar popover, settings, service rows — reads its status
+/// words from here so the same situation is never described two ways.
 public struct ScheduleMenuPresentation: Equatable, Sendable {
     public let state: ScheduleMenuState
     public let statusText: String
@@ -6,8 +10,11 @@ public struct ScheduleMenuPresentation: Equatable, Sendable {
     public let phoneStatusText: String
     public let phoneStatusKind: ServiceStatusKind
 
+    /// - Parameter hasSchedule: whether a usable schedule exists at all. A
+    ///   schedule the user switched off still needs editing, not setting up.
     public static func resolve(
         isEnabled: Bool,
+        hasSchedule: Bool = true,
         providersReady: Bool,
         alarmEnabled: Bool,
         phonePhase: PhoneAlarmMenuPhase
@@ -15,8 +22,8 @@ public struct ScheduleMenuPresentation: Equatable, Sendable {
         guard isEnabled else {
             return Self(
                 state: .draft,
-                statusText: "Draft",
-                primaryActionTitle: "Set Up Wake Schedule…",
+                statusText: hasSchedule ? "Off" : "Not set up",
+                primaryActionTitle: hasSchedule ? "Edit Schedule…" : "Set Up Schedule…",
                 destination: .schedule,
                 phoneStatusText: phoneStatus(for: phonePhase),
                 phoneStatusKind: statusKind(for: phonePhase)
@@ -26,7 +33,7 @@ public struct ScheduleMenuPresentation: Equatable, Sendable {
         guard providersReady else {
             return Self(
                 state: .actionRequired,
-                statusText: "Setup required",
+                statusText: "Needs setup",
                 primaryActionTitle: "Finish Setup…",
                 destination: .providers,
                 phoneStatusText: phoneStatus(for: phonePhase),
@@ -58,8 +65,8 @@ public struct ScheduleMenuPresentation: Equatable, Sendable {
         case .publishing:
             return Self(
                 state: .inProgress,
-                statusText: "Syncing…",
-                primaryActionTitle: "View Alarm Status…",
+                statusText: "Syncing",
+                primaryActionTitle: "Alarm Status…",
                 destination: .alarm,
                 phoneStatusText: phoneStatus(for: phonePhase),
                 phoneStatusKind: .inProgress
@@ -68,7 +75,7 @@ public struct ScheduleMenuPresentation: Equatable, Sendable {
             return Self(
                 state: .inProgress,
                 statusText: "Waiting for iPhone",
-                primaryActionTitle: "View Alarm Status…",
+                primaryActionTitle: "Alarm Status…",
                 destination: .alarm,
                 phoneStatusText: phoneStatus(for: phonePhase),
                 phoneStatusKind: .inProgress
@@ -76,7 +83,7 @@ public struct ScheduleMenuPresentation: Equatable, Sendable {
         case .draft:
             return Self(
                 state: .actionRequired,
-                statusText: "Setup required",
+                statusText: "Needs setup",
                 primaryActionTitle: "Finish Setup…",
                 destination: .alarm,
                 phoneStatusText: phoneStatus(for: phonePhase),
@@ -85,7 +92,7 @@ public struct ScheduleMenuPresentation: Equatable, Sendable {
         case .failed:
             return Self(
                 state: .actionRequired,
-                statusText: "Needs attention",
+                statusText: "Sync failed",
                 primaryActionTitle: "Fix Alarm Sync…",
                 destination: .alarm,
                 phoneStatusText: phoneStatus(for: phonePhase),
@@ -97,15 +104,15 @@ public struct ScheduleMenuPresentation: Equatable, Sendable {
     private static func phoneStatus(for phase: PhoneAlarmMenuPhase) -> String {
         switch phase {
         case .draft:
-            "Setup required"
+            "Needs setup"
         case .publishing:
-            "Syncing…"
+            "Syncing"
         case .published:
             "Waiting for iPhone"
         case .confirmed:
-            "Alarm confirmed"
+            "Ready"
         case .failed:
-            "Needs attention"
+            "Sync failed"
         }
     }
 

@@ -1,6 +1,7 @@
 public struct ClaudeRoutineCapability: Equatable, Sendable {
     public enum ProvisioningControl: Equatable, Sendable {
         case userManaged
+        case claudeCLIAssisted
     }
 
     public enum TriggerAPIStability: Equatable, Sendable {
@@ -15,14 +16,19 @@ public struct ClaudeRoutineCapability: Equatable, Sendable {
 
     public static let current = Self(
         runsWhenMacIsOff: true,
-        provisioningControl: .userManaged,
+        provisioningControl: .claudeCLIAssisted,
         triggerAPIStability: .experimental(betaHeader: "experimental-cc-routine-2026-04-01"),
         minimumRecurringIntervalMinutes: 60,
         scheduledStartCanBeDelayed: true
     )
 
     public var setupStatusText: String {
-        "Create or edit this Routine in Claude"
+        switch provisioningControl {
+        case .userManaged:
+            "Create or edit this Routine in Claude"
+        case .claudeCLIAssisted:
+            "Wakebar starts the official Claude Code setup flow"
+        }
     }
 
     public var timingStatusText: String {

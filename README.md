@@ -21,7 +21,7 @@
 
 <p align="center"><sub>Example with confirmed Claude setup and the experimental Codex route enabled. Open the image for a full-size view.</sub></p>
 
-Wakebar turns one wake time into provider-hosted prompts and an optional iPhone alarm. Wakebar generates setup details; you create the tasks in Claude and ChatGPT, then confirm their saved times. The default Claude Routine asks for `yes`. The experimental ChatGPT task sends `hi`. OpenAI has not documented whether this changes Codex usage limits. The iPhone companion receives the alarm schedule through iCloud and registers it with AlarmKit.
+Wakebar turns one wake time into provider-hosted prompts and an optional iPhone alarm. For Claude, Wakebar opens Claude Code’s official Routine setup and asks it to update only schedule-specific Wakebar Routines. You verify Claude’s proposed names, times, and links before confirming that setup is complete. ChatGPT task creation remains a guided manual step. The default Claude Routine asks for `yes`; the experimental ChatGPT task sends `hi`. OpenAI has not documented whether this changes Codex usage limits. The iPhone companion receives the alarm schedule through iCloud and registers it with AlarmKit.
 
 > [!IMPORTANT]
 > The macOS tests, iOS Simulator tests, and unsigned Release builds pass. Signed CloudKit, push-notification, and AlarmKit behavior still needs acceptance testing on a physical iPhone.
@@ -30,18 +30,18 @@ Wakebar turns one wake time into provider-hosted prompts and an optional iPhone 
 
 <p align="center">
   <a href="Docs/Images/wakebar-flow.svg">
-    <img src="Docs/Images/wakebar-flow.svg" width="680" alt="Wakebar flow with manual provider setup and a separate iCloud path for the iPhone alarm">
+    <img src="Docs/Images/wakebar-flow.svg" width="680" alt="Wakebar flow with Claude Code-assisted Routine setup, manual ChatGPT task setup, and a separate iCloud path for the iPhone alarm">
   </a>
 </p>
 
-Wakebar guides provider setup; it does not create provider tasks. Paste the generated instructions into Claude Code Routines and ChatGPT scheduled tasks. Then confirm the saved times in Wakebar.
+Wakebar starts Claude Code’s supported `/schedule` workflow and supplies the names, prompts, times, time zone, and safety limits. Wakebar asks Claude to show a combined review before it changes the Routines. Because this workflow is conversational, you must verify Claude’s proposal and the resulting Routine links. For Codex, Wakebar still prepares a ChatGPT scheduled task for you to create and confirm.
 
 | At the scheduled time | One-time setup | Works with the Mac off |
 | --- | --- | :---: |
-| Start Claude Code | Create the generated Claude Code Routines and confirm their times | Yes |
+| Start Claude Code | Let Wakebar open Claude Code, verify its Routine proposal and links, and confirm setup | Yes |
 | Test the Codex wake-up proxy | Create the generated ChatGPT scheduled task and confirm its times | Task: Yes; Codex effect: Unverified |
 | Ring the wake alarm | Let the iPhone receive the schedule and confirm AlarmKit | After iPhone confirmation |
-| Refresh sessions every five hours | Create all generated recurring provider tasks | Yes |
+| Refresh sessions every five hours | Ask Claude to update its Wakebar Routines and create the experimental ChatGPT task | Yes |
 
 Wakebar reports each stage separately. A schedule is not a sent prompt. A sent prompt is not proof that a provider reset a usage window.
 
@@ -53,6 +53,7 @@ Wakebar reports each stage separately. A schedule is not a sent prompt. A sent p
 - Versioned local persistence and duplicate-execution protection.
 - Conditional CloudKit writes, offline recovery, and phone acknowledgements.
 - Provider previews that do not send prompts, plus fixed minimal prompts for hosted tasks.
+- Claude Code version and subscription-sign-in checks with an official `/schedule` setup handoff.
 - Wakebar does not request or upload consumer subscription credentials.
 
 ## Verification

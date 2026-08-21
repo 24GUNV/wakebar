@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="680" height="1040" viewBox="0 0 680 1040" role="img" aria-labelledby="title description">
   <title id="title">Wakebar setup and execution flow</title>
-  <desc id="description">Wakebar has two independent paths. The user manually creates and confirms provider-hosted tasks. Wakebar also publishes an alarm schedule through iCloud for the iPhone to apply and confirm.</desc>
+  <desc id="description">Wakebar has two independent paths. Wakebar asks Claude Code to create or update schedule-specific Routines for user review, while ChatGPT task setup remains manual. Wakebar also publishes an alarm schedule through iCloud for the iPhone to apply and confirm.</desc>
   <defs>
     <style>
       .text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #1d1d1f; }
@@ -23,7 +23,7 @@
     <path d="M340 152v44M333 185l7 11 7-11" class="line"/>
     <rect x="70" y="196" width="540" height="136" rx="20" fill="#ffffff" stroke="#d8d8dc"/>
     <text x="102" y="243" font-size="27" font-weight="650">Wakebar on Mac</text>
-    <text x="102" y="279" font-size="19" class="secondary">Builds provider setup text and the alarm schedule.</text>
+    <text x="102" y="279" font-size="19" class="secondary">Builds Claude setup and the alarm schedule.</text>
     <text x="102" y="309" font-size="19" class="secondary">Reports provider and iPhone confirmation separately.</text>
 
     <text x="340" y="374" class="label" text-anchor="middle">TWO INDEPENDENT PATHS</text>
@@ -34,23 +34,23 @@
     <rect x="35" y="473" width="290" height="392" rx="20" fill="#ffffff" stroke="#d8d8dc"/>
     <circle cx="75" cy="521" r="18" fill="#5757d9" opacity="0.12"/>
     <text x="75" y="528" font-size="19" font-weight="700" class="accent" text-anchor="middle">1</text>
-    <text x="108" y="516" font-size="20" font-weight="650">Copy setup text</text>
-    <text x="108" y="544" font-size="17" class="secondary">Use “Copy Routine setup”</text>
-    <text x="108" y="568" font-size="17" class="secondary">or “Copy Codex setup.”</text>
+    <text x="108" y="516" font-size="20" font-weight="650">Start setup</text>
+    <text x="108" y="544" font-size="17" class="secondary">Wakebar checks Claude Code</text>
+    <text x="108" y="568" font-size="17" class="secondary">and subscription sign-in.</text>
 
     <line x1="67" y1="592" x2="293" y2="592" stroke="#e4e4e7"/>
     <circle cx="75" cy="636" r="18" fill="#5757d9" opacity="0.12"/>
     <text x="75" y="643" font-size="19" font-weight="700" class="accent" text-anchor="middle">2</text>
-    <text x="108" y="631" font-size="20" font-weight="650">Create hosted tasks</text>
-    <text x="108" y="659" font-size="17" class="secondary">You create them in Claude</text>
-    <text x="108" y="683" font-size="17" class="secondary">and ChatGPT. Wakebar cannot.</text>
+    <text x="108" y="631" font-size="20" font-weight="650">Ask Claude to update</text>
+    <text x="108" y="659" font-size="17" class="secondary">Claude proposes changes to</text>
+    <text x="108" y="683" font-size="17" class="secondary">only Wakebar-owned tasks.</text>
 
     <line x1="67" y1="707" x2="293" y2="707" stroke="#e4e4e7"/>
     <circle cx="75" cy="751" r="18" fill="#5757d9" opacity="0.12"/>
     <text x="75" y="758" font-size="19" font-weight="700" class="accent" text-anchor="middle">3</text>
-    <text x="108" y="746" font-size="20" font-weight="650">Confirm in Wakebar</text>
-    <text x="108" y="774" font-size="17" class="secondary">Confirm the saved times</text>
-    <text x="108" y="798" font-size="17" class="secondary">after checking each provider.</text>
+    <text x="108" y="746" font-size="20" font-weight="650">Review once</text>
+    <text x="108" y="774" font-size="17" class="secondary">Verify Claude’s proposal and links.</text>
+    <text x="108" y="798" font-size="17" class="secondary">ChatGPT setup stays manual.</text>
 
     <rect x="47" y="817" width="266" height="30" rx="15" fill="#5757d9" opacity="0.1"/>
     <text x="180" y="838" font-size="15" font-weight="650" class="accent" text-anchor="middle">Provider hosted · Mac can be off</text>

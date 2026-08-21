@@ -74,6 +74,11 @@ final class AppModel {
     var launchAtLoginState: LaunchAtLoginState
     var settingsDestination: SettingsDestination
     var settingsNavigationRequestID: UUID
+    /// What the CLIs currently report about their own usage windows. Empty
+    /// until the first read, and empty forever on a machine where neither CLI
+    /// has run — which is why nothing here may be required for a plan.
+    var usageWindows: [UsageWindow]
+    let claudeSetup: ClaudeSetupModel
 
     @ObservationIgnored private let scheduleStore: ScheduleStore
     @ObservationIgnored private let scheduleCalculator: ScheduleCalculator
@@ -82,6 +87,8 @@ final class AppModel {
     @ObservationIgnored private let providerDeliveryStore: ProviderDeliveryStore
     @ObservationIgnored private let phoneSchedulePublisher: MacPhoneSchedulePublisher
     @ObservationIgnored private let launchAtLoginService: LaunchAtLoginService
+    @ObservationIgnored private let usageWindowReader: any UsageWindowReading
+    @ObservationIgnored private let sessionChain = ChainedSessionPlanner()
     @ObservationIgnored private var scheduleSaveTask: Task<Void, Never>?
     @ObservationIgnored private var phoneAcknowledgementTask: Task<Void, Never>?
 
@@ -92,7 +99,9 @@ final class AppModel {
         phoneSchedulePublisher: MacPhoneSchedulePublisher = MacPhoneSchedulePublisher(),
         providerDeliveryStore: ProviderDeliveryStore = ProviderDeliveryStore(),
         launchAtLoginService: LaunchAtLoginService? = nil,
-        providerAdapters: [ProviderID: any ProviderAdapter]? = nil
+        claudeSetup: ClaudeSetupModel? = nil,
+        providerAdapters: [ProviderID: any ProviderAdapter]? = nil,
+        usageWindowReader: (any UsageWindowReading)? = nil
     ) {
         let resolvedLaunchAtLoginService = launchAtLoginService ?? LaunchAtLoginService()
         self.scheduleStore = scheduleStore
@@ -101,6 +110,8 @@ final class AppModel {
         self.phoneSchedulePublisher = phoneSchedulePublisher
         self.providerDeliveryStore = providerDeliveryStore
         self.launchAtLoginService = resolvedLaunchAtLoginService
+        self.usageWindowReader = usageWindowReader ?? SessionLogUsageWindowReader()
+        self.claudeSetup = claudeSetup ?? ClaudeSetupModel()
         self.providerAdapters = providerAdapters ?? [
             .claude: DryRunProviderAdapter(id: .claude) as any ProviderAdapter,
             .codex: CodexPreviewProviderAdapter() as any ProviderAdapter,
@@ -117,6 +128,7 @@ final class AppModel {
         )
         phoneAlarmPublishState = .draft
         lastConfirmedPhoneAlarm = nil
+        usageWindows = []
         launchAtLoginState = resolvedLaunchAtLoginService.state
         settingsDestination = .schedule
         settingsNavigationRequestID = UUID()
@@ -127,8 +139,134 @@ final class AppModel {
         return scheduleCalculator.nextWakeOccurrence(after: .now, for: schedule)
     }
 
+    /// The wake this countdown is measured from, so the progress bar shows how
+    /// far through the gap between two wakes the user currently is.
+    var previousWake: Date? {
+        guard schedule.isEnabled, schedule.isValid else { return nil }
+        return scheduleCalculator.previousWakeOccurrence(before: .now, for: schedule)
+    }
+
+    /// The master switch. Wakebar has no other way to stand down.
+    var isScheduleActive: Bool {
+        get { schedule.isEnabled }
+        set {
+            guard newValue != schedule.isEnabled else { return }
+            guard newValue == false || schedule.isValid else {
+                activityNotice = .error("Choose at least one day and provider first.")
+                return
+            }
+            schedule.isEnabled = newValue
+        }
+    }
+
+    /// True once there is a schedule worth showing, whether or not it is running.
+    var hasSchedule: Bool {
+        schedule.isValid
+    }
+
+    /// Wakebar can stop its own alarm, but a Routine or task already created in
+    /// a provider's cloud keeps running until the user removes it there.
+    var hasHostedSessions: Bool {
+        schedule.providerIDs.contains { schedule.backend(for: $0) == .providerCloud }
+    }
+
+    var weekdaySummary: String {
+        let days = schedule.selectedWeekdays
+        if days.isEmpty { return "No days" }
+        if days.count == Weekday.allCases.count { return "Every day" }
+        if days == Weekday.workweek { return "Weekdays" }
+        if days == [.saturday, .sunday] { return "Weekends" }
+        return Weekday.displayOrder(for: .autoupdatingCurrent)
+            .filter(days.contains)
+            .map(\.shortLabel)
+            .joined(separator: " ")
+    }
+
+    /// The wake time itself, readable even while the schedule is switched off
+    /// and there is no next occurrence to format.
+    var wakeTimeText: String {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = schedule.timeZone
+        let reference = calendar.date(
+            from: DateComponents(
+                year: 2001,
+                month: 1,
+                day: 1,
+                hour: schedule.hour,
+                minute: schedule.minute
+            )
+        )
+        guard let reference else { return "" }
+
+        let formatter = DateFormatter()
+        formatter.timeZone = schedule.timeZone
+        formatter.setLocalizedDateFormatFromTemplate("jmm")
+        return formatter.string(from: reference)
+    }
+
     var plannedEvents: [ScheduledEvent] {
-        schedulePlanner.nextEvents(after: .now, for: schedule)
+        schedulePlanner.nextEvents(after: .now, for: schedule, windows: usageWindows)
+    }
+
+    /// The open window the next session is waiting on, if any.
+    var governingUsageWindow: UsageWindow? {
+        sessionChain.governingWindow(windows: usageWindows, now: .now)
+    }
+
+    /// Every window worth reporting, session windows first and the soonest reset
+    /// ahead of the rest. Dates come back unformatted so the view can render
+    /// them in the schedule's own time zone.
+    var usageWindowRows: [UsageWindowRow] {
+        usageWindows
+            .filter { $0.isOpen(at: .now) }
+            .sorted { lhs, rhs in
+                if lhs.isSessionWindow != rhs.isSessionWindow {
+                    return lhs.isSessionWindow
+                }
+                return lhs.resetsAt < rhs.resetsAt
+            }
+            .map(UsageWindowRow.init)
+    }
+
+    /// The cutoff hour to name when nothing reported a session window, so the
+    /// fixed cadence the plan fell back to is stated rather than implied.
+    var assumedCadenceHour: Int? {
+        guard governingUsageWindow == nil,
+              schedule.cadence == .schedule,
+              schedule.repeatEveryFiveHours
+        else { return nil }
+        return schedule.repeatUntilHour
+    }
+
+    /// The usage band earns its space when there is a window to report or a
+    /// chain to explain. On a plain schedule with nothing open it would be three
+    /// empty rows, so it stays out.
+    var showsUsageBand: Bool {
+        if schedule.cadence == .continuous { return true }
+        return schedule.repeatEveryFiveHours || !usageWindowRows.isEmpty
+    }
+
+    /// Which clock the sessions run on. The quick switch in the popover writes
+    /// here, so flipping it re-plans immediately rather than waiting for a save.
+    var sessionCadence: SessionCadence {
+        get { schedule.cadence }
+        set {
+            guard newValue != schedule.cadence else { return }
+            schedule.cadence = newValue
+        }
+    }
+
+    /// The next thing Wakebar actually does, which is what the hero counts down
+    /// to. On the schedule that is the wake; chained to the window it is the
+    /// session, and the two can be days apart.
+    var nextFire: Date? {
+        guard schedule.isEnabled, schedule.isValid else { return nil }
+        switch schedule.cadence {
+        case .schedule:
+            return nextWake
+        case .continuous:
+            return nextInitialSessionStart ?? refreshSessionDates.first
+        }
     }
 
     var nextInitialSessionStart: Date? {
@@ -157,18 +295,6 @@ final class AppModel {
         return uniqueDates
     }
 
-    var selectedProviderSummary: String {
-        schedule.providerIDs.map(\.displayName).formatted()
-    }
-
-    var executionSummaries: [String] {
-        schedule.providerIDs.map { provider in
-            let isConfirmed = providerDeliveryStates[provider]?.isCurrentRevisionConfirmed == true
-            let status = isConfirmed ? "confirmed by you" : "setup required"
-            return "\(provider.displayName): \(status)"
-        }
-    }
-
     var providerReadiness: ScheduleEventReadiness {
         let selectedProviders = Set(schedule.providerIDs)
         guard !selectedProviders.isEmpty else { return .setupRequired }
@@ -185,78 +311,43 @@ final class AppModel {
     }
 
     func providerMenuStatus(for provider: ProviderID) -> String {
-        guard isProviderReady(provider) else { return "Setup required" }
-        return provider == .codex
-            ? "Confirmed by you · effect unverified"
-            : "Confirmed by you"
+        isProviderReady(provider) ? "Ready" : "Needs setup"
     }
 
     func providerMenuStatusKind(for provider: ProviderID) -> ServiceStatusKind {
-        guard isProviderReady(provider) else { return .actionRequired }
-        return provider == .codex ? .experimental : .ready
+        isProviderReady(provider) ? .ready : .actionRequired
     }
 
-    var sessionExecutionDetail: String {
-        let backends = Set(schedule.providerIDs.map { schedule.backend(for: $0) })
-        guard !backends.isEmpty else { return "Choose a provider" }
-        let location = if backends == [.providerCloud] {
-            providerReadiness == .ready ? "Cloud · confirmed by you" : "Cloud · setup required"
-        } else if backends == [.thisMac] {
-            "Requires this Mac awake"
-        } else if backends == [.alwaysOnRunner] {
-            "Always-on runner"
-        } else {
-            "Mixed execution"
-        }
-
-        let promptDetail = if schedule.providerIDs.count == 1,
-                              let provider = schedule.providerIDs.first {
-            "\(provider.displayName) \(provider.hostedPromptDescription)"
-        } else {
-            "provider-specific minimal prompts"
-        }
-
-        return "\(location) · \(promptDetail)"
+    /// Codex scheduling is unverified end to end, so its row carries a badge
+    /// rather than a status word of its own.
+    func providerIsExperimental(_ provider: ProviderID) -> Bool {
+        provider == .codex
     }
 
-    var phoneAlarmDetail: String {
+    /// What the iPhone alarm is doing while the schedule is switched off. Said
+    /// as a state word so it fits the same row grammar as everything else,
+    /// rather than as a paragraph of apology.
+    var stoppedPhoneStatus: String {
         switch phoneAlarmPublishState {
-        case .draft:
-            "Not synced to iPhone"
+        case .draft, .confirmed:
+            "Off"
         case .publishing:
-            lastConfirmedPhoneAlarm == nil
-                ? "Updating iCloud"
-                : "Updating iCloud · previous alarm remains active"
+            "Turning off"
         case .published:
-            lastConfirmedPhoneAlarm == nil
-                ? "iCloud updated · awaiting iPhone"
-                : "Awaiting iPhone · previous alarm may still ring"
-        case let .confirmed(acknowledgement):
-            if schedule.isEnabled && schedule.alarmOnIPhone {
-                "Confirmed on iPhone · revision \(acknowledgement.revision.sequence)"
-            } else {
-                "iPhone confirmed the previous alarm is off"
-            }
-        case let .failed(message):
-            lastConfirmedPhoneAlarm == nil
-                ? message
-                : "\(message) · previous alarm may still ring"
-        }
-    }
-
-    var draftPhoneStatus: String? {
-        guard !schedule.isEnabled else { return nil }
-        switch phoneAlarmPublishState {
-        case .draft:
-            return nil
-        case .publishing:
-            return "Turning off the previous iPhone alarm…"
-        case .published:
-            return "Waiting for the iPhone to turn off the previous alarm."
-        case .confirmed:
-            return "The iPhone confirmed the previous alarm is off."
+            "Waiting for iPhone"
         case .failed:
-            return "Wakebar could not turn off the previous iPhone alarm. It may still ring."
+            "May still ring"
+        }
+    }
+
+    var stoppedPhoneStatusKind: ServiceStatusKind {
+        switch phoneAlarmPublishState {
+        case .draft, .confirmed:
+            .ready
+        case .publishing, .published:
+            .inProgress
+        case .failed:
+            .actionRequired
         }
     }
 
@@ -281,20 +372,11 @@ final class AppModel {
     }
 
     var scheduleMenuState: ScheduleMenuState {
-        if scheduleMenuPresentation.state == .ready, schedule.includeCodex {
-            return .experimental
-        }
-        return scheduleMenuPresentation.state
+        scheduleMenuPresentation.state
     }
 
     var relevantSettingsDestination: SettingsDestination {
         SettingsDestination(scheduleMenuPresentation.destination)
-    }
-
-    var scheduleStatusText: String {
-        scheduleMenuState == .experimental
-            ? "Experimental"
-            : scheduleMenuPresentation.statusText
     }
 
     var primaryMenuActionTitle: String {
@@ -309,6 +391,7 @@ final class AppModel {
     private var scheduleMenuPresentation: ScheduleMenuPresentation {
         ScheduleMenuPresentation.resolve(
             isEnabled: schedule.isEnabled,
+            hasSchedule: schedule.isValid,
             providersReady: providerReadiness == .ready,
             alarmEnabled: schedule.alarmOnIPhone,
             phonePhase: phoneAlarmMenuPhase
@@ -366,6 +449,10 @@ final class AppModel {
         isLoaded = true
         launchAtLoginState = launchAtLoginService.state
         await refreshProviders()
+        await refreshUsageWindows()
+        Task {
+            await claudeSetup.refresh()
+        }
         if let acknowledgement = try? await phoneSchedulePublisher.acknowledgement(
             for: schedule.id
         ) {
@@ -395,6 +482,13 @@ final class AppModel {
         scheduleToActivate.codexRoute = .chatGPTWebTask
         schedule = scheduleToActivate
         showTransientMessage("Schedule saved. Syncing the iPhone alarm.")
+    }
+
+    /// Reading the logs touches tens of megabytes, so it stays off the schedule
+    /// path: a stale or missing reading only costs the chain its precision, and
+    /// the plan is still a plan without it.
+    func refreshUsageWindows() async {
+        usageWindows = await usageWindowReader.currentWindows(now: .now)
     }
 
     func refreshProviders() async {

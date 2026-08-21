@@ -45,6 +45,243 @@ final class SchedulePlannerTests: XCTestCase {
         XCTAssertEqual(times[2].minute, 50)
     }
 
+    /// A session sent while the window is still open does not open a new one,
+    /// so the first session waits for the reported reset instead of firing at
+    /// the time the fixed slot assumed.
+    func testOpenWindowDelaysTheFirstSession() throws {
+        let calendar = try utcCalendar()
+        let planner = SchedulePlanner(
+            calculator: ScheduleCalculator(calendar: calendar),
+            calendar: calendar
+        )
+        let now = try XCTUnwrap(
+            calendar.date(from: DateComponents(year: 2026, month: 8, day: 20, hour: 6))
+        )
+        var schedule = makeSchedule()
+        schedule.includeCodex = false
+        schedule.alarmOnIPhone = false
+        let resetsAt = try XCTUnwrap(
+            calendar.date(from: DateComponents(year: 2026, month: 8, day: 20, hour: 7, minute: 20))
+        )
+
+        let events = planner.nextEvents(
+            after: now,
+            for: schedule,
+            windows: [openWindow(resetsAt: resetsAt, observedAt: now)]
+        )
+
+        XCTAssertEqual(events.count, 1)
+        XCTAssertEqual(events[0].date, resetsAt.addingTimeInterval(60))
+    }
+
+    /// The chain must never start the day early. A window that closes at three
+    /// in the morning is not a reason to wake the providers then.
+    func testWindowClosingBeforeThePlannedStartChangesNothing() throws {
+        let calendar = try utcCalendar()
+        let planner = SchedulePlanner(
+            calculator: ScheduleCalculator(calendar: calendar),
+            calendar: calendar
+        )
+        let now = try XCTUnwrap(
+            calendar.date(from: DateComponents(year: 2026, month: 8, day: 20, hour: 2))
+        )
+        var schedule = makeSchedule()
+        schedule.includeCodex = false
+        schedule.alarmOnIPhone = false
+        let resetsAt = try XCTUnwrap(
+            calendar.date(from: DateComponents(year: 2026, month: 8, day: 20, hour: 3))
+        )
+
+        let events = planner.nextEvents(
+            after: now,
+            for: schedule,
+            windows: [openWindow(resetsAt: resetsAt, observedAt: now)]
+        )
+        let time = calendar.dateComponents([.hour, .minute], from: try XCTUnwrap(events.first?.date))
+
+        XCTAssertEqual(time.hour, 6)
+        XCTAssertEqual(time.minute, 50)
+    }
+
+    /// Refreshes are spaced by the window the provider actually reports, not by
+    /// the five hours the fixed slots assume.
+    func testRefreshesUseTheReportedWindowLength() throws {
+        let calendar = try utcCalendar()
+        let planner = SchedulePlanner(
+            calculator: ScheduleCalculator(calendar: calendar),
+            calendar: calendar
+        )
+        let now = try XCTUnwrap(
+            calendar.date(from: DateComponents(year: 2026, month: 8, day: 20, hour: 6))
+        )
+        var schedule = makeSchedule()
+        schedule.includeCodex = false
+        schedule.alarmOnIPhone = false
+        schedule.repeatEveryFiveHours = true
+        schedule.repeatUntilHour = 19
+        let resetsAt = try XCTUnwrap(
+            calendar.date(from: DateComponents(year: 2026, month: 8, day: 20, hour: 7))
+        )
+
+        let events = planner.nextEvents(
+            after: now,
+            for: schedule,
+            windows: [openWindow(resetsAt: resetsAt, observedAt: now, duration: 4 * 60 * 60)]
+        )
+        let times = events.map { calendar.dateComponents([.hour, .minute], from: $0.date) }
+
+        XCTAssertEqual(times.count, 3)
+        XCTAssertEqual(times.map(\.hour), [7, 11, 15])
+        XCTAssertEqual(Set(times.map(\.minute)), [1])
+    }
+
+    /// A weekly cap is not a window a session can reopen, so the plan ignores it.
+    func testNonSessionWindowsAreIgnored() throws {
+        let calendar = try utcCalendar()
+        let planner = SchedulePlanner(
+            calculator: ScheduleCalculator(calendar: calendar),
+            calendar: calendar
+        )
+        let now = try XCTUnwrap(
+            calendar.date(from: DateComponents(year: 2026, month: 8, day: 20, hour: 6))
+        )
+        var schedule = makeSchedule()
+        schedule.includeCodex = false
+        schedule.alarmOnIPhone = false
+        let resetsAt = now.addingTimeInterval(3 * 24 * 60 * 60)
+
+        let events = planner.nextEvents(
+            after: now,
+            for: schedule,
+            windows: [openWindow(resetsAt: resetsAt, observedAt: now, duration: 10080 * 60)]
+        )
+        let time = calendar.dateComponents([.hour, .minute], from: try XCTUnwrap(events.first?.date))
+
+        XCTAssertEqual(time.hour, 6)
+        XCTAssertEqual(time.minute, 50)
+    }
+
+    // MARK: - Continuous cadence
+
+    func testContinuousSessionsChainOffTheReportedWindow() throws {
+        let calendar = try utcCalendar()
+        let planner = SchedulePlanner(
+            calculator: ScheduleCalculator(calendar: calendar),
+            calendar: calendar
+        )
+        let now = try XCTUnwrap(
+            calendar.date(from: DateComponents(year: 2026, month: 8, day: 20, hour: 9))
+        )
+        var schedule = makeSchedule()
+        schedule.cadence = .continuous
+        schedule.includeCodex = false
+        schedule.alarmOnIPhone = false
+
+        let resetsAt = now.addingTimeInterval(90 * 60)
+        let events = planner.nextEvents(
+            after: now,
+            for: schedule,
+            windows: [openWindow(resetsAt: resetsAt, observedAt: now)]
+        )
+        let starts = events.map(\.date)
+
+        XCTAssertEqual(starts.first, resetsAt.addingTimeInterval(ChainedSessionPlanner.resetBuffer))
+        // Each session opens a window of its own, so the chain steps by the
+        // window the provider reported rather than by a wall-clock hour.
+        XCTAssertEqual(
+            starts.last,
+            try XCTUnwrap(starts.first).addingTimeInterval(3 * 5 * 60 * 60)
+        )
+    }
+
+    /// The cutoff is a schedule-cadence idea. A user who asked for the window to
+    /// stay open has asked for it to stay open overnight too.
+    func testContinuousSessionsIgnoreTheDailyCutoff() throws {
+        let calendar = try utcCalendar()
+        let planner = SchedulePlanner(
+            calculator: ScheduleCalculator(calendar: calendar),
+            calendar: calendar
+        )
+        let now = try XCTUnwrap(
+            calendar.date(from: DateComponents(year: 2026, month: 8, day: 20, hour: 18))
+        )
+        var schedule = makeSchedule()
+        schedule.cadence = .continuous
+        schedule.includeCodex = false
+        schedule.alarmOnIPhone = false
+        schedule.repeatUntilHour = 19
+
+        let events = planner.nextEvents(after: now, for: schedule)
+
+        XCTAssertFalse(events.isEmpty)
+        XCTAssertTrue(events.contains { $0.date > now.addingTimeInterval(6 * 60 * 60) })
+    }
+
+    /// With nothing open there is no reset to wait for, so the session that
+    /// opens the window goes now rather than a notional five hours out.
+    func testContinuousFiresPromptlyWhenNoWindowIsOpen() throws {
+        let calendar = try utcCalendar()
+        let planner = SchedulePlanner(
+            calculator: ScheduleCalculator(calendar: calendar),
+            calendar: calendar
+        )
+        let now = try XCTUnwrap(
+            calendar.date(from: DateComponents(year: 2026, month: 8, day: 20, hour: 12))
+        )
+        var schedule = makeSchedule()
+        schedule.cadence = .continuous
+        schedule.includeCodex = false
+        schedule.alarmOnIPhone = false
+
+        let first = try XCTUnwrap(planner.nextEvents(after: now, for: schedule).first)
+
+        XCTAssertEqual(first.date, now.addingTimeInterval(ChainedSessionPlanner.resetBuffer))
+    }
+
+    /// Chaining the sessions changed when the window opens, not when the user
+    /// wants to be woken.
+    func testContinuousStillPlansThePhoneAlarmOnSchedule() throws {
+        let calendar = try utcCalendar()
+        let planner = SchedulePlanner(
+            calculator: ScheduleCalculator(calendar: calendar),
+            calendar: calendar
+        )
+        let now = try XCTUnwrap(
+            calendar.date(from: DateComponents(year: 2026, month: 8, day: 20, hour: 12))
+        )
+        var schedule = makeSchedule()
+        schedule.cadence = .continuous
+
+        let events = planner.nextEvents(after: now, for: schedule)
+        let alarm = try XCTUnwrap(events.first { $0.kind == .phoneAlarm })
+
+        XCTAssertEqual(calendar.dateComponents([.hour], from: alarm.date).hour, 7)
+    }
+
+    /// A day selection gates the alarm, not the chain.
+    func testContinuousIsValidWithoutSelectedWeekdays() throws {
+        var schedule = makeSchedule()
+        schedule.selectedWeekdays = []
+
+        XCTAssertFalse(schedule.isValid)
+        schedule.cadence = .continuous
+        XCTAssertTrue(schedule.isValid)
+    }
+
+    private func openWindow(
+        resetsAt: Date,
+        observedAt: Date,
+        duration: TimeInterval = 5 * 60 * 60
+    ) -> UsageWindow {
+        UsageWindow(
+            provider: .claude,
+            duration: duration,
+            resetsAt: resetsAt,
+            observedAt: observedAt,
+            confidence: .reported
+        )
+    }
+
     func testDisabledSchedulePlansNothing() throws {
         let calendar = try utcCalendar()
         let planner = SchedulePlanner(

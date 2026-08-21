@@ -13,6 +13,18 @@ final class WakeScheduleTests: XCTestCase {
         XCTAssertTrue(updated.hasSameHostedSetup(as: original, for: .codex))
     }
 
+    func testHostedSetupSurvivesTheMasterSwitch() {
+        var original = WakeSchedule.default
+        original.isEnabled = true
+        var updated = original
+        updated.isEnabled = false
+
+        // Switching Wakebar off leaves the provider's cloud Routine in place,
+        // so the confirmation it earned still applies.
+        XCTAssertTrue(updated.hasSameHostedSetup(as: original, for: .claude))
+        XCTAssertTrue(updated.hasSameHostedSetup(as: original, for: .codex))
+    }
+
     func testHostedSetupChangesWhenProviderTimingChanges() {
         let original = WakeSchedule.default
         var updated = original

@@ -52,7 +52,11 @@ Complete this checklist with the same Apple development team on the Mac and iPho
 
 ## Provider setup
 
-- Create the Claude Code Routines from Wakebar’s copied setup text.
+- Verify the Claude Code not-installed, update-required, and sign-in-required states.
+
+- Start Routine setup from Wakebar. Confirm that Claude Code lists, creates, updates, and disables only Routines with the expected Wakebar schedule prefix.
+
+- Review and approve the combined Claude change. Confirm that Wakebar does not mark Claude ready before the user reports that Claude saved it.
 
 - Create the ChatGPT scheduled tasks from Wakebar’s copied setup text.
 

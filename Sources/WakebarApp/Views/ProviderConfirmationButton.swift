@@ -6,7 +6,8 @@ struct ProviderConfirmationButton: View {
     let provider: ProviderID
 
     var body: some View {
-        Button("I've finished setup", action: confirmSchedule)
+        Button("I've Finished Setup", action: confirmSchedule)
+            .help("Wakebar records your confirmation. It cannot check the provider for you.")
     }
 
     private func confirmSchedule() {

@@ -4,14 +4,15 @@ Wakebar treats a scheduled event, a sent prompt, and a refreshed usage window as
 
 ## Claude Code
 
-Claude Code Routines run on Anthropic infrastructure. They can run while the Mac is off. Routine creation and editing remain user-managed in Claude.
+Claude Code Routines run on Anthropic infrastructure. They can run while the Mac is off. Wakebar starts the supported interactive `/schedule` workflow through the locally installed Claude Code command-line interface (CLI). Claude asks the user to review the combined change before it saves.
 
-Wakebar now includes two building blocks:
+Wakebar includes three building blocks:
 
-- A provisioning plan for a Routine that sends a fixed minimal prompt at the selected time.
+- A CLI preflight that checks Claude Code 2.1.227 or later and Claude.ai sign-in.
+- A reconciliation request with schedule-specific Routine names. It asks Claude to create missing Routines, update matching Routines, and disable obsolete matching Routines.
 - An adapter that starts an existing Routine through the experimental trigger API after the user stores its token locally.
 
-The adapter accepts only Anthropic HTTPS trigger URLs. It does not upload tokens to a Wakebar service. It also avoids automatic retries because the trigger API does not provide an idempotency key.
+The `/schedule` workflow is conversational and is not an atomic or independently verified API operation. The user must check Claude’s proposed changes and resulting Routine links before marking setup complete. Wakebar does not read Claude credentials or call Anthropic’s private Routine interfaces. The CLI handoff uses the first-party Claude Code session. The optional trigger adapter accepts only Anthropic HTTPS trigger URLs. It does not upload tokens to a Wakebar service or retry automatically because the trigger API does not provide an idempotency key.
 
 Official references: [Claude Code Routines](https://code.claude.com/docs/en/routines) and [Routine trigger API](https://platform.claude.com/docs/en/api/claude-code/routines-fire).
 

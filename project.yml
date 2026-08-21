@@ -69,11 +69,6 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         ENABLE_HARDENED_RUNTIME: true
-    scheme:
-      testTargets:
-        - WakebarCoreTests
-      gatherCoverageData: true
-
   WakebarPhone:
     type: application
     platform: iOS
@@ -118,6 +113,20 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.24gunv.wakebar.core-tests
         PRODUCT_NAME: WakebarCoreTests
 
+  WakebarAppTests:
+    type: bundle.unit-test
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: Tests/WakebarAppTests
+    dependencies:
+      - target: Wakebar
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: true
+        PRODUCT_BUNDLE_IDENTIFIER: com.24gunv.wakebar.app-tests
+        PRODUCT_NAME: WakebarAppTests
+
   WakebarPhoneUITests:
     type: bundle.ui-testing
     platform: iOS
@@ -132,3 +141,27 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.24gunv.wakebar.phone-ui-tests
         PRODUCT_NAME: WakebarPhoneUITests
         TEST_TARGET_NAME: WakebarPhone
+
+schemes:
+  Wakebar:
+    build:
+      targets:
+        Wakebar: all
+        WakebarCoreTests: [test]
+        WakebarAppTests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      gatherCoverageData: true
+      targets:
+        - WakebarCoreTests
+        - WakebarAppTests
+      environmentVariables:
+        WAKEBAR_DISABLE_CLOUDKIT: "1"
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release

@@ -1,6 +1,14 @@
 import SwiftUI
 import WakebarCore
 
+/// The provider sheet: a title, the state of the one thing being set up, and
+/// the actions that change it, with the sheet's own buttons on a bottom bar
+/// where macOS keeps them.
+///
+/// It used to open with an accent-coloured icon at title size and close with
+/// two paragraphs of disclaimer. The disclaimers were facts about what Wakebar
+/// can and cannot verify, so they now ride as tooltips on the controls they
+/// qualify instead of as body copy.
 struct ProviderSetupSectionView: View {
     @Bindable var model: AppModel
     let provider: ProviderID
@@ -11,147 +19,133 @@ struct ProviderSetupSectionView: View {
     private let pasteboard = PasteboardService()
 
     var body: some View {
-        VStack(alignment: .leading, spacing: WakebarDesign.sectionSpacing) {
-            HStack {
-                Image(systemName: provider.systemImage)
-                    .font(.title2)
-                    .foregroundStyle(Color.accentColor)
+        VStack(alignment: .leading, spacing: 0) {
+            VStack(alignment: .leading, spacing: WakebarDesign.sectionSpacing) {
+                header
 
-                Text(setupTitle)
-                    .font(.title2)
-                    .bold()
-
-                Spacer()
-
-                Button(purpose == .cleanup ? "Cancel" : "Done") {
-                    dismiss()
+                if purpose == .cleanup {
+                    cleanupControls
+                } else {
+                    setupControls
                 }
             }
-
-            Text(setupHelpText)
-                .foregroundStyle(.secondary)
-
-            Divider()
-
-            if purpose == .cleanup {
-                cleanupControls
-            } else {
-                setupControls
-            }
+            .padding(WakebarDesign.windowPadding)
+            .frame(maxWidth: .infinity, alignment: .leading)
 
             Spacer(minLength: 0)
 
-            Text(footerText)
-                .font(.footnote)
-                .foregroundStyle(.secondary)
+            Divider()
+
+            actionBar
+                .padding(.horizontal, WakebarDesign.windowPadding)
+                .padding(.vertical, 12)
         }
-        .padding(WakebarDesign.horizontalPadding)
-        .frame(width: 440)
-        .frame(minHeight: 310)
+        .frame(width: WakebarDesign.sheetWidth)
+        .frame(minHeight: WakebarDesign.sheetMinimumHeight)
         .interactiveDismissDisabled(purpose == .cleanup)
     }
 
-    private var setupTitle: String {
-        if purpose == .cleanup {
-            return provider == .claude ? "Remove Claude Code" : "Remove experimental Codex"
+    private var header: some View {
+        HStack(spacing: 6) {
+            Text(headerTitle)
+                .font(.headline)
+
+            if model.providerIsExperimental(provider) {
+                RowBadge(text: "Experimental")
+                    .help("Wakebar has not verified that a Codex task refreshes the ChatGPT usage window.")
+            }
         }
-        return provider == .claude ? "Claude Code setup" : "Experimental Codex setup"
     }
+
+    private var headerTitle: String {
+        purpose == .cleanup ? "Remove \(provider.displayName)" : provider.displayName
+    }
+
+    /// What the provider holds in its own cloud, named the way the provider
+    /// names it. It is the subject of every row and button on this sheet.
+    private var hostedItemLabel: String {
+        provider == .claude ? "Routine" : "Scheduled task"
+    }
+
+    // MARK: - Setup
 
     @ViewBuilder
     private var setupControls: some View {
-        if model.isProviderReady(provider) {
-            Label(confirmedStatusText, systemImage: confirmedStatusImage)
-                .foregroundStyle(provider == .codex ? .orange : .secondary)
+        if provider == .claude {
+            ClaudeRoutineSetupView(model: model)
         } else {
-            Label("One-time setup required", systemImage: "exclamationmark.circle")
-                .foregroundStyle(.orange)
-        }
+            LabeledContent(hostedItemLabel) {
+                WindowStatusValue(
+                    text: model.providerMenuStatus(for: provider),
+                    kind: model.providerMenuStatusKind(for: provider)
+                )
+            }
 
-        Button(setupButtonTitle, systemImage: "arrow.up.forward.app", action: prepareSetup)
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
+            HStack(spacing: WakebarDesign.compactSpacing) {
+                Button("Copy Setup and Open ChatGPT", action: prepareCodexSetup)
+                    .buttonStyle(.borderedProminent)
 
-        if model.isProviderReady(provider) {
-            Button("Mark as not set up", action: clearConfirmation)
-        } else {
-            HStack {
-                ProviderConfirmationButton(model: model, provider: provider)
-                Text("after you review and save it in the provider")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
+                if model.isProviderReady(provider) {
+                    Button("Mark as Not Set Up", action: clearConfirmation)
+                } else {
+                    ProviderConfirmationButton(model: model, provider: provider)
+                }
             }
         }
     }
+
+    // MARK: - Cleanup
 
     private var cleanupControls: some View {
         VStack(alignment: .leading, spacing: WakebarDesign.sectionSpacing) {
-            Label("Hosted task may still be active", systemImage: "exclamationmark.triangle.fill")
-                .foregroundStyle(.orange)
-
-            Button(cleanupButtonTitle, systemImage: "arrow.up.forward.app", action: openProvider)
-                .controlSize(.large)
-
-            Button("I've paused or deleted it") {
-                onCleanupConfirmed()
+            LabeledContent(hostedItemLabel) {
+                WindowStatusValue(text: "Still running", kind: .actionRequired)
             }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
+
+            Text(cleanupCaveat)
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Button(cleanupButtonTitle, action: openProvider)
         }
     }
 
-    private var setupButtonTitle: String {
-        switch provider {
-        case .claude:
-            "Copy setup and open Routines"
-        case .codex:
-            "Copy setup and open ChatGPT"
-        }
-    }
-
-    private var confirmedStatusText: String {
-        provider == .codex
-            ? "Marked as set up by you · effect unverified"
-            : "Marked as set up by you"
-    }
-
-    private var confirmedStatusImage: String {
-        provider == .codex ? "flask.fill" : "checkmark.circle.fill"
-    }
-
-    private var footerText: String {
-        if purpose == .cleanup {
-            return "Wakebar keeps the current schedule until you acknowledge that the hosted task is paused or deleted."
-        }
-        return "Wakebar does not receive independent proof that a provider task exists. This status records your confirmation."
-    }
-
-    private var setupHelpText: String {
-        if purpose == .cleanup {
-            return provider == .claude
-                ? "Removing Claude Code from Wakebar does not stop its existing Routine. Pause or delete it in Claude before Wakebar saves this change."
-                : "Removing Codex from Wakebar does not stop its experimental ChatGPT task. Pause or delete it in ChatGPT before Wakebar saves this change."
-        }
-        switch provider {
-        case .claude:
-            return "Wakebar prepares the details; Anthropic requires you to review and save the Routine once."
-        case .codex:
-            return "OpenAI requires you to create the task, and its usage-window effect is unverified."
-        }
-    }
-
-    private func prepareSetup() {
-        switch provider {
-        case .claude:
-            prepareClaudeSetup()
-        case .codex:
-            prepareCodexSetup()
-        }
+    /// The one sentence on this sheet. It carries the fact the rows cannot: the
+    /// removal happens in Wakebar, and the provider keeps running regardless.
+    private var cleanupCaveat: String {
+        provider == .claude
+            ? "Wakebar cannot stop a Routine that already lives in Claude."
+            : "Wakebar cannot stop a task that already lives in ChatGPT."
     }
 
     private var cleanupButtonTitle: String {
         provider == .claude ? "Open Claude Routines" : "Open ChatGPT Scheduled"
     }
+
+    // MARK: - Sheet buttons
+
+    private var actionBar: some View {
+        HStack(spacing: WakebarDesign.compactSpacing) {
+            Spacer(minLength: 0)
+
+            if purpose == .cleanup {
+                Button("Cancel") { dismiss() }
+                    .keyboardShortcut(.cancelAction)
+
+                Button("I've Removed It", action: onCleanupConfirmed)
+                    .buttonStyle(.borderedProminent)
+                    .keyboardShortcut(.defaultAction)
+                    .help("Wakebar saves the schedule change once you confirm this.")
+            } else {
+                Button("Done") { dismiss() }
+                    .buttonStyle(.borderedProminent)
+                    .keyboardShortcut(.defaultAction)
+            }
+        }
+    }
+
+    // MARK: - Actions
 
     private func openProvider() {
         let urlString = provider == .claude
@@ -159,17 +153,6 @@ struct ProviderSetupSectionView: View {
             : "https://chatgpt.com/scheduled"
         if let url = URL(string: urlString) {
             openURL(url)
-        }
-    }
-
-    private func prepareClaudeSetup() {
-        let didCopy = pasteboard.copy(model.claudeSetupInstructions())
-        model.reportCopyResult(
-            didCopy,
-            successMessage: "Routine details copied. Use them to fill the Routines form."
-        )
-        if didCopy, let routinesURL = URL(string: "https://claude.ai/code/routines") {
-            openURL(routinesURL)
         }
     }
 

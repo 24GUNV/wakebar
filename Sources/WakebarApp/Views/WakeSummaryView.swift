@@ -7,44 +7,35 @@ struct WakeSummaryView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            if model.schedule.isEnabled {
-                WakeOverviewHeaderView(
-                    nextWake: model.nextWake,
-                    nextSessionStart: model.nextInitialSessionStart,
-                    status: model.scheduleStatusText,
-                    menuState: model.scheduleMenuState
+            if model.hasSchedule {
+                WakeCountdownView(
+                    nextFire: model.nextFire,
+                    cadence: model.sessionCadence,
+                    wakeTimeText: model.wakeTimeText,
+                    weekdaySummary: model.weekdaySummary,
+                    isActive: $model.isScheduleActive,
+                    onCadenceChange: { model.sessionCadence = $0 }
                 )
 
-                Divider()
-                    .padding(.leading, WakebarDesign.horizontalPadding)
+                insetDivider
 
-                VStack(spacing: 0) {
-                    ForEach(model.schedule.providerIDs) { provider in
-                        ServiceStatusRow(
-                            title: provider.displayName,
-                            status: model.providerMenuStatus(for: provider),
-                            kind: model.providerMenuStatusKind(for: provider)
+                if model.isScheduleActive {
+                    serviceRows
+
+                    if model.showsUsageBand {
+                        insetDivider
+                        RefreshSummaryView(
+                            nextRefresh: model.refreshSessionDates.first,
+                            windows: model.usageWindowRows,
+                            assumedCadenceHour: model.assumedCadenceHour,
+                            showsNextSession: model.sessionCadence == .schedule
                         )
                     }
-
-                    if model.schedule.alarmOnIPhone {
-                        ServiceStatusRow(
-                            title: "iPhone alarm",
-                            status: model.phoneAlarmMenuStatus,
-                            kind: model.phoneAlarmServiceStatusKind
-                        )
-                    }
-                }
-                .padding(.horizontal, WakebarDesign.horizontalPadding)
-
-                if model.schedule.repeatEveryFiveHours {
-                    Divider()
-                        .padding(.leading, WakebarDesign.horizontalPadding)
-
-                    RefreshSummaryView(nextRefresh: model.refreshSessionDates.first)
+                } else {
+                    stoppedRows
                 }
             } else {
-                DraftScheduleView(phoneStatus: model.draftPhoneStatus)
+                DraftScheduleView()
             }
 
             if let activityNotice = model.activityNotice {
@@ -53,43 +44,111 @@ struct WakeSummaryView: View {
 
             Divider()
 
-            HStack(spacing: WakebarDesign.compactSpacing) {
-                Button(primaryActionTitle, systemImage: "calendar", action: showRelevantSettings)
-
-                Spacer(minLength: WakebarDesign.sectionSpacing)
-
-                Menu("More", systemImage: "ellipsis.circle") {
-                    Button("Settings…", systemImage: "gearshape", action: showGeneralSettings)
-                        .keyboardShortcut(",", modifiers: .command)
-
-                    Button("Preview setup", systemImage: "play", action: testSessionStart)
-                        .disabled(model.isRunning)
-
-                    Divider()
-
-                    Button("Quit Wakebar", systemImage: "power", action: quitWakebar)
-                        .keyboardShortcut("q", modifiers: .command)
-                }
-                .menuStyle(.borderlessButton)
-                .fixedSize()
-            }
-            .buttonStyle(.borderless)
-            .padding(.horizontal, WakebarDesign.horizontalPadding)
-            .padding(.vertical, WakebarDesign.compactSpacing)
+            footer
         }
     }
 
-    private func showRelevantSettings() {
-        model.requestSettings(model.relevantSettingsDestination)
-        showSettingsWindow()
+    // MARK: - Bands
+
+    private var serviceRows: some View {
+        rowBand {
+            ForEach(model.schedule.providerIDs) { provider in
+                ServiceStatusRow(
+                    title: provider.displayName,
+                    status: model.providerMenuStatus(for: provider),
+                    kind: model.providerMenuStatusKind(for: provider),
+                    badge: model.providerIsExperimental(provider) ? "Experimental" : nil,
+                    action: { showSettings(.providers) }
+                )
+            }
+
+            if model.schedule.alarmOnIPhone {
+                ServiceStatusRow(
+                    title: "iPhone alarm",
+                    status: model.phoneAlarmMenuStatus,
+                    kind: model.phoneAlarmServiceStatusKind,
+                    action: { showSettings(.alarm) }
+                )
+            }
+        }
     }
 
-    private func showGeneralSettings() {
-        model.requestSettings(.general)
-        showSettingsWindow()
+    /// Switching Wakebar off stops its own alarm but cannot reach a Routine
+    /// already living in a provider's cloud. Saying so as two rows keeps the
+    /// caveat scannable instead of turning the popover into a paragraph.
+    private var stoppedRows: some View {
+        rowBand {
+            if model.schedule.alarmOnIPhone {
+                ServiceStatusRow(
+                    title: "iPhone alarm",
+                    status: model.stoppedPhoneStatus,
+                    kind: model.stoppedPhoneStatusKind,
+                    action: { showSettings(.alarm) }
+                )
+            }
+
+            if model.hasHostedSessions {
+                ServiceStatusRow(
+                    title: "Cloud sessions",
+                    status: "Still running",
+                    kind: .inProgress,
+                    action: { showSettings(.providers) }
+                )
+            }
+        }
     }
 
-    private func showSettingsWindow() {
+    private func rowBand<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        VStack(spacing: 0) {
+            content()
+        }
+        .padding(.horizontal, WakebarDesign.horizontalPadding - WakebarDesign.compactSpacing)
+        .padding(.vertical, 4)
+    }
+
+    private var footer: some View {
+        HStack(spacing: 2) {
+            Button(model.primaryMenuActionTitle) {
+                showSettings(model.relevantSettingsDestination)
+            }
+
+            Spacer(minLength: WakebarDesign.compactSpacing)
+
+            Menu {
+                Button("Settings…") { showSettings(.general) }
+                    .keyboardShortcut(",", modifiers: .command)
+
+                Button("Preview setup", action: testSessionStart)
+                    .disabled(model.isRunning)
+
+                Divider()
+
+                Button("Quit Wakebar", action: quitWakebar)
+                    .keyboardShortcut("q", modifiers: .command)
+            } label: {
+                Image(systemName: "ellipsis")
+                    .font(.system(size: 12, weight: .semibold))
+                    .frame(width: 24, height: 20)
+            }
+            .menuStyle(.borderlessButton)
+            .menuIndicator(.hidden)
+            .fixedSize()
+            .accessibilityLabel("More")
+        }
+        .buttonStyle(PopoverFooterButtonStyle())
+        .padding(.horizontal, WakebarDesign.horizontalPadding - WakebarDesign.compactSpacing)
+        .padding(.vertical, 5)
+    }
+
+    private var insetDivider: some View {
+        Divider()
+            .padding(.leading, WakebarDesign.horizontalPadding)
+    }
+
+    // MARK: - Actions
+
+    private func showSettings(_ destination: SettingsDestination) {
+        model.requestSettings(destination)
         NSApplication.shared.activate()
         openWindow(id: "settings")
     }
@@ -102,9 +161,5 @@ struct WakeSummaryView: View {
 
     private func quitWakebar() {
         NSApplication.shared.terminate(nil)
-    }
-
-    private var primaryActionTitle: String {
-        model.primaryMenuActionTitle
     }
 }

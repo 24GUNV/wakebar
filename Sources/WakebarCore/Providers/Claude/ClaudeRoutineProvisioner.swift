@@ -29,13 +29,12 @@ public struct ClaudeRoutineProvisioner: Sendable {
             weekdays: request.weekdays,
             timeZoneIdentifier: request.timeZoneIdentifier,
             userActions: [
-                "Create a cloud Routine in Claude Code.",
-                "Copy this name, prompt, time, weekdays, and time zone into the Routine.",
-                "Remove repositories and connectors because this Routine does not need them.",
+                "Let Wakebar open the official Claude Code Routine setup flow.",
+                "Review Claude's final configuration and approve the save.",
                 "Add an API trigger only if Wakebar should also offer Run now. Store its token in this Mac's Keychain."
             ],
             limitations: [
-                "Wakebar cannot create or edit a Claude Routine through a public API.",
+                "Anthropic does not expose a public Routine creation API, so Claude Code asks for final confirmation.",
                 "Claude can start a scheduled run a few minutes after the selected time.",
                 "Each successful run uses Claude Code subscription capacity and counts toward applicable Routine limits."
             ]
