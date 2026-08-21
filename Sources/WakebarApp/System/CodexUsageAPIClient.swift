@@ -1,0 +1,66 @@
+import Foundation
+import WakebarCore
+
+actor CodexUsageAPIClient: Sendable {
+    private let credentialResolver: UsageWindowCredentialResolver
+    private let session: URLSession
+    private let decoder = CodexUsageWindowDecoder()
+
+    init(
+        credentialResolver: UsageWindowCredentialResolver = UsageWindowCredentialResolver(),
+        session: URLSession? = nil
+    ) {
+        self.credentialResolver = credentialResolver
+        self.session = session ?? Self.makeSession()
+    }
+
+    func currentWindows(now: Date) async throws -> [UsageWindow] {
+        let credential = try credentialResolver.codexCredential()
+        guard let url = URL(string: "https://chatgpt.com/backend-api/wham/usage") else {
+            throw UsageWindowAPIError.invalidResponse
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(credential.accessToken)", forHTTPHeaderField: "Authorization")
+        request.setValue(credential.accountID, forHTTPHeaderField: "ChatGPT-Account-Id")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue("Wakebar", forHTTPHeaderField: "User-Agent")
+
+        let (data, response): (Data, URLResponse)
+        do {
+            (data, response) = try await session.data(for: request)
+        } catch {
+            throw UsageWindowAPIError.network
+        }
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw UsageWindowAPIError.invalidResponse
+        }
+        // 401 and 403 are different diagnoses. Collapsing them tells a user
+        // whose token merely expired to go looking for a missing scope.
+        guard (200..<300).contains(httpResponse.statusCode) else {
+            switch httpResponse.statusCode {
+            case 401: throw UsageWindowAPIError.unauthorized
+            case 403: throw UsageWindowAPIError.forbidden
+            case 429: throw UsageWindowAPIError.rateLimited
+            default: throw UsageWindowAPIError.network
+            }
+        }
+
+        do {
+            return try decoder.decode(data, observedAt: now)
+        } catch {
+            throw UsageWindowAPIError.invalidResponse
+        }
+    }
+
+    private static func makeSession() -> URLSession {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.urlCache = nil
+        configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
+        configuration.timeoutIntervalForRequest = 10
+        configuration.timeoutIntervalForResource = 10
+        return URLSession(configuration: configuration)
+    }
+}

@@ -28,6 +28,7 @@ struct WakeSummaryView: View {
                         RefreshSummaryView(
                             nextRefresh: model.refreshSessionDates.first,
                             windows: model.usageWindowRows,
+                            providerIssues: model.visibleUsageWindowIssues,
                             assumedCadenceHour: model.assumedCadenceHour,
                             showsNextSession: model.sessionCadence == .schedule
                         )

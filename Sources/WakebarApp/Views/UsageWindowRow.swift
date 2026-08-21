@@ -16,7 +16,7 @@ struct UsageWindowRow: Identifiable, Equatable {
     /// Reconstructed rather than reported, so the time is shown as approximate.
     let isEstimate: Bool
 
-    var id: String { "\(provider.rawValue)-\(isSessionWindow)" }
+    var id: String { "\(provider.rawValue)-\(isSessionWindow)-\(resetsAt.timeIntervalSinceReferenceDate)" }
 
     init(_ window: UsageWindow) {
         provider = window.provider

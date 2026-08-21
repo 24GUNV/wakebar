@@ -11,6 +11,7 @@ import WakebarCore
 struct RefreshSummaryView: View {
     let nextRefresh: Date?
     let windows: [UsageWindowRow]
+    let providerIssues: [ProviderID: UsageWindowProviderIssue]
     /// Set only when nothing reported a session window and the plan fell back
     /// to its fixed cadence.
     let assumedCadenceHour: Int?
@@ -24,6 +25,13 @@ struct RefreshSummaryView: View {
             ForEach(windows) { window in
                 row(label: window.label) {
                     windowValue(window)
+                }
+            }
+
+            ForEach(providerIssues.keys.sorted { $0.rawValue < $1.rawValue }, id: \.self) { provider in
+                row(label: "\(provider.displayName) usage") {
+                    Text(providerIssues[provider]?.message ?? "")
+                        .foregroundStyle(.tertiary)
                 }
             }
 

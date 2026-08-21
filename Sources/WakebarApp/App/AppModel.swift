@@ -78,6 +78,8 @@ final class AppModel {
     /// until the first read, and empty forever on a machine where neither CLI
     /// has run — which is why nothing here may be required for a plan.
     var usageWindows: [UsageWindow]
+    /// Why a provider has no live session window, when the API can say.
+    var usageWindowIssues: [ProviderID: UsageWindowProviderIssue]
     let claudeSetup: ClaudeSetupModel
 
     @ObservationIgnored private let scheduleStore: ScheduleStore
@@ -110,7 +112,7 @@ final class AppModel {
         self.phoneSchedulePublisher = phoneSchedulePublisher
         self.providerDeliveryStore = providerDeliveryStore
         self.launchAtLoginService = resolvedLaunchAtLoginService
-        self.usageWindowReader = usageWindowReader ?? SessionLogUsageWindowReader()
+        self.usageWindowReader = usageWindowReader ?? LiveUsageWindowReader()
         self.claudeSetup = claudeSetup ?? ClaudeSetupModel()
         self.providerAdapters = providerAdapters ?? [
             .claude: DryRunProviderAdapter(id: .claude) as any ProviderAdapter,
@@ -129,6 +131,7 @@ final class AppModel {
         phoneAlarmPublishState = .draft
         lastConfirmedPhoneAlarm = nil
         usageWindows = []
+        usageWindowIssues = [:]
         launchAtLoginState = resolvedLaunchAtLoginService.state
         settingsDestination = .schedule
         settingsNavigationRequestID = UUID()
@@ -243,7 +246,14 @@ final class AppModel {
     /// empty rows, so it stays out.
     var showsUsageBand: Bool {
         if schedule.cadence == .continuous { return true }
-        return schedule.repeatEveryFiveHours || !usageWindowRows.isEmpty
+        return schedule.repeatEveryFiveHours || !usageWindowRows.isEmpty || !visibleUsageWindowIssues.isEmpty
+    }
+
+    /// Only the providers this schedule actually uses. The reader asks both APIs
+    /// either way, and telling someone who never set Codex up that its
+    /// credentials are missing reports a problem they do not have.
+    var visibleUsageWindowIssues: [ProviderID: UsageWindowProviderIssue] {
+        usageWindowIssues.filter { schedule.providerIDs.contains($0.key) }
     }
 
     /// Which clock the sessions run on. The quick switch in the popover writes
@@ -467,7 +477,10 @@ final class AppModel {
         isLoaded = true
         launchAtLoginState = launchAtLoginService.state
         await refreshProviders()
-        await refreshUsageWindows()
+        // Usage is not read here. Nothing outside the popover consumes it, and
+        // on macOS each uncached Claude read can raise a credential prompt — so
+        // reading at launch charges the user a password for a panel they have
+        // not opened. The popover takes its own reading when it appears.
         Task {
             await claudeSetup.refresh()
         }
@@ -502,11 +515,16 @@ final class AppModel {
         showTransientMessage("Schedule saved. Syncing the iPhone alarm.")
     }
 
-    /// Reading the logs touches tens of megabytes, so it stays off the schedule
-    /// path: a stale or missing reading only costs the chain its precision, and
+    /// A stale or missing usage reading only costs the chain its precision, and
     /// the plan is still a plan without it.
     func refreshUsageWindows() async {
-        usageWindows = await usageWindowReader.currentWindows(now: .now)
+        let now = Date.now
+        usageWindows = await usageWindowReader.currentWindows(now: now)
+        if let issueReader = usageWindowReader as? any UsageWindowIssueReporting {
+            usageWindowIssues = await issueReader.currentUsageWindowIssues()
+        } else {
+            usageWindowIssues = [:]
+        }
     }
 
     func refreshProviders() async {

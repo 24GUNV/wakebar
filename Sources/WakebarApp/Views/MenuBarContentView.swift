@@ -15,7 +15,8 @@ struct MenuBarContentView: View {
         .task {
             await model.load()
             // The window moves while the popover is closed, so the reading is
-            // taken every time it opens rather than once at launch.
+            // taken every time it opens rather than once at launch. The reader's
+            // own cache decides whether that costs an actual call.
             await model.refreshUsageWindows()
         }
     }
