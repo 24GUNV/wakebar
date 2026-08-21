@@ -29,7 +29,12 @@ struct WeekdayPicker: View {
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { value in
-                        guard width > 0 else { return }
+                        guard width > 0, value.location.x >= 0 else { return }
+                        // Truncation toward zero turns any negative x into index
+                        // 0, so without the guard above, dragging off the leading
+                        // edge quietly paints Sunday. Off the trailing edge the
+                        // index simply falls outside the range and nothing
+                        // happens, and both edges should behave the same way.
                         let index = Int(value.location.x / width)
                         guard orderedWeekdays.indices.contains(index) else { return }
                         let weekday = orderedWeekdays[index]
