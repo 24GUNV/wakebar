@@ -8,7 +8,6 @@ public struct WakeSchedule: Identifiable, Codable, Equatable, Sendable {
     public var minute: Int
     public var selectedWeekdays: Set<Weekday>
     public var sessionLeadMinutes: Int
-    public var alarmOnIPhone: Bool
     public var repeatEveryFiveHours: Bool
     public var cadence: SessionCadence
     public var repeatUntilHour: Int
@@ -29,7 +28,6 @@ public struct WakeSchedule: Identifiable, Codable, Equatable, Sendable {
         minute: Int,
         selectedWeekdays: Set<Weekday>,
         sessionLeadMinutes: Int,
-        alarmOnIPhone: Bool,
         repeatEveryFiveHours: Bool,
         repeatUntilHour: Int,
         cadence: SessionCadence = .schedule,
@@ -49,7 +47,6 @@ public struct WakeSchedule: Identifiable, Codable, Equatable, Sendable {
         self.minute = minute
         self.selectedWeekdays = selectedWeekdays
         self.sessionLeadMinutes = sessionLeadMinutes
-        self.alarmOnIPhone = alarmOnIPhone
         self.repeatEveryFiveHours = repeatEveryFiveHours
         self.repeatUntilHour = repeatUntilHour
         self.cadence = cadence
@@ -84,8 +81,6 @@ public struct WakeSchedule: Identifiable, Codable, Equatable, Sendable {
 
     /// Continuous sessions ride the usage window rather than the calendar, so a
     /// day selection is only required when the schedule is what drives them.
-    /// The alarm still reads the days either way; it just no longer decides
-    /// whether the schedule is usable at all.
     public var isValid: Bool {
         guard !providerIDs.isEmpty else { return false }
         return cadence == .continuous || !selectedWeekdays.isEmpty
@@ -102,17 +97,13 @@ public struct WakeSchedule: Identifiable, Codable, Equatable, Sendable {
 
     /// Whether the hosted schedule a provider was set up against still matches.
     ///
-    /// `isEnabled` is deliberately not compared. Turning Wakebar off does not
-    /// remove the Routine or task already living in the provider's cloud, so a
-    /// confirmation has to survive the switch being flipped off and on again.
+    /// `isEnabled` is deliberately not compared. It changes the hosted item's
+    /// enabled state, not the schedule configuration that earned confirmation.
     public func hasSameHostedSetup(as other: Self, for provider: ProviderID) -> Bool {
         guard hour == other.hour,
               minute == other.minute,
               selectedWeekdays == other.selectedWeekdays,
               sessionLeadMinutes == other.sessionLeadMinutes,
-              repeatEveryFiveHours == other.repeatEveryFiveHours,
-              cadence == other.cadence,
-              repeatUntilHour == other.repeatUntilHour,
               followsSystemTimeZone == other.followsSystemTimeZone,
               timeZoneIdentifier == other.timeZoneIdentifier
         else { return false }
@@ -121,6 +112,9 @@ public struct WakeSchedule: Identifiable, Codable, Equatable, Sendable {
         case .claude:
             return includeClaude == other.includeClaude
                 && claudeBackend == other.claudeBackend
+                && repeatEveryFiveHours == other.repeatEveryFiveHours
+                && cadence == other.cadence
+                && repeatUntilHour == other.repeatUntilHour
         case .codex:
             return includeCodex == other.includeCodex
                 && codexBackend == other.codexBackend
@@ -144,7 +138,6 @@ public struct WakeSchedule: Identifiable, Codable, Equatable, Sendable {
             minute: 0,
             selectedWeekdays: Weekday.workweek,
             sessionLeadMinutes: 10,
-            alarmOnIPhone: true,
             repeatEveryFiveHours: false,
             repeatUntilHour: 19,
             includeClaude: true,
@@ -165,7 +158,6 @@ public struct WakeSchedule: Identifiable, Codable, Equatable, Sendable {
         case minute
         case selectedWeekdays
         case sessionLeadMinutes
-        case alarmOnIPhone
         case repeatEveryFiveHours
         case cadence
         case repeatUntilHour
@@ -192,7 +184,6 @@ public struct WakeSchedule: Identifiable, Codable, Equatable, Sendable {
         selectedWeekdays = try values.decodeIfPresent(Set<Weekday>.self, forKey: .selectedWeekdays)
             ?? (legacyWeekdaysOnly ? Weekday.workweek : Set(Weekday.allCases))
         sessionLeadMinutes = try values.decodeIfPresent(Int.self, forKey: .sessionLeadMinutes) ?? 10
-        alarmOnIPhone = try values.decodeIfPresent(Bool.self, forKey: .alarmOnIPhone) ?? true
         repeatEveryFiveHours = try values.decodeIfPresent(Bool.self, forKey: .repeatEveryFiveHours) ?? false
         repeatUntilHour = try values.decodeIfPresent(Int.self, forKey: .repeatUntilHour) ?? 19
         // Schedules written before cadence existed carry their intent in the
@@ -221,7 +212,6 @@ public struct WakeSchedule: Identifiable, Codable, Equatable, Sendable {
         try values.encode(minute, forKey: .minute)
         try values.encode(selectedWeekdays, forKey: .selectedWeekdays)
         try values.encode(sessionLeadMinutes, forKey: .sessionLeadMinutes)
-        try values.encode(alarmOnIPhone, forKey: .alarmOnIPhone)
         try values.encode(repeatEveryFiveHours, forKey: .repeatEveryFiveHours)
         try values.encode(repeatUntilHour, forKey: .repeatUntilHour)
         try values.encode(cadence, forKey: .cadence)

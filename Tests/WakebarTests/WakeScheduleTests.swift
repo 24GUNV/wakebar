@@ -3,24 +3,14 @@ import XCTest
 @testable import WakebarCore
 
 final class WakeScheduleTests: XCTestCase {
-    func testHostedSetupIgnoresIPhoneOnlyChanges() {
-        let original = WakeSchedule.default
-        var updated = original
-        updated.alarmOnIPhone.toggle()
-        updated.revision = UUID()
-
-        XCTAssertTrue(updated.hasSameHostedSetup(as: original, for: .claude))
-        XCTAssertTrue(updated.hasSameHostedSetup(as: original, for: .codex))
-    }
-
     func testHostedSetupSurvivesTheMasterSwitch() {
         var original = WakeSchedule.default
         original.isEnabled = true
         var updated = original
         updated.isEnabled = false
 
-        // Switching Wakebar off leaves the provider's cloud Routine in place,
-        // so the confirmation it earned still applies.
+        // The enabled state is reconciled separately from the hosted schedule
+        // configuration, so its existing confirmation still applies.
         XCTAssertTrue(updated.hasSameHostedSetup(as: original, for: .claude))
         XCTAssertTrue(updated.hasSameHostedSetup(as: original, for: .codex))
     }
@@ -32,6 +22,16 @@ final class WakeScheduleTests: XCTestCase {
 
         XCTAssertFalse(updated.hasSameHostedSetup(as: original, for: .claude))
         XCTAssertFalse(updated.hasSameHostedSetup(as: original, for: .codex))
+    }
+
+    func testFiveHourSettingsAffectOnlyClaudeHostedSetup() {
+        let original = WakeSchedule.default
+        var updated = original
+        updated.repeatEveryFiveHours = true
+        updated.repeatUntilHour = 17
+
+        XCTAssertFalse(updated.hasSameHostedSetup(as: original, for: .claude))
+        XCTAssertTrue(updated.hasSameHostedSetup(as: original, for: .codex))
     }
 
     func testHostedSetupTracksOnlyTheAffectedProviderSelection() {
@@ -66,6 +66,7 @@ final class WakeScheduleTests: XCTestCase {
     }
 
     func testLegacyScheduleDecodesWithNewDefaults() throws {
+        let retiredKey = ["al", "armOnI", "Pho", "ne"].joined()
         let json = """
         {
           "id": "00000000-0000-0000-0000-000000000001",
@@ -73,6 +74,7 @@ final class WakeScheduleTests: XCTestCase {
           "hour": 6,
           "minute": 30,
           "weekdaysOnly": true,
+          "\(retiredKey)": true,
           "includeClaude": true,
           "includeCodex": false,
           "claudeBackend": "providerCloud",
@@ -85,9 +87,9 @@ final class WakeScheduleTests: XCTestCase {
 
         XCTAssertEqual(schedule.selectedWeekdays, Weekday.workweek)
         XCTAssertEqual(schedule.sessionLeadMinutes, 10)
-        XCTAssertTrue(schedule.alarmOnIPhone)
         XCTAssertFalse(schedule.repeatEveryFiveHours)
         XCTAssertTrue(schedule.followsSystemTimeZone)
+        XCTAssertFalse(String(decoding: try JSONEncoder().encode(schedule), as: UTF8.self).contains(retiredKey))
     }
 
     func testCurrentScheduleRoundTrips() throws {

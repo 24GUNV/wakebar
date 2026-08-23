@@ -30,7 +30,7 @@ struct RefreshSummaryView: View {
 
             ForEach(providerIssues.keys.sorted { $0.rawValue < $1.rawValue }, id: \.self) { provider in
                 row(label: "\(provider.displayName) usage") {
-                    Text(providerIssues[provider]?.message ?? "")
+                    Text(providerIssues[provider]?.message(for: provider) ?? "")
                         .foregroundStyle(.tertiary)
                 }
             }

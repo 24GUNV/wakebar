@@ -75,4 +75,18 @@ final class ExecutionLedgerTests: XCTestCase {
         XCTAssertFalse(containsAfterReset)
         XCTAssertTrue(secondClaim)
     }
+
+    func testClaimSurvivesRelaunchWhenLedgerPathContainsSpaces() async throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appending(path: "Wakebar Ledger \(UUID())", directoryHint: .isDirectory)
+        let ledgerURL = directory.appending(path: "ledger.json")
+        let firstLedger = ExecutionLedger(fileURL: ledgerURL)
+        let didClaim = try await firstLedger.claim(eventID: "spaced-path")
+        XCTAssertTrue(didClaim)
+
+        let reloadedLedger = ExecutionLedger(fileURL: ledgerURL)
+        let containsClaim = try await reloadedLedger.contains(eventID: "spaced-path")
+
+        XCTAssertTrue(containsClaim)
+    }
 }

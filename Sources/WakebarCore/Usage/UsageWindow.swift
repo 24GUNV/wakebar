@@ -7,6 +7,8 @@ import Foundation
 /// against reality instead of against a fixed clock time.
 public struct UsageWindow: Equatable, Sendable {
     public let provider: ProviderID
+    /// Which provider limit this reading describes.
+    public let limitKind: UsageLimitKind
     /// How long the window runs. Providers report this per plan, so it is read
     /// rather than assumed — a plan with a weekly cap reports 10080.
     public let duration: TimeInterval
@@ -30,6 +32,7 @@ public struct UsageWindow: Equatable, Sendable {
 
     public init(
         provider: ProviderID,
+        limitKind: UsageLimitKind? = nil,
         duration: TimeInterval,
         resetsAt: Date,
         usedFraction: Double? = nil,
@@ -37,6 +40,7 @@ public struct UsageWindow: Equatable, Sendable {
         confidence: Confidence
     ) {
         self.provider = provider
+        self.limitKind = limitKind ?? (duration <= 8 * 60 * 60 ? .session : .weekly)
         self.duration = duration
         self.resetsAt = resetsAt
         self.usedFraction = usedFraction
@@ -51,6 +55,6 @@ public struct UsageWindow: Equatable, Sendable {
     /// A window long enough to be a plan-level cap is not something a morning
     /// session can reopen, so it must not drive scheduling.
     public var isSessionWindow: Bool {
-        duration <= 8 * 60 * 60
+        limitKind == .session
     }
 }

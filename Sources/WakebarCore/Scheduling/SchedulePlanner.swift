@@ -16,9 +16,8 @@ public struct SchedulePlanner: Sendable {
     }
 
     /// - Parameter windows: what the providers say about the usage windows that
-    ///   are open right now. When one is, sessions are spaced by the window the
-    ///   provider actually reports and the first one waits for it to close;
-    ///   with none, the plan falls back to the assumed five hours.
+    ///   are open right now. Claude refreshes can follow its reported session
+    ///   window. Codex has only a weekly limit and receives one scheduled task.
     /// - Parameter readyProviders: which providers have a confirmed setup and can
     ///   actually receive a session. Nil means readiness is unknown — the planner
     ///   then plans for everything the schedule selects, which is what the pure
@@ -99,7 +98,12 @@ public struct SchedulePlanner: Sendable {
     ) -> [ScheduledEvent] {
         let nextWake = calculator.nextWakeOccurrence(after: date, for: schedule)
 
-        var events: [ScheduledEvent] = providers.flatMap { provider -> [ScheduledEvent] in
+        let events: [ScheduledEvent] = providers.flatMap { provider -> [ScheduledEvent] in
+            // Codex reports a weekly cap, not a session window. Its scheduled
+            // task can still run before the named wake, but there is no rolling
+            // window for continuous cadence to refresh.
+            guard provider != .codex else { return [] }
+
             // A provider that reports its limits but never a session window has
             // no reset to chain to — a Codex plan carrying only a weekly cap is
             // the case. Assuming five hours for it would march sessions at a
@@ -133,19 +137,6 @@ public struct SchedulePlanner: Sendable {
             }
         }
 
-        // The alarm still belongs to the calendar. Chaining the sessions changed
-        // when the window opens, not when the user wants to be woken.
-        if schedule.alarmOnIPhone, let nextWake {
-            events.append(
-                ScheduledEvent(
-                    scheduleID: schedule.id,
-                    date: nextWake,
-                    wakeDate: nextWake,
-                    kind: .phoneAlarm
-                )
-            )
-        }
-
         return sorted(events).filter { $0.date > date }
     }
 
@@ -159,16 +150,18 @@ public struct SchedulePlanner: Sendable {
         let leadTime = TimeInterval(schedule.sessionLeadMinutes * 60)
         let plannedStart = wakeDate.addingTimeInterval(-leadTime)
 
-        // Each provider is clamped against its own open window. Two providers
-        // whose windows have drifted apart get two different start times, which
-        // is the only way both actually open a fresh window.
-        var events = providers.flatMap { provider -> [ScheduledEvent] in
-            let window = chain.governingWindow(windows: windows, now: now, provider: provider)
+        // Claude waits for its open session window. Codex has no session window,
+        // so its one scheduled task stays at the named time.
+        let events = providers.flatMap { provider -> [ScheduledEvent] in
+            let window = provider == .claude
+                ? chain.governingWindow(windows: windows, now: now, provider: provider)
+                : nil
             let sessionStarts = sessionStartDates(
                 beginningAt: firstSessionStart(plannedStart: plannedStart, window: window),
                 wakeDate: wakeDate,
                 schedule: schedule,
-                window: window
+                window: window,
+                provider: provider
             )
 
             return sessionStarts.enumerated().map { index, sessionStart in
@@ -182,17 +175,6 @@ public struct SchedulePlanner: Sendable {
                     )
                 )
             }
-        }
-
-        if schedule.alarmOnIPhone {
-            events.append(
-                ScheduledEvent(
-                    scheduleID: schedule.id,
-                    date: wakeDate,
-                    wakeDate: wakeDate,
-                    kind: .phoneAlarm
-                )
-            )
         }
 
         return sorted(events)
@@ -227,9 +209,10 @@ public struct SchedulePlanner: Sendable {
         beginningAt firstSessionStart: Date,
         wakeDate: Date,
         schedule: WakeSchedule,
-        window: UsageWindow?
+        window: UsageWindow?,
+        provider: ProviderID
     ) -> [Date] {
-        guard schedule.repeatEveryFiveHours else {
+        guard provider == .claude, schedule.repeatEveryFiveHours else {
             return [firstSessionStart]
         }
 

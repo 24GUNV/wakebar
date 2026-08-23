@@ -14,8 +14,7 @@ public struct ChainedSessionPlanner: Sendable {
     /// How long after a reset to fire. A session that races the reset reopens
     /// the window that just closed, wasting the whole chain, so it waits.
     public static let resetBuffer: TimeInterval = 60
-    /// What a session window is worth when no provider will say. Both CLIs
-    /// have used five hours for as long as they have reported anything.
+    /// What a Claude session window is worth when the provider will not say.
     public static let assumedWindowDuration: TimeInterval = 5 * 60 * 60
 
     public let buffer: TimeInterval

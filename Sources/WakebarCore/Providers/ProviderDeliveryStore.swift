@@ -11,7 +11,9 @@ public actor ProviderDeliveryStore {
 
     public func load(for revision: UUID) throws -> [ProviderID: ProviderDeliveryState] {
         let storedStates: [ProviderID: ProviderDeliveryState]
-        if FileManager.default.fileExists(atPath: fileURL.path()) {
+        if FileManager.default.fileExists(
+            atPath: fileURL.path(percentEncoded: false)
+        ) {
             storedStates = try JSONDecoder().decode(
                 [ProviderID: ProviderDeliveryState].self,
                 from: Data(contentsOf: fileURL)

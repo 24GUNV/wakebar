@@ -2,7 +2,11 @@ import AppKit
 import SwiftUI
 import WakebarCore
 import XCTest
+#if SWIFT_PACKAGE
+@testable import WakebarApp
+#else
 @testable import Wakebar
+#endif
 
 /// The weekday strip is drawn from text and shapes rather than AppKit controls,
 /// which is what lets it be rendered offscreen at all — the settings window's

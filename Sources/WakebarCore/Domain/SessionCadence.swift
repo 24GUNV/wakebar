@@ -11,7 +11,7 @@ public enum SessionCadence: String, Codable, Sendable, CaseIterable, Identifiabl
     /// One session before each scheduled wake, optionally repeating to a cutoff.
     case schedule
     /// One session every time the usage window resets, indefinitely. The wake
-    /// time still governs the alarm; it just no longer governs the sessions.
+    /// time does not govern sessions in this mode.
     case continuous
 
     public var id: String { rawValue }

@@ -18,7 +18,7 @@ public enum ProviderID: String, CaseIterable, Codable, Hashable, Identifiable, S
     public var hostedPromptDescription: String {
         switch self {
         case .claude:
-            "asks for “yes”"
+            "requests a tool-free “hi” reply"
         case .codex:
             "sends “hi”"
         }

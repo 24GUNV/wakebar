@@ -2,7 +2,11 @@ import AppKit
 import SwiftUI
 import WakebarCore
 import XCTest
+#if SWIFT_PACKAGE
+@testable import WakebarApp
+#else
 @testable import Wakebar
+#endif
 
 /// Renders the menu bar popover offscreen so its layout can be inspected as
 /// pixels rather than guessed at. Skipped unless WAKEBAR_SNAPSHOT_DIR is set.
@@ -63,32 +67,18 @@ final class PopoverSnapshotTests: XCTestCase {
     private func readyModel() -> AppModel {
         let model = baseModel(isEnabled: true)
         confirm(model, providers: [.claude, .codex])
-        model.phoneAlarmPublishState = .confirmed(
-            PhoneAlarmAcknowledgement(
-                scheduleID: model.schedule.id,
-                alarmID: model.schedule.id,
-                revision: PhoneScheduleRevision(
-                    sequence: 3,
-                    modifiedAt: .now,
-                    writerID: "mac"
-                ),
-                confirmedAt: .now
-            )
-        )
         return model
     }
 
     private func setupModel() -> AppModel {
         let model = baseModel(isEnabled: true)
         confirm(model, providers: [.claude])
-        model.phoneAlarmPublishState = .publishing
         return model
     }
 
     private func stoppedModel() -> AppModel {
         let model = baseModel(isEnabled: false)
         confirm(model, providers: [.claude, .codex])
-        model.phoneAlarmPublishState = .failed("Could not sync the iPhone alarm.")
         return model
     }
 
@@ -119,11 +109,11 @@ final class PopoverSnapshotTests: XCTestCase {
     }
 
     /// The same band with nothing to chain to, which is what a machine that has
-    /// never run either CLI will show.
+    /// never returned provider usage will show.
     private func assumedModel() -> AppModel { repeatingModel() }
 
-    /// Both providers holding open windows that have drifted apart, which is the
-    /// normal case once the user has worked in one and not the other.
+    /// The complete usage summary: Claude's session and weekly limits, plus
+    /// Codex's weekly limit.
     private func divergedModel() -> AppModel {
         let model = continuousModel()
         model.usageWindows = [
@@ -136,9 +126,28 @@ final class PopoverSnapshotTests: XCTestCase {
                 confidence: .reported
             ),
             UsageWindow(
+                provider: .claude,
+                limitKind: .weekly,
+                duration: 7 * 24 * 60 * 60,
+                resetsAt: .now.addingTimeInterval(4 * 24 * 60 * 60),
+                usedFraction: 0.24,
+                observedAt: .now,
+                confidence: .reported
+            ),
+            UsageWindow(
+                provider: .claude,
+                limitKind: .weeklyFable,
+                duration: 7 * 24 * 60 * 60,
+                resetsAt: .now.addingTimeInterval(5 * 24 * 60 * 60),
+                usedFraction: 0.18,
+                observedAt: .now,
+                confidence: .reported
+            ),
+            UsageWindow(
                 provider: .codex,
-                duration: 5 * 60 * 60,
-                resetsAt: .now.addingTimeInterval(70 * 60),
+                limitKind: .weekly,
+                duration: 7 * 24 * 60 * 60,
+                resetsAt: .now.addingTimeInterval(6 * 24 * 60 * 60),
                 usedFraction: 0.62,
                 observedAt: .now,
                 confidence: .reported
@@ -166,14 +175,6 @@ final class PopoverSnapshotTests: XCTestCase {
         model.schedule = schedule
         model.desiredRevision = schedule.revision
         confirm(model, providers: [.claude, .codex])
-        model.phoneAlarmPublishState = .confirmed(
-            PhoneAlarmAcknowledgement(
-                scheduleID: schedule.id,
-                alarmID: schedule.id,
-                revision: PhoneScheduleRevision(sequence: 3, modifiedAt: .now, writerID: "mac"),
-                confirmedAt: .now
-            )
-        )
         return model
     }
 

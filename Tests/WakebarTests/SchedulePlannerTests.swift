@@ -3,7 +3,7 @@ import XCTest
 @testable import WakebarCore
 
 final class SchedulePlannerTests: XCTestCase {
-    func testPlansProviderSessionsBeforePhoneAlarm() throws {
+    func testPlansOneSessionForEachProvider() throws {
         let calendar = try utcCalendar()
         let calculator = ScheduleCalculator(calendar: calendar)
         let planner = SchedulePlanner(calculator: calculator, calendar: calendar)
@@ -14,10 +14,8 @@ final class SchedulePlannerTests: XCTestCase {
 
         let events = planner.nextEvents(after: now, for: schedule)
 
-        XCTAssertEqual(events.count, 3)
+        XCTAssertEqual(events.count, 2)
         XCTAssertEqual(events[0].date, events[1].date)
-        XCTAssertLessThan(events[0].date, events[2].date)
-        XCTAssertEqual(events[2].kind, .phoneAlarm)
     }
 
     func testFiveHourRefreshesStopAtConfiguredHour() throws {
@@ -29,7 +27,6 @@ final class SchedulePlannerTests: XCTestCase {
         )
         var schedule = makeSchedule()
         schedule.includeCodex = false
-        schedule.alarmOnIPhone = false
         schedule.repeatEveryFiveHours = true
         schedule.repeatUntilHour = 19
 
@@ -43,6 +40,26 @@ final class SchedulePlannerTests: XCTestCase {
         XCTAssertEqual(times[1].minute, 50)
         XCTAssertEqual(times[2].hour, 16)
         XCTAssertEqual(times[2].minute, 50)
+    }
+
+    func testCodexDoesNotReceiveFiveHourRefreshes() throws {
+        let calendar = try utcCalendar()
+        let planner = SchedulePlanner(
+            calculator: ScheduleCalculator(calendar: calendar),
+            calendar: calendar
+        )
+        let now = try XCTUnwrap(
+            calendar.date(from: DateComponents(year: 2026, month: 8, day: 20, hour: 6))
+        )
+        var schedule = makeSchedule()
+        schedule.includeClaude = false
+        schedule.repeatEveryFiveHours = true
+        schedule.repeatUntilHour = 19
+
+        let events = planner.nextEvents(after: now, for: schedule)
+
+        XCTAssertEqual(events.count, 1)
+        XCTAssertEqual(firstStart(for: .codex, in: events), events.first?.date)
     }
 
     /// A session sent while the window is still open does not open a new one,
@@ -59,7 +76,6 @@ final class SchedulePlannerTests: XCTestCase {
         )
         var schedule = makeSchedule()
         schedule.includeCodex = false
-        schedule.alarmOnIPhone = false
         let resetsAt = try XCTUnwrap(
             calendar.date(from: DateComponents(year: 2026, month: 8, day: 20, hour: 7, minute: 20))
         )
@@ -87,7 +103,6 @@ final class SchedulePlannerTests: XCTestCase {
         )
         var schedule = makeSchedule()
         schedule.includeCodex = false
-        schedule.alarmOnIPhone = false
         let resetsAt = try XCTUnwrap(
             calendar.date(from: DateComponents(year: 2026, month: 8, day: 20, hour: 3))
         )
@@ -116,7 +131,6 @@ final class SchedulePlannerTests: XCTestCase {
         )
         var schedule = makeSchedule()
         schedule.includeCodex = false
-        schedule.alarmOnIPhone = false
         schedule.repeatEveryFiveHours = true
         schedule.repeatUntilHour = 19
         let resetsAt = try XCTUnwrap(
@@ -147,7 +161,6 @@ final class SchedulePlannerTests: XCTestCase {
         )
         var schedule = makeSchedule()
         schedule.includeCodex = false
-        schedule.alarmOnIPhone = false
         let resetsAt = now.addingTimeInterval(3 * 24 * 60 * 60)
 
         let events = planner.nextEvents(
@@ -175,7 +188,6 @@ final class SchedulePlannerTests: XCTestCase {
         var schedule = makeSchedule()
         schedule.cadence = .continuous
         schedule.includeCodex = false
-        schedule.alarmOnIPhone = false
 
         let resetsAt = now.addingTimeInterval(90 * 60)
         let events = planner.nextEvents(
@@ -208,7 +220,6 @@ final class SchedulePlannerTests: XCTestCase {
         var schedule = makeSchedule()
         schedule.cadence = .continuous
         schedule.includeCodex = false
-        schedule.alarmOnIPhone = false
         schedule.repeatUntilHour = 19
 
         let events = planner.nextEvents(after: now, for: schedule)
@@ -231,34 +242,13 @@ final class SchedulePlannerTests: XCTestCase {
         var schedule = makeSchedule()
         schedule.cadence = .continuous
         schedule.includeCodex = false
-        schedule.alarmOnIPhone = false
 
         let first = try XCTUnwrap(planner.nextEvents(after: now, for: schedule).first)
 
         XCTAssertEqual(first.date, now.addingTimeInterval(ChainedSessionPlanner.resetBuffer))
     }
 
-    /// Chaining the sessions changed when the window opens, not when the user
-    /// wants to be woken.
-    func testContinuousStillPlansThePhoneAlarmOnSchedule() throws {
-        let calendar = try utcCalendar()
-        let planner = SchedulePlanner(
-            calculator: ScheduleCalculator(calendar: calendar),
-            calendar: calendar
-        )
-        let now = try XCTUnwrap(
-            calendar.date(from: DateComponents(year: 2026, month: 8, day: 20, hour: 12))
-        )
-        var schedule = makeSchedule()
-        schedule.cadence = .continuous
-
-        let events = planner.nextEvents(after: now, for: schedule)
-        let alarm = try XCTUnwrap(events.first { $0.kind == .phoneAlarm })
-
-        XCTAssertEqual(calendar.dateComponents([.hour], from: alarm.date).hour, 7)
-    }
-
-    /// A day selection gates the alarm, not the chain.
+    /// A day selection gates the fixed schedule, not the continuous chain.
     func testContinuousIsValidWithoutSelectedWeekdays() throws {
         var schedule = makeSchedule()
         schedule.selectedWeekdays = []
@@ -268,11 +258,7 @@ final class SchedulePlannerTests: XCTestCase {
         XCTAssertTrue(schedule.isValid)
     }
 
-    /// The whole point of chaining, and the thing a single shared "soonest
-    /// window" got wrong: a session fired into a window that is still open does
-    /// not reopen it, so a provider chained off someone else's reset silently
-    /// loses its place.
-    func testEachProviderChainsOffItsOwnWindow() throws {
+    func testContinuousCadenceChainsClaudeAndSkipsCodex() throws {
         let calendar = try utcCalendar()
         let planner = SchedulePlanner(
             calculator: ScheduleCalculator(calendar: calendar),
@@ -283,22 +269,24 @@ final class SchedulePlannerTests: XCTestCase {
         )
         var schedule = makeSchedule()
         schedule.cadence = .continuous
-        schedule.alarmOnIPhone = false
 
         let claudeReset = now.addingTimeInterval(60 * 60)
-        let codexReset = now.addingTimeInterval(4 * 60 * 60)
         let events = planner.nextEvents(
             after: now,
             for: schedule,
             windows: [
                 openWindow(resetsAt: claudeReset, observedAt: now),
-                openWindow(resetsAt: codexReset, observedAt: now, provider: .codex),
+                openWindow(
+                    resetsAt: now.addingTimeInterval(4 * 60 * 60),
+                    observedAt: now,
+                    provider: .codex
+                ),
             ]
         )
 
         let buffer = ChainedSessionPlanner.resetBuffer
         XCTAssertEqual(firstStart(for: .claude, in: events), claudeReset.addingTimeInterval(buffer))
-        XCTAssertEqual(firstStart(for: .codex, in: events), codexReset.addingTimeInterval(buffer))
+        XCTAssertNil(firstStart(for: .codex, in: events))
     }
 
     /// The same drift under the schedule cadence, where the clamp used to be
@@ -312,8 +300,7 @@ final class SchedulePlannerTests: XCTestCase {
         let now = try XCTUnwrap(
             calendar.date(from: DateComponents(year: 2026, month: 8, day: 20, hour: 5))
         )
-        var schedule = makeSchedule()
-        schedule.alarmOnIPhone = false
+        let schedule = makeSchedule()
 
         // Claude's window is still open past the planned start, so its session
         // waits. Codex has nothing open, so its session keeps the planned time.
@@ -364,23 +351,6 @@ final class SchedulePlannerTests: XCTestCase {
         XCTAssertTrue(planner.nextEvents(after: .now, for: schedule).isEmpty)
     }
 
-    func testKeepsTodaysAlarmAfterInitialSessionTimePasses() throws {
-        let calendar = try utcCalendar()
-        let planner = SchedulePlanner(
-            calculator: ScheduleCalculator(calendar: calendar),
-            calendar: calendar
-        )
-        let now = try XCTUnwrap(
-            calendar.date(from: DateComponents(year: 2026, month: 8, day: 20, hour: 6, minute: 55))
-        )
-
-        let events = planner.nextEvents(after: now, for: makeSchedule())
-
-        XCTAssertEqual(events.count, 1)
-        XCTAssertEqual(events[0].kind, .phoneAlarm)
-        XCTAssertEqual(calendar.component(.hour, from: events[0].date), 7)
-    }
-
     func testRelaunchDuringRefreshChainKeepsRemainingRefreshes() throws {
         let calendar = try utcCalendar()
         let planner = SchedulePlanner(
@@ -392,7 +362,6 @@ final class SchedulePlannerTests: XCTestCase {
         )
         var schedule = makeSchedule()
         schedule.includeCodex = false
-        schedule.alarmOnIPhone = false
         schedule.repeatEveryFiveHours = true
 
         let events = planner.nextEvents(after: now, for: schedule)
@@ -412,7 +381,6 @@ final class SchedulePlannerTests: XCTestCase {
         )
         var schedule = makeSchedule()
         schedule.includeCodex = false
-        schedule.alarmOnIPhone = false
         schedule.repeatEveryFiveHours = true
         schedule.skippedWakeDate = try XCTUnwrap(
             calendar.date(from: DateComponents(year: 2026, month: 8, day: 20, hour: 7))
@@ -435,7 +403,6 @@ final class SchedulePlannerTests: XCTestCase {
             minute: 0,
             selectedWeekdays: Weekday.workweek,
             sessionLeadMinutes: 10,
-            alarmOnIPhone: true,
             repeatEveryFiveHours: false,
             repeatUntilHour: 19,
             includeClaude: true,
@@ -467,7 +434,6 @@ final class SchedulePlannerTests: XCTestCase {
         )
         var schedule = makeSchedule()
         schedule.cadence = .continuous
-        schedule.alarmOnIPhone = false
 
         let events = planner.nextEvents(
             after: now,
@@ -491,9 +457,7 @@ final class SchedulePlannerTests: XCTestCase {
         XCTAssertTrue(providers.contains(.claude))
     }
 
-    /// A provider Wakebar has heard nothing from is a different case: the five
-    /// hour assumption is the only plan available, so it still gets one.
-    func testContinuousStillAssumesFiveHoursForAProviderThatReportedNothing() throws {
+    func testContinuousDoesNotAssumeAFiveHourCodexWindow() throws {
         let calendar = try utcCalendar()
         let planner = SchedulePlanner(
             calculator: ScheduleCalculator(calendar: calendar),
@@ -505,11 +469,10 @@ final class SchedulePlannerTests: XCTestCase {
         var schedule = makeSchedule()
         schedule.cadence = .continuous
         schedule.includeClaude = false
-        schedule.alarmOnIPhone = false
 
         let events = planner.nextEvents(after: now, for: schedule, windows: [])
 
-        XCTAssertFalse(events.isEmpty)
+        XCTAssertTrue(events.isEmpty)
     }
 
     /// A session sent to a provider that was never set up does nothing, so the
@@ -542,26 +505,4 @@ final class SchedulePlannerTests: XCTestCase {
         XCTAssertTrue(providers.contains(.claude))
     }
 
-    /// The alarm is Wakebar's own to fire and owes nothing to a provider, so an
-    /// unconfigured pair silences the sessions and not the wake.
-    func testTheAlarmStillPlansWhenNoProviderIsSetUp() throws {
-        let calendar = try utcCalendar()
-        let planner = SchedulePlanner(
-            calculator: ScheduleCalculator(calendar: calendar),
-            calendar: calendar
-        )
-        let now = try XCTUnwrap(
-            calendar.date(from: DateComponents(year: 2026, month: 8, day: 20, hour: 9))
-        )
-        let schedule = makeSchedule()
-
-        let events = planner.nextEvents(
-            after: now,
-            for: schedule,
-            windows: [],
-            readyProviders: []
-        )
-
-        XCTAssertEqual(events.map(\.kind), [.phoneAlarm])
-    }
 }

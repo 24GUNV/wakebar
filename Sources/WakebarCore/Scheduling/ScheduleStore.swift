@@ -8,7 +8,9 @@ public actor ScheduleStore {
     }
 
     public func load() throws -> WakeSchedule? {
-        guard FileManager.default.fileExists(atPath: fileURL.path()) else {
+        guard FileManager.default.fileExists(
+            atPath: fileURL.path(percentEncoded: false)
+        ) else {
             return nil
         }
 

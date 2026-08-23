@@ -10,58 +10,64 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  apple-platforms:
+  macos:
     runs-on: macos-26
-    timeout-minutes: 20
+    timeout-minutes: 25
+    env:
+      CLANG_MODULE_CACHE_PATH: ${{ runner.temp }}/wakebar-clang-module-cache
+      SWIFTPM_MODULECACHE_OVERRIDE: ${{ runner.temp }}/wakebar-clang-module-cache
+      WAKEBAR_SCRATCH_PATH: ${{ runner.temp }}/wakebar-swift-scratch
+      WAKEBAR_SPM_CACHE_PATH: ${{ runner.temp }}/wakebar-swiftpm-cache
+      WAKEBAR_DERIVED_DATA_PATH: ${{ runner.temp }}/wakebar-derived-data
 
     steps:
       - name: Check out repository
         uses: actions/checkout@v5
 
+      - name: Require Xcode 26
+        run: |
+          xcodebuild -version
+          xcodebuild -version | grep -q '^Xcode 26\.'
+
       - name: Install XcodeGen
         run: brew install xcodegen
+
+      - name: Restore SwiftPM download cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.WAKEBAR_SPM_CACHE_PATH }}
+          key: swiftpm-${{ runner.os }}-xcode26-${{ hashFiles('Package.swift', 'Package.resolved') }}
+          restore-keys: |
+            swiftpm-${{ runner.os }}-xcode26-
+
+      - name: Prepare clean compiler paths
+        run: |
+          mkdir -p "$CLANG_MODULE_CACHE_PATH"
+          mkdir -p "$WAKEBAR_SCRATCH_PATH"
+          mkdir -p "$WAKEBAR_SPM_CACHE_PATH"
+          mkdir -p "$WAKEBAR_DERIVED_DATA_PATH"
 
       - name: Generate Xcode project
         run: xcodegen generate
 
-      - name: Test shared core and macOS app
+      - name: Parse Swift sources
+        run: find Sources Tests -name '*.swift' -print0 | xargs -0 -n 1 swiftc -frontend -parse
+
+      - name: Test core and app targets
         run: >-
-          xcodebuild
-          -project Wakebar.xcodeproj
-          -scheme Wakebar
-          -configuration Debug
-          -destination 'platform=macOS'
-          CODE_SIGNING_ALLOWED=NO
-          test
+          swift test
+          --disable-sandbox
+          --cache-path "$WAKEBAR_SPM_CACHE_PATH"
+          --scratch-path "$WAKEBAR_SCRATCH_PATH"
 
-      - name: Test iPhone companion
-        run: |
-          wakebar_simulator_id="$(python3 Scripts/select_ios_simulator.py)"
-          test -n "$wakebar_simulator_id"
-          xcodebuild \
-            -project Wakebar.xcodeproj \
-            -scheme WakebarPhone \
-            -configuration Debug \
-            -destination "platform=iOS Simulator,id=$wakebar_simulator_id" \
-            CODE_SIGNING_ALLOWED=NO \
-            test
-
-      - name: Build macOS Release configuration
+      - name: Build unsigned Release app
         run: >-
           xcodebuild
           -project Wakebar.xcodeproj
           -scheme Wakebar
           -configuration Release
           -destination 'generic/platform=macOS'
-          CODE_SIGNING_ALLOWED=NO
-          build
-
-      - name: Build iPhone Release configuration
-        run: >-
-          xcodebuild
-          -project Wakebar.xcodeproj
-          -scheme WakebarPhone
-          -configuration Release
-          -destination 'generic/platform=iOS Simulator'
+          -derivedDataPath "$WAKEBAR_DERIVED_DATA_PATH"
+          CLANG_MODULE_CACHE_PATH="$CLANG_MODULE_CACHE_PATH"
           CODE_SIGNING_ALLOWED=NO
           build

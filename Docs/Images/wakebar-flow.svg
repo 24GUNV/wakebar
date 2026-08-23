@@ -1,89 +1,48 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="680" height="1040" viewBox="0 0 680 1040" role="img" aria-labelledby="title description">
-  <title id="title">Wakebar setup and execution flow</title>
-  <desc id="description">Wakebar has two independent paths. Wakebar asks Claude Code to create or update schedule-specific Routines for user review, while ChatGPT task setup remains manual. Wakebar also publishes an alarm schedule through iCloud for the iPhone to apply and confirm.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="540" viewBox="0 0 880 540" role="img" aria-labelledby="title description">
+  <title id="title">Wakebar provider flow</title>
+  <desc id="description">A local Wakebar schedule produces automatic Claude Routine synchronization and manual ChatGPT task instructions. Provider usage data supplies the measured Codex verdict.</desc>
   <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0l10 5-10 5z" fill="#8B93A7"/>
+    </marker>
     <style>
-      .text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #1d1d1f; }
-      .secondary { fill: #6e6e73; }
-      .line { fill: none; stroke: #c7c7cc; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
-      .label { font-size: 17px; font-weight: 700; letter-spacing: 1.2px; fill: #6e6e73; }
-      .accent { fill: #5757d9; }
+      .primary { fill: #172033; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .secondary { fill: #697386; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .eyebrow { fill: #5A5CD3; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 13px; font-weight: 750; letter-spacing: 1.2px; }
+      .card { fill: #FFFFFF; stroke: #E1E5ED; stroke-width: 1.5; }
+      .link { fill: none; stroke: #8B93A7; stroke-width: 2; marker-end: url(#arrow); }
     </style>
   </defs>
+  <rect width="880" height="540" rx="34" fill="#F3F5F9"/>
+  <text x="54" y="58" class="primary" font-size="28" font-weight="720">One local schedule, two provider paths</text>
+  <text x="54" y="88" class="secondary" font-size="17">Wakebar automates configuration where supported and measures uncertain behavior.</text>
 
-  <rect width="680" height="1040" rx="28" fill="#fafafa" stroke="#e4e4e7"/>
-  <g class="text">
-    <rect x="70" y="40" width="540" height="112" rx="18" fill="#ffffff" stroke="#d8d8dc"/>
-    <rect x="98" y="68" width="52" height="52" rx="13" class="accent"/>
-    <circle cx="124" cy="94" r="15" fill="none" stroke="#fff" stroke-width="2.7"/>
-    <path d="M124 94v-10M124 94l-7 8" fill="none" stroke="#fff" stroke-width="2.7" stroke-linecap="round"/>
-    <text x="176" y="91" font-size="26" font-weight="650">Wake schedule</text>
-    <text x="176" y="124" font-size="19" class="secondary">Wake time · weekdays · providers</text>
+  <rect x="54" y="136" width="228" height="268" rx="22" class="card"/>
+  <rect x="76" y="158" width="52" height="52" rx="15" fill="#5A5CD3"/>
+  <path d="M91 184h22M102 173v22" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+  <text x="76" y="246" class="eyebrow">WAKEBAR</text>
+  <text x="76" y="280" class="primary" font-size="22" font-weight="680">Local schedule</text>
+  <text x="76" y="314" class="secondary" font-size="16">Morning time</text>
+  <text x="76" y="341" class="secondary" font-size="16">Selected weekdays</text>
+  <text x="76" y="368" class="secondary" font-size="16">Five-hour cadence</text>
 
-    <path d="M340 152v44M333 185l7 11 7-11" class="line"/>
-    <rect x="70" y="196" width="540" height="136" rx="20" fill="#ffffff" stroke="#d8d8dc"/>
-    <text x="102" y="243" font-size="27" font-weight="650">Wakebar on Mac</text>
-    <text x="102" y="279" font-size="19" class="secondary">Builds Claude setup and the alarm schedule.</text>
-    <text x="102" y="309" font-size="19" class="secondary">Reports provider and iPhone confirmation separately.</text>
+  <path d="M282 220H342" class="link"/>
+  <path d="M282 326H342" class="link"/>
 
-    <text x="340" y="374" class="label" text-anchor="middle">TWO INDEPENDENT PATHS</text>
-    <path d="M340 332v62M340 394H180v28M340 394h160v28" class="line"/>
-    <path d="M173 411l7 11 7-11M493 411l7 11 7-11" class="line"/>
+  <rect x="346" y="128" width="480" height="176" rx="22" class="card"/>
+  <rect x="368" y="150" width="112" height="28" rx="14" fill="#F0EEFF"/>
+  <text x="424" y="169" class="eyebrow" text-anchor="middle">AUTOMATIC</text>
+  <text x="368" y="214" class="primary" font-size="22" font-weight="680">Claude Code Routines</text>
+  <text x="368" y="244" class="secondary" font-size="16">List, compare, and write only changes.</text>
+  <text x="368" y="272" class="secondary" font-size="16">Re-sync at launch, every 24 hours, and after token changes.</text>
+  <circle cx="790" cy="215" r="15" fill="#DDF7E8"/>
+  <path d="M783 215l5 5 10-12" fill="none" stroke="#208A55" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
 
-    <text x="180" y="455" class="label" text-anchor="middle">PROVIDER SETUP</text>
-    <rect x="35" y="473" width="290" height="392" rx="20" fill="#ffffff" stroke="#d8d8dc"/>
-    <circle cx="75" cy="521" r="18" fill="#5757d9" opacity="0.12"/>
-    <text x="75" y="528" font-size="19" font-weight="700" class="accent" text-anchor="middle">1</text>
-    <text x="108" y="516" font-size="20" font-weight="650">Start setup</text>
-    <text x="108" y="544" font-size="17" class="secondary">Wakebar checks Claude Code</text>
-    <text x="108" y="568" font-size="17" class="secondary">and subscription sign-in.</text>
-
-    <line x1="67" y1="592" x2="293" y2="592" stroke="#e4e4e7"/>
-    <circle cx="75" cy="636" r="18" fill="#5757d9" opacity="0.12"/>
-    <text x="75" y="643" font-size="19" font-weight="700" class="accent" text-anchor="middle">2</text>
-    <text x="108" y="631" font-size="20" font-weight="650">Ask Claude to update</text>
-    <text x="108" y="659" font-size="17" class="secondary">Claude proposes changes to</text>
-    <text x="108" y="683" font-size="17" class="secondary">only Wakebar-owned tasks.</text>
-
-    <line x1="67" y1="707" x2="293" y2="707" stroke="#e4e4e7"/>
-    <circle cx="75" cy="751" r="18" fill="#5757d9" opacity="0.12"/>
-    <text x="75" y="758" font-size="19" font-weight="700" class="accent" text-anchor="middle">3</text>
-    <text x="108" y="746" font-size="20" font-weight="650">Review once</text>
-    <text x="108" y="774" font-size="17" class="secondary">Verify Claude’s proposal and links.</text>
-    <text x="108" y="798" font-size="17" class="secondary">ChatGPT setup stays manual.</text>
-
-    <rect x="47" y="817" width="266" height="30" rx="15" fill="#5757d9" opacity="0.1"/>
-    <text x="180" y="838" font-size="15" font-weight="650" class="accent" text-anchor="middle">Provider hosted · Mac can be off</text>
-
-    <text x="500" y="455" class="label" text-anchor="middle">IPHONE ALARM</text>
-    <rect x="355" y="473" width="290" height="392" rx="20" fill="#ffffff" stroke="#d8d8dc"/>
-    <circle cx="395" cy="521" r="18" fill="#5757d9" opacity="0.12"/>
-    <text x="395" y="528" font-size="19" font-weight="700" class="accent" text-anchor="middle">1</text>
-    <text x="428" y="516" font-size="20" font-weight="650">Publish to iCloud</text>
-    <text x="428" y="544" font-size="17" class="secondary">Wakebar publishes a</text>
-    <text x="428" y="568" font-size="17" class="secondary">versioned alarm schedule.</text>
-
-    <line x1="387" y1="592" x2="613" y2="592" stroke="#e4e4e7"/>
-    <circle cx="395" cy="636" r="18" fill="#5757d9" opacity="0.12"/>
-    <text x="395" y="643" font-size="19" font-weight="700" class="accent" text-anchor="middle">2</text>
-    <text x="428" y="631" font-size="20" font-weight="650">Apply on iPhone</text>
-    <text x="428" y="659" font-size="17" class="secondary">The companion receives</text>
-    <text x="428" y="683" font-size="17" class="secondary">and applies the revision.</text>
-
-    <line x1="387" y1="707" x2="613" y2="707" stroke="#e4e4e7"/>
-    <circle cx="395" cy="751" r="18" fill="#5757d9" opacity="0.12"/>
-    <text x="395" y="758" font-size="19" font-weight="700" class="accent" text-anchor="middle">3</text>
-    <text x="428" y="746" font-size="20" font-weight="650">Confirm AlarmKit</text>
-    <text x="428" y="774" font-size="17" class="secondary">The iPhone acknowledges</text>
-    <text x="428" y="798" font-size="17" class="secondary">only after it applies the alarm.</text>
-
-    <rect x="367" y="817" width="266" height="30" rx="15" fill="#5757d9" opacity="0.1"/>
-    <text x="500" y="838" font-size="15" font-weight="650" class="accent" text-anchor="middle">Confirmed · Mac can be off</text>
-
-    <rect x="70" y="903" width="540" height="96" rx="18" fill="#ffffff" stroke="#d8d8dc"/>
-    <circle cx="105" cy="951" r="17" fill="#ff9f0a" opacity="0.15"/>
-    <path d="M105 941v13M105 961v1" stroke="#b45309" stroke-width="2.4" stroke-linecap="round"/>
-    <text x="137" y="942" font-size="20" font-weight="650">Result boundary</text>
-    <text x="137" y="972" font-size="18" class="secondary">A sent prompt does not prove that a usage window reset.</text>
-  </g>
+  <rect x="346" y="326" width="480" height="166" rx="22" class="card"/>
+  <rect x="368" y="348" width="92" height="28" rx="14" fill="#FFF2E1"/>
+  <text x="414" y="367" fill="#A05A13" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="13" font-weight="750" letter-spacing="1.1" text-anchor="middle">MANUAL</text>
+  <text x="368" y="412" class="primary" font-size="22" font-weight="680">ChatGPT scheduled task</text>
+  <text x="368" y="442" class="secondary" font-size="16">Copy exact names, local schedules, and prompt.</text>
+  <text x="368" y="470" class="secondary" font-size="16">Provider usage data supplies the stored Codex verdict.</text>
+  <path d="M760 398a24 24 0 1 0 0 48 24 24 0 1 0 0-48zm0 10v15l10 6" fill="none" stroke="#5A5CD3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

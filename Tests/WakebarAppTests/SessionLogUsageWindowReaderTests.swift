@@ -1,5 +1,9 @@
 import XCTest
+#if SWIFT_PACKAGE
+@testable import WakebarApp
+#else
 @testable import Wakebar
+#endif
 
 final class SessionLogUsageWindowReaderTests: XCTestCase {
     /// The scan reads the field out of the raw bytes rather than decoding the

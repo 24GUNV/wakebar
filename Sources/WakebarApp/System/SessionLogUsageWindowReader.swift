@@ -62,7 +62,7 @@ actor SessionLogUsageWindowReader: UsageWindowReading {
             guard let contents = try? String(contentsOf: url, encoding: .utf8) else { continue }
             let open = rateLimitReader
                 .allWindows(fromSessionLog: contents, observedAt: now)
-                .filter { $0.isOpen(at: now) }
+                .filter { !$0.isSessionWindow && $0.isOpen(at: now) }
             if !open.isEmpty { return open }
         }
         return []

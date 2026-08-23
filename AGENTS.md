@@ -2,7 +2,7 @@
 
 ## Scope
 
-Wakebar is a native macOS menu-bar app. It schedules minimal prompts for Claude Code and Codex, and it coordinates an optional iPhone alarm.
+Wakebar is a native macOS menu-bar app. It coordinates provider-hosted schedules that start and refresh Claude Code and Codex usage windows.
 
 ## Structure
 

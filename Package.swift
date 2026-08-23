@@ -20,6 +20,10 @@ let package = Package(
             dependencies: ["WakebarCore"],
             path: "Verification"
         ),
-        .testTarget(name: "WakebarTests", dependencies: ["WakebarCore"])
+        .testTarget(name: "WakebarTests", dependencies: ["WakebarCore"]),
+        .testTarget(
+            name: "WakebarAppTests",
+            dependencies: ["WakebarApp", "WakebarCore"]
+        )
     ]
 )

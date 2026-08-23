@@ -1,7 +1,7 @@
 import Foundation
 import WakebarCore
 
-actor CodexUsageAPIClient: Sendable {
+actor CodexUsageAPIClient: ProviderUsageReading {
     private let credentialResolver: UsageWindowCredentialResolver
     private let session: URLSession
     private let decoder = CodexUsageWindowDecoder()

@@ -9,18 +9,17 @@ import WakebarCore
 /// as "Wakebar cannot see this", which is a different and wrong claim.
 struct UsageWindowRow: Identifiable, Equatable {
     let provider: ProviderID
-    /// False for a plan-level cap, which resets days out rather than hours.
-    let isSessionWindow: Bool
+    let limitKind: UsageLimitKind
     let resetsAt: Date
     let usedFraction: Double?
     /// Reconstructed rather than reported, so the time is shown as approximate.
     let isEstimate: Bool
 
-    var id: String { "\(provider.rawValue)-\(isSessionWindow)-\(resetsAt.timeIntervalSinceReferenceDate)" }
+    var id: String { "\(provider.rawValue)-\(limitKind.rawValue)-\(resetsAt.timeIntervalSinceReferenceDate)" }
 
     init(_ window: UsageWindow) {
         provider = window.provider
-        isSessionWindow = window.isSessionWindow
+        limitKind = window.limitKind
         resetsAt = window.resetsAt
         usedFraction = window.usedFraction
         isEstimate = window.confidence == .inferred
@@ -29,6 +28,15 @@ struct UsageWindowRow: Identifiable, Equatable {
     /// Says which limit this is, because "Codex resets" beside a date six days
     /// out would otherwise read as a broken session window.
     var label: String {
-        isSessionWindow ? "\(provider.displayName) resets" : "\(provider.displayName) weekly"
+        switch limitKind {
+        case .session:
+            "\(provider.displayName) resets"
+        case .weekly:
+            "\(provider.displayName) weekly"
+        case .weeklyFable:
+            "\(provider.displayName) Fable weekly"
+        }
     }
+
+    var isSessionWindow: Bool { limitKind == .session }
 }

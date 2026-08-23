@@ -62,7 +62,9 @@ public actor ExecutionLedger {
             return records
         }
 
-        guard FileManager.default.fileExists(atPath: fileURL.path()) else {
+        guard FileManager.default.fileExists(
+            atPath: fileURL.path(percentEncoded: false)
+        ) else {
             records = [:]
             return [:]
         }

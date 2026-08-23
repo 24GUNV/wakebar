@@ -102,7 +102,6 @@ final class ScheduleCalculatorTests: XCTestCase {
             minute: 0,
             selectedWeekdays: Weekday.workweek,
             sessionLeadMinutes: 10,
-            alarmOnIPhone: true,
             repeatEveryFiveHours: false,
             repeatUntilHour: 19,
             includeClaude: true,

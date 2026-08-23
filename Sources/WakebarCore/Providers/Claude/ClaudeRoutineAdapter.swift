@@ -3,6 +3,7 @@ import Foundation
 public struct ClaudeRoutineAdapter<CredentialStore, Transport>: ProviderAdapter
 where CredentialStore: ClaudeRoutineCredentialStore, Transport: ClaudeRoutineTransport {
     public let id = ProviderID.claude
+    private static var maximumPromptLength: Int { 65_536 }
 
     private let configuration: ClaudeRoutineAPIConfiguration
     private let credentialStore: CredentialStore
@@ -109,7 +110,7 @@ where CredentialStore: ClaudeRoutineCredentialStore, Transport: ClaudeRoutineTra
     }
 
     private static func validate(prompt: String) throws {
-        guard prompt.count <= ClaudeRoutineProvisioner.maximumPromptLength else {
+        guard prompt.count <= maximumPromptLength else {
             throw ClaudeRoutineError.promptTooLong
         }
     }

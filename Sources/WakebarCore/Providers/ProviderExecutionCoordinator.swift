@@ -9,8 +9,10 @@ public actor ProviderExecutionCoordinator {
         event: ScheduledEvent,
         using adapter: any ProviderAdapter
     ) async throws -> ExecutionAttemptResult {
-        guard case let .providerSession(provider, _) = event.kind else {
-            throw ProviderExecutionCoordinatorError.alarmEventCannotUseProviderAdapter
+        let provider: ProviderID
+        switch event.kind {
+        case let .providerSession(value, _):
+            provider = value
         }
         guard provider == adapter.id else {
             throw ProviderExecutionCoordinatorError.providerMismatch
