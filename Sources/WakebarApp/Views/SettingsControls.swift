@@ -1,6 +1,27 @@
 import SwiftUI
 import WakebarCore
 
+/// The System Settings tile: a white glyph on a small tinted rounded
+/// rectangle. It marks a row that stands for a whole service, the way System
+/// Settings marks each pane — ordinary rows stay bare so the tiles keep
+/// meaning something.
+struct SettingsIconTile: View {
+    let symbol: String
+    let tint: Color
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: WakebarDesign.settingsTileRadius, style: .continuous)
+            .fill(tint.gradient)
+            .frame(width: WakebarDesign.settingsTileSize, height: WakebarDesign.settingsTileSize)
+            .overlay {
+                Image(systemName: symbol)
+                    .font(WakebarDesign.settingsTileGlyph)
+                    .foregroundStyle(.white)
+            }
+            .accessibilityHidden(true)
+    }
+}
+
 /// A row's value in the settings window, told the way the popover tells it: the
 /// state word on its own, and a glyph only on the row that needs the user.
 ///

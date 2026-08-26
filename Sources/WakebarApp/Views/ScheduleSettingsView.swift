@@ -14,8 +14,6 @@ struct ScheduleSettingsView: View {
     @State private var draft: WakeSchedule
     @State private var wakeTime: Date
     @State private var providerSetupRequest: ProviderSetupRequest?
-    @State private var pendingCleanupProviders: [ProviderID] = []
-    @State private var acknowledgedCleanupProvider: ProviderID?
     @State private var isAdvancedExpanded = false
 
     init(model: AppModel) {
@@ -30,7 +28,6 @@ struct ScheduleSettingsView: View {
             Form {
                 scheduleSection
                 servicesSection
-                alarmSection
                 advancedSection
             }
             .formStyle(.grouped)
@@ -41,15 +38,10 @@ struct ScheduleSettingsView: View {
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 bottomBar
             }
-            .sheet(item: $providerSetupRequest, onDismiss: handleProviderSheetDismissal) { request in
+            .sheet(item: $providerSetupRequest) { request in
                 ProviderSetupSectionView(
                     model: model,
-                    provider: request.provider,
-                    purpose: request.purpose,
-                    onCleanupConfirmed: {
-                        acknowledgedCleanupProvider = request.provider
-                        providerSetupRequest = nil
-                    }
+                    provider: request.provider
                 )
             }
             .onAppear {
@@ -138,7 +130,11 @@ struct ScheduleSettingsView: View {
         } header: {
             Text("Services")
         } footer: {
+            // Explicit footnote styling: System Settings' footer voice, stated
+            // rather than inherited, so a form-style change cannot promote it.
             Text("Sessions run in the provider’s cloud, so this Mac can stay off.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
         }
         .id(SettingsDestination.providers)
     }
@@ -146,7 +142,9 @@ struct ScheduleSettingsView: View {
     private func serviceRow(provider: ProviderID, isOn: Binding<Bool>) -> some View {
         ProviderSettingsRow(
             title: provider.displayName,
-            badge: model.providerIsExperimental(provider) ? "Experimental" : nil,
+            tileSymbol: provider.settingsTileSymbol,
+            tileTint: provider.settingsTileTint,
+            badge: nil,
             status: model.providerMenuStatus(for: provider),
             statusKind: model.providerMenuStatusKind(for: provider),
             actionTitle: model.isProviderReady(provider) ? "Manage…" : "Set Up…",
@@ -155,7 +153,7 @@ struct ScheduleSettingsView: View {
                 ? "Finish this service’s one-time setup with the provider."
                 : "Save the schedule before running setup.",
             action: {
-                providerSetupRequest = ProviderSetupRequest(provider: provider, purpose: .setup)
+                providerSetupRequest = ProviderSetupRequest(provider: provider)
             },
             isOn: isOn
         )
@@ -167,78 +165,20 @@ struct ScheduleSettingsView: View {
         model.schedule.isEnabled && draft.hasSameHostedSetup(as: model.schedule, for: provider)
     }
 
-    // MARK: - iPhone alarm
-
-    private var alarmSection: some View {
-        Section("iPhone Alarm") {
-            Toggle("Ring on iPhone", isOn: $draft.alarmOnIPhone)
-                .disabled(!draft.followsSystemTimeZone && !draft.alarmOnIPhone)
-                .help(alarmHelpText)
-
-            if draft.alarmOnIPhone {
-                LabeledContent("Delivery") {
-                    HStack(spacing: WakebarDesign.compactSpacing) {
-                        WindowStatusValue(
-                            text: model.phoneAlarmMenuStatus,
-                            kind: model.phoneAlarmServiceStatusKind
-                        )
-
-                        alarmActionButton
-                    }
-                }
-
-                if case let .failed(message) = model.phoneAlarmPublishState {
-                    Text(message)
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-            }
-        }
-        .id(SettingsDestination.alarm)
-    }
-
-    @ViewBuilder
-    private var alarmActionButton: some View {
-        switch model.phoneAlarmPublishState {
-        case .published:
-            Button("Check iPhone") {
-                Task {
-                    await model.refreshPhoneAcknowledgement()
-                }
-            }
-        case .failed:
-            Button("Retry") {
-                Task {
-                    await model.retryPhoneSchedule()
-                }
-            }
-        case .draft, .publishing, .confirmed:
-            EmptyView()
-        }
-    }
-
-    private var alarmHelpText: String {
-        if !draft.followsSystemTimeZone {
-            return "iPhone alarms need Follow system time zone."
-        }
-        return "Your iPhone confirms the alarm once it receives the iCloud schedule."
-    }
-
     // MARK: - Advanced
 
     private var advancedSection: some View {
         Section(isExpanded: $isAdvancedExpanded) {
-            Picker("Sessions", selection: $draft.cadence) {
+            Picker("Claude sessions", selection: $draft.cadence) {
                 Text("Before each wake").tag(SessionCadence.schedule)
                 Text("Every time the window resets").tag(SessionCadence.continuous)
             }
-            .help("Wakebar reads the reset time from Claude Code and Codex. With none to read it assumes five hours.")
+            .help("Wakebar reads Claude's reset time. With none to read, it assumes five hours. Codex runs only at the named time.")
 
             // The cutoff and the fallback slots only mean anything to a cadence
             // that is pinned to a day. Chained sessions have no day to end.
             if draft.cadence == .schedule {
-                Toggle("Keep going through the day", isOn: $draft.repeatEveryFiveHours)
+                Toggle("Keep Claude going through the day", isOn: $draft.repeatEveryFiveHours)
 
                 if draft.repeatEveryFiveHours {
                     Picker("Last session by", selection: $draft.repeatUntilHour) {
@@ -247,8 +187,8 @@ struct ScheduleSettingsView: View {
                         }
                     }
 
-                    LabeledContent("Fallback starts", value: plannedSessionStarts)
-                        .help("When neither CLI reports a window, sessions run at these times instead.")
+                    LabeledContent("Claude fallback starts", value: plannedSessionStarts)
+                        .help("When Claude does not report a window, its sessions run at these times instead.")
                 }
             }
 
@@ -356,54 +296,15 @@ struct ScheduleSettingsView: View {
 
     private func saveDraft() {
         applyWakeTime(wakeTime)
-        pendingCleanupProviders = draft.providersRemoved(from: model.schedule)
-        if let provider = pendingCleanupProviders.first {
-            providerSetupRequest = ProviderSetupRequest(provider: provider, purpose: .cleanup)
-            return
-        }
-
-        saveDraftAfterCleanup()
+        saveDraftToModel()
     }
 
-    private func saveDraftAfterCleanup() {
+    private func saveDraftToModel() {
         let providerToSetUp = pendingSetupProvider
         model.saveSchedule(draft)
         apply(model.schedule)
         if let providerToSetUp {
-            providerSetupRequest = ProviderSetupRequest(
-                provider: providerToSetUp,
-                purpose: .setup
-            )
-        }
-    }
-
-    private func handleProviderSheetDismissal() {
-        guard let provider = acknowledgedCleanupProvider else {
-            for pendingProvider in pendingCleanupProviders {
-                restoreProviderSelection(pendingProvider)
-            }
-            pendingCleanupProviders = []
-            return
-        }
-        acknowledgedCleanupProvider = nil
-        pendingCleanupProviders.removeAll { $0 == provider }
-
-        if let nextProvider = pendingCleanupProviders.first {
-            providerSetupRequest = ProviderSetupRequest(
-                provider: nextProvider,
-                purpose: .cleanup
-            )
-        } else {
-            saveDraftAfterCleanup()
-        }
-    }
-
-    private func restoreProviderSelection(_ provider: ProviderID) {
-        switch provider {
-        case .claude:
-            draft.includeClaude = true
-        case .codex:
-            draft.includeCodex = true
+            providerSetupRequest = ProviderSetupRequest(provider: providerToSetUp)
         }
     }
 
@@ -468,5 +369,24 @@ struct ScheduleSettingsView: View {
             from: DateComponents(year: 2001, month: 1, day: 1, hour: hour)
         )
         return date?.formatted(date: .omitted, time: .shortened) ?? "\(hour):00"
+    }
+}
+
+private extension ProviderID {
+    /// Each service's tile, fixed per service so the row is recognisable before
+    /// its name is read: Claude in its coral, Codex as code on the grey System
+    /// Settings reserves for tools.
+    var settingsTileSymbol: String {
+        switch self {
+        case .claude: "sparkle"
+        case .codex: "chevron.left.forwardslash.chevron.right"
+        }
+    }
+
+    var settingsTileTint: Color {
+        switch self {
+        case .claude: Color(red: 0.85, green: 0.47, blue: 0.34)
+        case .codex: .gray
+        }
     }
 }

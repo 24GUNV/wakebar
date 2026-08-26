@@ -71,6 +71,12 @@ enum WakebarDesign {
     /// The warning glyph beside a settings row value, optically matched to the
     /// window's 13pt control text the way `statusGlyph` is to the popover's 11pt.
     static let windowStatusGlyph = Font.system(size: 12, weight: .semibold)
+
+    /// The service tile beside a settings row, at the size System Settings puts
+    /// beside its own 13pt labels, with the glyph weighted to read white-on-tint.
+    static let settingsTileSize: CGFloat = 24
+    static let settingsTileRadius: CGFloat = 6
+    static let settingsTileGlyph = Font.system(size: 12, weight: .semibold)
 }
 
 extension View {

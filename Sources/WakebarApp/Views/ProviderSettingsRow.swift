@@ -2,13 +2,16 @@ import SwiftUI
 import WakebarCore
 
 /// One service in the settings window, in the popover's grammar: what it is on
-/// the left, what state it is in on the right, and the switch that turns it on
-/// at the trailing edge where macOS keeps its switches.
+/// the left — led by its System Settings-style tile — what state it is in on
+/// the right, and the switch that turns it on at the trailing edge where macOS
+/// keeps its switches.
 ///
 /// The status and the button only appear once the service is on. An off service
 /// has no state worth reporting, and a row of greyed-out controls is noise.
 struct ProviderSettingsRow: View {
     let title: String
+    let tileSymbol: String
+    let tileTint: Color
     var badge: String?
     let status: String
     let statusKind: ServiceStatusKind
@@ -20,6 +23,8 @@ struct ProviderSettingsRow: View {
 
     var body: some View {
         HStack(spacing: WakebarDesign.compactSpacing) {
+            SettingsIconTile(symbol: tileSymbol, tint: tileTint)
+
             Text(title)
 
             if let badge {
