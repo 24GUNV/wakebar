@@ -8,7 +8,6 @@ final class AppModel {
     var schedule: WakeSchedule {
         didSet {
             guard isLoaded, schedule != oldValue else { return }
-            let wasActive = oldValue.isEnabled
             if schedule.isEnabled && !schedule.isValid {
                 schedule.isEnabled = false
                 activityNotice = .error("Choose at least one day and provider before saving.")
@@ -44,21 +43,20 @@ final class AppModel {
                 }
             )
             saveProviderDeliveryStates()
-            let shouldPublishPhoneUpdate = schedule.isEnabled || wasActive
-            phoneAlarmPublishState = shouldPublishPhoneUpdate ? .publishing : .draft
-            phoneAcknowledgementTask?.cancel()
             scheduleSaveTask?.cancel()
+            claudeRoutineSyncTask?.cancel()
             let scheduleToSave = schedule
 
             scheduleSaveTask = Task {
                 try? await Task.sleep(for: .milliseconds(250))
                 guard !Task.isCancelled else { return }
                 await persist(scheduleToSave)
-                if shouldPublishPhoneUpdate {
-                    await publishPhoneSchedule(scheduleToSave)
-                } else {
-                    phoneAlarmPublishState = .draft
-                }
+            }
+
+            claudeRoutineSyncTask = Task {
+                try? await Task.sleep(for: .milliseconds(500))
+                guard !Task.isCancelled else { return }
+                await syncClaudeRoutines(for: scheduleToSave, showsNotice: true)
             }
         }
     }
@@ -69,54 +67,65 @@ final class AppModel {
     var isLoading = false
     var desiredRevision: UUID
     var providerDeliveryStates: [ProviderID: ProviderDeliveryState]
-    var phoneAlarmPublishState: PhoneAlarmPublishState
-    var lastConfirmedPhoneAlarm: PhoneAlarmAcknowledgement?
     var launchAtLoginState: LaunchAtLoginState
     var settingsDestination: SettingsDestination
     var settingsNavigationRequestID: UUID
+    var onboardingFlow: OnboardingFlow
+    /// A schedule file on disk is the only durable record that setup has been
+    /// attempted, so no separate onboarding flag is stored.
+    var hasSavedSchedule: Bool
+    /// Guards the automatic presentation so reopening the popover cannot raise
+    /// the window twice in one launch.
+    var hasPresentedOnboarding: Bool
     /// What the CLIs currently report about their own usage windows. Empty
     /// until the first read, and empty forever on a machine where neither CLI
     /// has run — which is why nothing here may be required for a plan.
     var usageWindows: [UsageWindow]
     /// Why a provider has no live session window, when the API can say.
     var usageWindowIssues: [ProviderID: UsageWindowProviderIssue]
+    var providerStartNowStates: [ProviderID: ProviderStartNowState]
     let claudeSetup: ClaudeSetupModel
+    let codexSetup: CodexSetupModel
 
     @ObservationIgnored private let scheduleStore: ScheduleStore
     @ObservationIgnored private let scheduleCalculator: ScheduleCalculator
     @ObservationIgnored private let schedulePlanner: SchedulePlanner
     @ObservationIgnored private let providerAdapters: [ProviderID: any ProviderAdapter]
     @ObservationIgnored private let providerDeliveryStore: ProviderDeliveryStore
-    @ObservationIgnored private let phoneSchedulePublisher: MacPhoneSchedulePublisher
     @ObservationIgnored private let launchAtLoginService: LaunchAtLoginService
     @ObservationIgnored private let usageWindowReader: any UsageWindowReading
+    @ObservationIgnored private let startNowCoordinator: ProviderStartNowCoordinator
     @ObservationIgnored private let sessionChain = ChainedSessionPlanner()
     @ObservationIgnored private var scheduleSaveTask: Task<Void, Never>?
-    @ObservationIgnored private var phoneAcknowledgementTask: Task<Void, Never>?
+    @ObservationIgnored private var claudeRoutineSyncTask: Task<Void, Never>?
+    @ObservationIgnored private var claudeMaintenanceTask: Task<Void, Never>?
+    @ObservationIgnored private var providerStartNowTasks: [ProviderID: Task<Void, Never>] = [:]
 
     init(
         scheduleStore: ScheduleStore = ScheduleStore(),
         scheduleCalculator: ScheduleCalculator = ScheduleCalculator(),
         schedulePlanner: SchedulePlanner? = nil,
-        phoneSchedulePublisher: MacPhoneSchedulePublisher = MacPhoneSchedulePublisher(),
         providerDeliveryStore: ProviderDeliveryStore = ProviderDeliveryStore(),
         launchAtLoginService: LaunchAtLoginService? = nil,
         claudeSetup: ClaudeSetupModel? = nil,
+        codexSetup: CodexSetupModel? = nil,
         providerAdapters: [ProviderID: any ProviderAdapter]? = nil,
-        usageWindowReader: (any UsageWindowReading)? = nil
+        usageWindowReader: (any UsageWindowReading)? = nil,
+        startNowCoordinator: ProviderStartNowCoordinator = ProviderStartNowCoordinator()
     ) {
         let resolvedLaunchAtLoginService = launchAtLoginService ?? LaunchAtLoginService()
         self.scheduleStore = scheduleStore
         self.scheduleCalculator = scheduleCalculator
         self.schedulePlanner = schedulePlanner ?? SchedulePlanner(calculator: scheduleCalculator)
-        self.phoneSchedulePublisher = phoneSchedulePublisher
         self.providerDeliveryStore = providerDeliveryStore
         self.launchAtLoginService = resolvedLaunchAtLoginService
         self.usageWindowReader = usageWindowReader ?? LiveUsageWindowReader()
+        self.startNowCoordinator = startNowCoordinator
         self.claudeSetup = claudeSetup ?? ClaudeSetupModel()
+        self.codexSetup = codexSetup ?? CodexSetupModel()
         self.providerAdapters = providerAdapters ?? [
             .claude: DryRunProviderAdapter(id: .claude) as any ProviderAdapter,
-            .codex: CodexPreviewProviderAdapter() as any ProviderAdapter,
+            .codex: DryRunProviderAdapter(id: .codex) as any ProviderAdapter,
         ]
         let initialSchedule = WakeSchedule.default
         schedule = initialSchedule
@@ -128,13 +137,17 @@ final class AppModel {
                 (provider, .draft(provider: provider, revision: initialRevision))
             }
         )
-        phoneAlarmPublishState = .draft
-        lastConfirmedPhoneAlarm = nil
         usageWindows = []
         usageWindowIssues = [:]
+        providerStartNowStates = Dictionary(
+            uniqueKeysWithValues: ProviderID.allCases.map { ($0, .idle) }
+        )
         launchAtLoginState = resolvedLaunchAtLoginService.state
         settingsDestination = .schedule
         settingsNavigationRequestID = UUID()
+        onboardingFlow = OnboardingFlow(providers: initialSchedule.providerIDs)
+        hasSavedSchedule = false
+        hasPresentedOnboarding = false
     }
 
     var nextWake: Date? {
@@ -167,10 +180,10 @@ final class AppModel {
         schedule.isValid
     }
 
-    /// Wakebar can stop its own alarm, but a Routine or task already created in
-    /// a provider's cloud keeps running until the user removes it there.
+    /// Codex tasks remain external. Claude Routines are disabled directly when
+    /// the schedule is switched off.
     var hasHostedSessions: Bool {
-        schedule.providerIDs.contains { schedule.backend(for: $0) == .providerCloud }
+        schedule.includeCodex && schedule.codexRoute.executionBackend == .providerCloud
     }
 
     var weekdaySummary: String {
@@ -226,7 +239,7 @@ final class AppModel {
 
     /// The open window the next session is waiting on, if any.
     var governingUsageWindow: UsageWindow? {
-        sessionChain.governingWindow(windows: usageWindows, now: .now)
+        sessionChain.governingWindow(windows: usageWindows, now: .now, provider: .claude)
     }
 
     /// Every window worth reporting, session windows first and the soonest reset
@@ -234,7 +247,7 @@ final class AppModel {
     /// them in the schedule's own time zone.
     var usageWindowRows: [UsageWindowRow] {
         usageWindows
-            .filter { $0.isOpen(at: .now) }
+            .filter { $0.isOpen(at: .now) && ($0.provider != .codex || !$0.isSessionWindow) }
             .sorted { lhs, rhs in
                 if lhs.isSessionWindow != rhs.isSessionWindow {
                     return lhs.isSessionWindow
@@ -267,6 +280,21 @@ final class AppModel {
     /// credentials are missing reports a problem they do not have.
     var visibleUsageWindowIssues: [ProviderID: UsageWindowProviderIssue] {
         usageWindowIssues.filter { schedule.providerIDs.contains($0.key) }
+    }
+
+    func usageSummary(at now: Date) -> UsageSummaryViewModel {
+        let events = schedulePlanner.nextEvents(
+            after: now,
+            for: schedule,
+            windows: usageWindows
+        )
+        return UsageSummaryViewModel(
+            enabledProviders: schedule.providerIDs,
+            events: events,
+            windows: usageWindows,
+            issues: visibleUsageWindowIssues,
+            now: now
+        )
     }
 
     /// Which clock the sessions run on. The quick switch in the popover writes
@@ -320,10 +348,6 @@ final class AppModel {
         }?.date
     }
 
-    var nextPlannedPhoneAlarm: Date? {
-        plannedEvents.first { $0.kind == .phoneAlarm }?.date
-    }
-
     var refreshSessionDates: [Date] {
         let sessionDates = plannedEvents.compactMap { event -> Date? in
             if case .providerSession(_, .refresh(index: _)) = event.kind {
@@ -359,53 +383,32 @@ final class AppModel {
         isProviderReady(provider) ? .ready : .actionRequired
     }
 
-    /// Codex scheduling is unverified end to end, so its row carries a badge
-    /// rather than a status word of its own.
-    func providerIsExperimental(_ provider: ProviderID) -> Bool {
-        provider == .codex
-    }
-
-    /// What the iPhone alarm is doing while the schedule is switched off. Said
-    /// as a state word so it fits the same row grammar as everything else,
-    /// rather than as a paragraph of apology.
-    var stoppedPhoneStatus: String {
-        switch phoneAlarmPublishState {
-        case .draft, .confirmed:
-            "Off"
-        case .publishing:
-            "Turning off"
-        case .published:
-            "Waiting for iPhone"
-        case .failed:
-            "May still ring"
+    var isCodexTaskConfirmed: Bool {
+        get { isProviderReady(.codex) }
+        set {
+            guard schedule.includeCodex else { return }
+            if newValue {
+                providerDeliveryStates[.codex] = ProviderDeliveryState(
+                    provider: .codex,
+                    desiredRevision: desiredRevision,
+                    appliedRevision: desiredRevision,
+                    phase: .confirmed,
+                    lastConfirmedAt: .now,
+                    detail: "Task creation confirmed by the user. A task is not a sent prompt."
+                )
+            } else {
+                providerDeliveryStates[.codex] = .draft(
+                    provider: .codex,
+                    revision: desiredRevision
+                )
+            }
+            saveProviderDeliveryStates()
         }
     }
 
-    var stoppedPhoneStatusKind: ServiceStatusKind {
-        switch phoneAlarmPublishState {
-        case .draft, .confirmed:
-            .ready
-        case .publishing, .published:
-            .inProgress
-        case .failed:
-            .actionRequired
-        }
-    }
-
-    var phoneAlarmReadiness: ScheduleEventReadiness {
-        if case .confirmed = phoneAlarmPublishState {
-            .ready
-        } else {
-            .setupRequired
-        }
-    }
-
-    var phoneAlarmMenuStatus: String {
-        scheduleMenuPresentation.phoneStatusText
-    }
-
-    var phoneAlarmServiceStatusKind: ServiceStatusKind {
-        scheduleMenuPresentation.phoneStatusKind
+    var codexTaskConfirmedAt: Date? {
+        guard isCodexTaskConfirmed else { return nil }
+        return providerDeliveryStates[.codex]?.lastConfirmedAt
     }
 
     var isScheduleReady: Bool {
@@ -414,6 +417,13 @@ final class AppModel {
 
     var scheduleMenuState: ScheduleMenuState {
         scheduleMenuPresentation.state
+    }
+
+    var menuBarIconState: MenuBarIconState {
+        MenuBarIconState.resolve(
+            isScheduleEnabled: schedule.isEnabled,
+            menuState: scheduleMenuState
+        )
     }
 
     var relevantSettingsDestination: SettingsDestination {
@@ -433,25 +443,8 @@ final class AppModel {
         ScheduleMenuPresentation.resolve(
             isEnabled: schedule.isEnabled,
             hasSchedule: schedule.isValid,
-            providersReady: providerReadiness == .ready,
-            alarmEnabled: schedule.alarmOnIPhone,
-            phonePhase: phoneAlarmMenuPhase
+            providersReady: providerReadiness == .ready
         )
-    }
-
-    private var phoneAlarmMenuPhase: PhoneAlarmMenuPhase {
-        switch phoneAlarmPublishState {
-        case .draft:
-            .draft
-        case .publishing:
-            .publishing
-        case .published:
-            .published
-        case .confirmed:
-            .confirmed
-        case .failed:
-            .failed
-        }
     }
 
     func load() async {
@@ -459,16 +452,16 @@ final class AppModel {
         isLoading = true
         defer { isLoading = false }
 
-        var shouldPublishDisabledSchedule = false
         do {
-            var loadedSchedule = try await scheduleStore.load() ?? .default
+            let storedSchedule = try await scheduleStore.load()
+            hasSavedSchedule = storedSchedule != nil
+            var loadedSchedule = storedSchedule ?? .default
             loadedSchedule.skippedWakeDate = nil
             loadedSchedule.claudeBackend = .providerCloud
             loadedSchedule.codexBackend = .providerCloud
             loadedSchedule.codexRoute = .chatGPTWebTask
             if loadedSchedule.isEnabled && !loadedSchedule.isValid {
                 loadedSchedule.isEnabled = false
-                shouldPublishDisabledSchedule = true
             }
             schedule = loadedSchedule
         } catch {
@@ -494,23 +487,8 @@ final class AppModel {
         // on macOS each uncached Claude read can raise a credential prompt — so
         // reading at launch charges the user a password for a panel they have
         // not opened. The popover takes its own reading when it appears.
-        Task {
-            await claudeSetup.refresh()
-        }
-        if let acknowledgement = try? await phoneSchedulePublisher.acknowledgement(
-            for: schedule.id
-        ) {
-            lastConfirmedPhoneAlarm = acknowledgement
-            if !schedule.isEnabled {
-                shouldPublishDisabledSchedule = true
-            }
-        }
-        if shouldPublishDisabledSchedule {
-            await persist(schedule)
-        }
-        if schedule.isEnabled || shouldPublishDisabledSchedule {
-            await publishPhoneSchedule(schedule)
-        }
+        await syncClaudeRoutines(for: schedule, showsNotice: false)
+        startClaudeMaintenance()
     }
 
     func saveSchedule(_ updatedSchedule: WakeSchedule) {
@@ -525,7 +503,42 @@ final class AppModel {
         scheduleToActivate.codexBackend = .providerCloud
         scheduleToActivate.codexRoute = .chatGPTWebTask
         schedule = scheduleToActivate
-        showTransientMessage("Schedule saved. Syncing the iPhone alarm.")
+        hasSavedSchedule = true
+        showTransientMessage("Schedule saved.")
+    }
+
+    var shouldPresentOnboarding: Bool {
+        OnboardingLaunchDecision.resolve(
+            hasSavedSchedule: hasSavedSchedule,
+            hasPresentedThisLaunch: hasPresentedOnboarding
+        ) == .present
+    }
+
+    /// Restarts the walkthrough from the welcome step, whether it was requested
+    /// automatically or manually.
+    func beginOnboarding() {
+        hasPresentedOnboarding = true
+        onboardingFlow = OnboardingFlow(providers: schedule.providerIDs)
+    }
+
+    /// The schedule step saves through the same path as the settings window,
+    /// then fixes which provider steps follow.
+    func completeOnboardingScheduleStep(with draft: WakeSchedule) {
+        guard draft.isValid else {
+            activityNotice = .error("Choose at least one day and provider before saving.")
+            return
+        }
+        saveSchedule(draft)
+        onboardingFlow.setProviders(schedule.providerIDs)
+        onboardingFlow.advance()
+    }
+
+    func advanceOnboarding() {
+        onboardingFlow.advance()
+    }
+
+    func retreatOnboarding() {
+        onboardingFlow.retreat()
     }
 
     /// A stale or missing usage reading only costs the chain its precision, and
@@ -581,52 +594,38 @@ final class AppModel {
         }
     }
 
-    func claudeSetupInstructions() -> String {
-        ProviderSetupPromptCompiler().claudeRoutineInstructions(for: schedule)
+    func syncClaudeRoutines() async {
+        claudeRoutineSyncTask?.cancel()
+        await syncClaudeRoutines(for: schedule, showsNotice: true)
     }
 
-    func codexSetupInstructions() -> String {
-        ProviderSetupPromptCompiler().chatGPTTaskPrompt(for: schedule)
-    }
+    func startNow(_ provider: ProviderID) {
+        providerStartNowTasks[provider]?.cancel()
+        providerStartNowStates[provider] = .requested
+        let requestedSchedule = schedule
 
-    func reportCopyResult(_ succeeded: Bool, successMessage: String) {
-        if succeeded {
-            showTransientMessage(successMessage)
-        } else {
-            activityNotice = .error("Could not copy the setup instructions.")
+        providerStartNowTasks[provider] = Task {
+            defer { providerStartNowTasks[provider] = nil }
+            do {
+                let outcome = try await startNowCoordinator.requestStart(
+                    for: provider,
+                    schedule: requestedSchedule
+                )
+                guard !Task.isCancelled else { return }
+                switch outcome {
+                case let .started(date):
+                    providerStartNowStates[provider] = .started(date)
+                    await refreshUsageWindows()
+                case .unconfirmed:
+                    providerStartNowStates[provider] = .unconfirmed
+                }
+            } catch is CancellationError {
+                return
+            } catch {
+                providerStartNowStates[provider] = .unconfirmed
+                activityNotice = .error(startNowFailureMessage(for: provider))
+            }
         }
-    }
-
-    func confirmProviderSchedule(_ provider: ProviderID) {
-        providerDeliveryStates[provider] = ProviderDeliveryState(
-            provider: provider,
-            desiredRevision: desiredRevision,
-            appliedRevision: desiredRevision,
-            phase: .confirmed,
-            lastConfirmedAt: .now,
-            detail: "Confirmed manually"
-        )
-        saveProviderDeliveryStates()
-        showTransientMessage("\(provider.displayName) marked as set up.")
-    }
-
-    func clearProviderConfirmation(_ provider: ProviderID) {
-        providerDeliveryStates[provider] = .draft(provider: provider, revision: desiredRevision)
-        saveProviderDeliveryStates()
-    }
-
-    func refreshPhoneAcknowledgement() async {
-        guard case let .published(receipt) = phoneAlarmPublishState else { return }
-        if await applyAcknowledgement(for: receipt) {
-            showTransientMessage("The iPhone alarm is confirmed.")
-        } else {
-            showTransientMessage("Still waiting for the iPhone.")
-        }
-    }
-
-    func retryPhoneSchedule() async {
-        guard schedule.isEnabled, schedule.alarmOnIPhone else { return }
-        await publishPhoneSchedule(schedule)
     }
 
     func enableLaunchAtLogin() {
@@ -649,51 +648,67 @@ final class AppModel {
         }
     }
 
-    private func publishPhoneSchedule(_ schedule: WakeSchedule) async {
-        phoneAlarmPublishState = .publishing
-        do {
-            let receipt = try await phoneSchedulePublisher.publish(schedule)
-            phoneAlarmPublishState = .published(receipt)
-            startPhoneAcknowledgementChecks(for: receipt)
-        } catch PhoneAlarmScheduleValidationError.fixedTimeZoneUnsupported {
-            phoneAlarmPublishState = .failed("Use the system time zone to sync an iPhone alarm.")
-        } catch {
-            phoneAlarmPublishState = .failed("Could not sync the iPhone alarm.")
+    private func syncClaudeRoutines(
+        for syncedSchedule: WakeSchedule,
+        showsNotice: Bool
+    ) async {
+        let result = await claudeSetup.sync(for: syncedSchedule)
+        guard schedule.revision == syncedSchedule.revision else { return }
+
+        guard let result else {
+            providerDeliveryStates[.claude] = ProviderDeliveryState(
+                provider: .claude,
+                desiredRevision: desiredRevision,
+                phase: .failed,
+                detail: claudeSetup.failureMessage
+            )
+            saveProviderDeliveryStates()
+            if showsNotice {
+                activityNotice = .error(
+                    syncedSchedule.includeClaude
+                        ? "Could not sync Claude Routines."
+                        : "Could not disable the removed Claude Routines."
+                )
+            }
+            return
+        }
+
+        if syncedSchedule.includeClaude {
+            providerDeliveryStates[.claude] = ProviderDeliveryState(
+                provider: .claude,
+                desiredRevision: desiredRevision,
+                appliedRevision: desiredRevision,
+                phase: .confirmed,
+                lastConfirmedAt: .now,
+                detail: result.summary
+            )
+        } else {
+            providerDeliveryStates[.claude] = .draft(
+                provider: .claude,
+                revision: desiredRevision
+            )
+        }
+        saveProviderDeliveryStates()
+        if showsNotice {
+            showTransientMessage("Claude Routines synced. No prompt was sent.")
         }
     }
 
-    private func startPhoneAcknowledgementChecks(for receipt: PhoneAlarmPublishReceipt) {
-        phoneAcknowledgementTask?.cancel()
-        phoneAcknowledgementTask = Task {
-            var delaySeconds = 0
+    private func startClaudeMaintenance() {
+        claudeMaintenanceTask?.cancel()
+        claudeMaintenanceTask = Task {
             while !Task.isCancelled {
-                if delaySeconds > 0 {
-                    try? await Task.sleep(for: .seconds(delaySeconds))
-                }
-                guard !Task.isCancelled else { return }
-
-                guard case let .published(currentReceipt) = phoneAlarmPublishState,
-                      currentReceipt == receipt
-                else { return }
-
-                if await applyAcknowledgement(for: receipt) {
+                do {
+                    try await Task.sleep(for: .seconds(5 * 60))
+                } catch {
                     return
                 }
-
-                delaySeconds = delaySeconds == 0 ? 5 : min(delaySeconds * 2, 300)
+                guard !Task.isCancelled else { return }
+                if await claudeSetup.shouldResync(now: .now) {
+                    await syncClaudeRoutines(for: schedule, showsNotice: false)
+                }
             }
         }
-    }
-
-    private func applyAcknowledgement(for receipt: PhoneAlarmPublishReceipt) async -> Bool {
-        guard let acknowledgement = try? await phoneSchedulePublisher.acknowledgement(
-            for: receipt.scheduleID
-        ), acknowledgement.revision == receipt.revision
-        else { return false }
-
-        phoneAlarmPublishState = .confirmed(acknowledgement)
-        lastConfirmedPhoneAlarm = acknowledgement
-        return true
     }
 
     private func saveProviderDeliveryStates() {
@@ -710,6 +725,15 @@ final class AppModel {
         } catch {
             launchAtLoginState = launchAtLoginService.state
             activityNotice = .error("Could not update launch at login.")
+        }
+    }
+
+    private func startNowFailureMessage(for provider: ProviderID) -> String {
+        switch provider {
+        case .claude:
+            "Claude did not accept the Routine request. The window was not confirmed."
+        case .codex:
+            "Wakebar could not prepare ChatGPT. The window was not confirmed."
         }
     }
 

@@ -22,19 +22,18 @@ struct WakeSummaryView: View {
 
                 if model.isScheduleActive {
                     serviceRows
-
-                    if model.showsUsageBand {
-                        insetDivider
-                        RefreshSummaryView(
-                            nextRefresh: model.refreshSessionDates.first,
-                            windows: model.usageWindowRows,
-                            providerIssues: model.visibleUsageWindowIssues,
-                            assumedCadenceHour: model.assumedCadenceHour,
-                            showsNextSession: model.sessionCadence == .schedule
-                        )
-                    }
                 } else {
                     stoppedRows
+                }
+
+                insetDivider
+
+                TimelineView(.periodic(from: .now, by: 60)) { context in
+                    UsageSummaryBandView(
+                        summary: model.usageSummary(at: context.date),
+                        startStates: model.providerStartNowStates,
+                        onStartNow: model.startNow
+                    )
                 }
             } else {
                 DraftScheduleView()
@@ -59,40 +58,22 @@ struct WakeSummaryView: View {
                     title: provider.displayName,
                     status: model.providerMenuStatus(for: provider),
                     kind: model.providerMenuStatusKind(for: provider),
-                    badge: model.providerIsExperimental(provider) ? "Experimental" : nil,
+                    badge: nil,
                     action: { showSettings(.providers) }
                 )
             }
 
-            if model.schedule.alarmOnIPhone {
-                ServiceStatusRow(
-                    title: "iPhone alarm",
-                    status: model.phoneAlarmMenuStatus,
-                    kind: model.phoneAlarmServiceStatusKind,
-                    action: { showSettings(.alarm) }
-                )
-            }
         }
     }
 
-    /// Switching Wakebar off stops its own alarm but cannot reach a Routine
-    /// already living in a provider's cloud. Saying so as two rows keeps the
-    /// caveat scannable instead of turning the popover into a paragraph.
+    /// ChatGPT tasks are user-managed, so switching Wakebar off cannot disable
+    /// them. The row keeps that external state visible.
     private var stoppedRows: some View {
         rowBand {
-            if model.schedule.alarmOnIPhone {
-                ServiceStatusRow(
-                    title: "iPhone alarm",
-                    status: model.stoppedPhoneStatus,
-                    kind: model.stoppedPhoneStatusKind,
-                    action: { showSettings(.alarm) }
-                )
-            }
-
             if model.hasHostedSessions {
                 ServiceStatusRow(
-                    title: "Cloud sessions",
-                    status: "Still running",
+                    title: "ChatGPT task",
+                    status: "Still scheduled",
                     kind: .inProgress,
                     action: { showSettings(.providers) }
                 )
@@ -111,7 +92,13 @@ struct WakeSummaryView: View {
     private var footer: some View {
         HStack(spacing: 2) {
             Button(model.primaryMenuActionTitle) {
-                showSettings(model.relevantSettingsDestination)
+                // An unsaved schedule has nothing to edit yet, so the primary
+                // action runs the guided setup instead.
+                if model.scheduleMenuState == .draft, !model.hasSchedule {
+                    showSetupGuide()
+                } else {
+                    showSettings(model.relevantSettingsDestination)
+                }
             }
 
             Spacer(minLength: WakebarDesign.compactSpacing)
@@ -120,10 +107,16 @@ struct WakeSummaryView: View {
                 Button("Settings…") { showSettings(.general) }
                     .keyboardShortcut(",", modifiers: .command)
 
+                Button("Setup Guide…", action: showSetupGuide)
+
                 Button("Preview setup", action: testSessionStart)
                     .disabled(model.isRunning)
 
                 Divider()
+
+                Link("Check for updates", destination: WakebarRelease.releasesURL)
+
+                Text("Wakebar \(WakebarRelease.currentVersion)")
 
                 Button("Quit Wakebar", action: quitWakebar)
                     .keyboardShortcut("q", modifiers: .command)
@@ -153,6 +146,12 @@ struct WakeSummaryView: View {
         model.requestSettings(destination)
         NSApplication.shared.activate()
         openWindow(id: "settings")
+    }
+
+    private func showSetupGuide() {
+        model.beginOnboarding()
+        NSApplication.shared.activate()
+        openWindow(id: "onboarding")
     }
 
     private func testSessionStart() {
