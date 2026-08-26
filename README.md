@@ -1,82 +1,66 @@
-<p align="center">
-  <img src="Resources/AppIconSource.svg" width="96" alt="Wakebar app icon">
-</p>
+# Wakebar
 
-<h1 align="center">Wakebar</h1>
+Wakebar is a native macOS menu-bar app for Claude Code and Codex users. Set a morning time and weekdays before bed. Wakebar then coordinates provider-hosted prompts and reports the limits each provider exposes.
 
-<p align="center">
-  Schedule a Claude Code wake-up and test an experimental Codex proxy before you wake up.<br>
-  After provider setup, the Mac can stay off. The optional alarm also needs iPhone confirmation.
-</p>
+Claude setup is automatic. Codex setup uses a ChatGPT scheduled task that you create from Wakebar’s exact instructions. The menu shows Claude five-hour, weekly, and Fable weekly usage. It shows Codex weekly usage without inventing a five-hour window.
 
-<p align="center">
-  <strong>Native SwiftUI</strong> · macOS 14+ · iOS 26+
-</p>
-
-<p align="center">
-  <a href="Docs/Images/wakebar-overview.svg">
-    <img src="Docs/Images/wakebar-overview.svg" width="680" alt="Wakebar menu with Claude, an experimental Codex proxy, an iPhone alarm, and session refreshes">
-  </a>
-</p>
-
-<p align="center"><sub>Example with confirmed Claude setup and the experimental Codex route enabled. Open the image for a full-size view.</sub></p>
-
-Wakebar turns one wake time into provider-hosted prompts and an optional iPhone alarm. For Claude, Wakebar opens Claude Code’s official Routine setup and asks it to update only schedule-specific Wakebar Routines. You verify Claude’s proposed names, times, and links before confirming that setup is complete. ChatGPT task creation remains a guided manual step. The default Claude Routine asks for `yes`; the experimental ChatGPT task sends `hi`. OpenAI has not documented whether this changes Codex usage limits. The iPhone companion receives the alarm schedule through iCloud and registers it with AlarmKit.
-
-> [!IMPORTANT]
-> The macOS tests, iOS Simulator tests, and unsigned Release builds pass. Signed CloudKit, push-notification, and AlarmKit behavior still needs acceptance testing on a physical iPhone.
+![Wakebar menu overview](Docs/Images/wakebar-overview.svg)
 
 ## How it works
 
-<p align="center">
-  <a href="Docs/Images/wakebar-flow.svg">
-    <img src="Docs/Images/wakebar-flow.svg" width="680" alt="Wakebar flow with Claude Code-assisted Routine setup, manual ChatGPT task setup, and a separate iCloud path for the iPhone alarm">
-  </a>
-</p>
+![Wakebar provider flow](Docs/Images/wakebar-flow.svg)
 
-Wakebar starts Claude Code’s supported `/schedule` workflow and supplies the names, prompts, times, time zone, and safety limits. Wakebar asks Claude to show a combined review before it changes the Routines. Because this workflow is conversational, you must verify Claude’s proposal and the resulting Routine links. For Codex, Wakebar still prepares a ChatGPT scheduled task for you to create and confirm.
+Wakebar compiles one local schedule into two provider-specific plans:
 
-| At the scheduled time | One-time setup | Works with the Mac off |
-| --- | --- | :---: |
-| Start Claude Code | Let Wakebar open Claude Code, verify its Routine proposal and links, and confirm setup | Yes |
-| Test the Codex wake-up proxy | Create the generated ChatGPT scheduled task and confirm its times | Task: Yes; Codex effect: Unverified |
-| Ring the wake alarm | Let the iPhone receive the schedule and confirm AlarmKit | After iPhone confirmation |
-| Refresh sessions every five hours | Ask Claude to update its Wakebar Routines and create the experimental ChatGPT task | Yes |
+- Claude: Wakebar lists existing Routines and writes only the changes required for the compiled plan.
 
-Wakebar reports each stage separately. A schedule is not a sent prompt. A sent prompt is not proof that a provider reset a usage window.
+- Codex: Wakebar supplies exact task instructions for you to use at [chatgpt.com/scheduled](https://chatgpt.com/scheduled).
 
-## Included
+- Usage: Wakebar reads Claude’s five-hour, weekly, and Fable weekly limits and Codex’s weekly limit.
 
-- A compact macOS menu-bar schedule editor and status view.
-- A native iPhone companion for AlarmKit authorization and alarm confirmation.
-- Shared schedule compilation for wake, alarm, and five-hour refresh events.
-- Versioned local persistence and duplicate-execution protection.
-- Conditional CloudKit writes, offline recovery, and phone acknowledgements.
-- Provider previews that do not send prompts, plus fixed minimal prompts for hosted tasks.
-- Claude Code version and subscription-sign-in checks with an official `/schedule` setup handoff.
-- Wakebar does not request or upload consumer subscription credentials.
+- Repeats: The optional five-hour repeat cadence applies only to Claude; Codex receives one scheduled task before each selected wake.
 
-## Verification
+Creating a scheduled task is not the same as sending a prompt. A prompt is sent only when the provider runs a scheduled fire. Wakebar does not report that a usage window started unless provider usage data confirms the change.
 
-| Check | Result |
-| --- | --- |
-| Shared XCTest suite on macOS | 78 passed |
-| Shared XCTest suite on iOS Simulator | 78 passed |
-| iPhone first-launch UI test | Passed |
-| macOS and iPhone Release builds | Passed |
-| Signed physical-iPhone acceptance | Pending |
+An August 24, 2026 live test confirmed that the ChatGPT task fired. Codex reports a weekly limit, so Wakebar does not test or display a five-hour Codex window.
 
-The latest [GitHub Actions workflow](https://github.com/24GUNV/wakebar/actions/workflows/ci.yml) uses Xcode 26.6. Simulator tests cannot certify real background CloudKit delivery or system alarm presentation.
+## Cost of a fire
 
-## Build
+Each fire starts a short cloud session on the connected subscription. It consumes subscription usage. It does not use Anthropic or OpenAI API credits.
 
-You need:
+The minimal prompts are:
 
-- macOS 14 or later;
-- Xcode 26 or later;
-- an Apple development team with access to `iCloud.com.24gunv.wakebar`.
+- Claude Code Routine: `Reply only with hi. Do not use tools, edit files, publish artifacts, or request permissions.`
 
-Generate the Xcode project and run the test suite:
+- ChatGPT scheduled task: reply only with `hi`, and keep the recurring task enabled after every run.
+
+## Requirements
+
+- macOS 14 or later
+
+- Xcode with Swift 6.2 or later
+
+- [XcodeGen](https://github.com/yonaskolb/XcodeGen)
+
+- Claude Code signed in with Claude.ai
+
+- Codex signed in with ChatGPT
+
+- ChatGPT scheduled tasks available for the account
+
+Wakebar is a direct-download, notarized, non-sandboxed app. The non-sandboxed build can read the existing local command-line credentials that the providers own.
+
+## Install
+
+1. Download the latest notarized `.dmg` from [GitHub Releases](https://github.com/24GUNV/wakebar/releases).
+
+2. Open the disk image and drag Wakebar to Applications.
+
+3. Open Wakebar from Applications.
+
+Gatekeeper verifies the Developer ID signature and notarization ticket. Do not bypass Gatekeeper. If verification fails, delete the download and get a new copy from GitHub Releases.
+
+## Build from source
 
 ```sh
 brew install xcodegen
@@ -84,48 +68,103 @@ xcodegen generate
 xcodebuild \
   -project Wakebar.xcodeproj \
   -scheme Wakebar \
+  -configuration Debug \
   -destination 'platform=macOS' \
   CODE_SIGNING_ALLOWED=NO \
-  test
+  build
 ```
 
-Build and open the signed debug app:
+For a signed local development build, create the local signing identity once,
+then build and run:
 
 ```sh
-WAKEBAR_DEVELOPMENT_TEAM=YOUR_TEAM_ID ./Scripts/compile_and_run.sh
+Scripts/setup_dev_signing.sh   # once; creates the "Wakebar Dev Signing" identity
+Scripts/compile_and_run.sh
 ```
 
-Create a signed macOS archive:
+Debug builds sign with that fixed identity so the macOS Keychain
+"Always Allow" grant for the Claude Code credential survives rebuilds. An
+ad-hoc or unsigned build changes identity on every rebuild and macOS asks
+again each time. To sign with an Apple team identity instead, set
+`WAKEBAR_DEVELOPMENT_TEAM`.
+
+## Set up Wakebar
+
+1. Open Wakebar from the menu bar.
+
+2. Set the morning time and weekdays.
+
+3. Select Claude Code, Codex, or both.
+
+4. Save the schedule.
+
+5. Open Claude setup and synchronize the Routines.
+
+6. Open Codex setup and select **Copy instructions**.
+
+7. Open [chatgpt.com/scheduled](https://chatgpt.com/scheduled) and create each listed task.
+
+8. Return to Wakebar and select **I created the task**.
+
+## Usage and Start now
+
+Open the menu to refresh usage immediately. Wakebar refreshes it every 60 seconds while the menu stays open. Closing the menu stops this refresh loop.
+
+Claude shows five-hour, weekly, and Fable weekly usage. Codex shows weekly usage. If authentication is missing, the row shows the command that restores sign-in.
+
+Select **Start now** for an immediate request:
+
+- Claude runs the managed Morning Routine and synchronizes it first if necessary.
+
+- Codex copies `hi` and opens [chatgpt.com](https://chatgpt.com) for the user to send the prompt.
+
+For Claude, Wakebar reads usage every 30 seconds for up to five minutes. **Window started** appears only after Claude confirms a new five-hour window. Codex has no equivalent five-hour check.
+
+## Claude schedule maintenance
+
+Claude cron expressions use Coordinated Universal Time (UTC). Wakebar synchronizes Routines at launch, once every 24 hours, and when the resolved Claude access token changes. This process corrects daylight-saving-time drift.
+
+Anthropic does not document the Claude Code Routines API. Wakebar isolates this integration in `ClaudeRoutinesClient`. If the provider changes the API, the rest of the scheduling and persistence code remains independent.
+
+## Security
+
+Wakebar reads only these existing credentials:
+
+- the Claude Code OAuth credential from macOS Keychain;
+
+- Codex authentication from `~/.codex`.
+
+Wakebar sends the Claude credential only to `api.anthropic.com`. It sends the Codex credential only to `chatgpt.com`. Wakebar does not upload credentials or usage data anywhere else. It does not store provider secrets in the repository or in Wakebar preferences.
+
+## Verification
+
+Run the local checks:
 
 ```sh
-WAKEBAR_DEVELOPMENT_TEAM=YOUR_TEAM_ID ./Scripts/package_app.sh release
+xcodegen generate
+find Sources Tests -name '*.swift' -print0 | xargs -0 -n 1 swiftc -frontend -parse
+DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
+  CLANG_MODULE_CACHE_PATH=/tmp/wakebar-clang-cache \
+  SWIFTPM_MODULECACHE_OVERRIDE=/tmp/wakebar-clang-cache \
+  swift test --disable-sandbox --scratch-path /tmp/wakebar-swift-test
+xcodebuild \
+  -project Wakebar.xcodeproj \
+  -scheme Wakebar \
+  -configuration Release \
+  -destination 'generic/platform=macOS' \
+  CODE_SIGNING_ALLOWED=NO \
+  build
 ```
 
-Before distribution, complete the [physical-device release checklist](Docs/RELEASE_CHECKLIST.md).
-
-## Project map
+## Repository structure
 
 ```text
-Sources/WakebarCore   Scheduling, providers, persistence, and alarm coordination
-Sources/WakebarApp    macOS menu-bar app
-Sources/WakebarPhone  iPhone companion
-Tests/WakebarTests    Shared deterministic tests
-UITests               iPhone launch coverage
-Docs                  Integration boundaries and release checks
+Sources/WakebarCore      Scheduling, provider plans, persistence, and usage models
+Sources/WakebarApp       macOS app, provider clients, shared state, and SwiftUI views
+Tests/WakebarTests       Deterministic core tests
+Tests/WakebarAppTests    Deterministic client, reconciliation, and UI-layout tests
+Scripts                  Local build and packaging scripts
+Docs                     Integration and release notes
 ```
 
-## Design and safety decisions
-
-- Confirmed provider tasks run on provider-hosted infrastructure, so the Mac can be off.
-- Consumer subscription credentials stay with their provider.
-- The **Preview** control does not send a provider prompt.
-- Wakebar records occurrence identifiers before execution to suppress duplicates.
-- Before Wakebar removes a service, you confirm that you paused or deleted its hosted task.
-- The UI distinguishes scheduled, sent, accepted, and confirmed states.
-- Wakebar does not claim that a minimal prompt resets a five-hour or weekly limit.
-
-Read the [integration notes](Docs/INTEGRATIONS.md) and [iPhone reliability model](Docs/IPHONE_COMPANION.md) for the exact capability boundaries.
-
-## Acknowledgements
-
-The menu-bar structure takes inspiration from the MIT-licensed [CodexBar](https://github.com/steipete/CodexBar). See [REFERENCES.md](REFERENCES.md) for attribution details.
+See [integration details](Docs/INTEGRATIONS.md) and the [release checklist](Docs/RELEASE_CHECKLIST.md).
