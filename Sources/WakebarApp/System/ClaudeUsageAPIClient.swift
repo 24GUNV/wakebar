@@ -1,21 +1,24 @@
 import Foundation
 import WakebarCore
 
-actor ClaudeUsageAPIClient: Sendable {
-    private let credentialResolver: UsageWindowCredentialResolver
+actor ClaudeUsageAPIClient: ProviderUsageReading {
+    private let credentialStore: ClaudeCredentialStore
+    private let credentialIntent: ClaudeCredentialIntent
     private let session: URLSession
     private let decoder = ClaudeUsageWindowDecoder()
 
     init(
-        credentialResolver: UsageWindowCredentialResolver = UsageWindowCredentialResolver(),
+        credentialStore: ClaudeCredentialStore = .shared,
+        credentialIntent: ClaudeCredentialIntent = .background,
         session: URLSession? = nil
     ) {
-        self.credentialResolver = credentialResolver
+        self.credentialStore = credentialStore
+        self.credentialIntent = credentialIntent
         self.session = session ?? Self.makeSession()
     }
 
     func currentWindows(now: Date) async throws -> [UsageWindow] {
-        let accessToken = try credentialResolver.claudeAccessToken()
+        let accessToken = try await credentialStore.credential(credentialIntent).accessToken
         guard let url = URL(string: "https://api.anthropic.com/api/oauth/usage") else {
             throw UsageWindowAPIError.invalidResponse
         }
@@ -42,7 +45,9 @@ actor ClaudeUsageAPIClient: Sendable {
         // whose token merely expired to go looking for a missing scope.
         guard (200..<300).contains(httpResponse.statusCode) else {
             switch httpResponse.statusCode {
-            case 401: throw UsageWindowAPIError.unauthorized
+            case 401:
+                await credentialStore.invalidate(tokenMatching: accessToken)
+                throw UsageWindowAPIError.unauthorized
             case 403: throw UsageWindowAPIError.forbidden
             case 429: throw UsageWindowAPIError.rateLimited
             default: throw UsageWindowAPIError.network

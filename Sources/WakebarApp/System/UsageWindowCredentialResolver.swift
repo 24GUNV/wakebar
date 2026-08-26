@@ -1,4 +1,5 @@
 import Foundation
+import LocalAuthentication
 import Security
 
 /// Resolves the CLIs' existing credentials without modifying or exporting
@@ -12,6 +13,9 @@ struct UsageWindowCredentialResolver: Sendable {
     enum KeychainResult: Sendable {
         case data(Data)
         case notFound
+        /// The item exists but reading it needs the user's consent dialog,
+        /// and the caller asked for a quiet read (or the user declined).
+        case interactionRequired
         case unavailable
     }
 
@@ -19,12 +23,12 @@ struct UsageWindowCredentialResolver: Sendable {
     private let homeDirectory: URL
     /// Injected so tests can answer without querying the real Keychain. The
     /// live query prompts the user for access, which a test run must never do.
-    private let keychainLookup: @Sendable () -> KeychainResult
+    private let keychainLookup: @Sendable (_ allowUI: Bool) -> KeychainResult
 
     init(
         environment: [String: String] = ProcessInfo.processInfo.environment,
         homeDirectory: URL = FileManager.default.homeDirectoryForCurrentUser,
-        keychainLookup: (@Sendable () -> KeychainResult)? = nil
+        keychainLookup: (@Sendable (_ allowUI: Bool) -> KeychainResult)? = nil
     ) {
         self.environment = environment
         self.homeDirectory = homeDirectory
@@ -50,7 +54,7 @@ struct UsageWindowCredentialResolver: Sendable {
         return CodexCredential(accessToken: accessToken, accountID: accountID)
     }
 
-    func claudeAccessToken() throws -> String {
+    func claudeCredential(allowUI: Bool = true) throws -> ClaudeCredential {
         let path = path(
             environmentVariable: "CLAUDE_CONFIG_DIR",
             fallback: homeDirectory.appendingPathComponent(".claude")
@@ -58,24 +62,24 @@ struct UsageWindowCredentialResolver: Sendable {
 
         var fileHasOnlyMCPAuthentication = false
         if let data = try? Data(contentsOf: path),
-           let credentials = try? JSONDecoder().decode(ClaudeCredentials.self, from: data) {
+           let credentials = try? JSONDecoder().decode(ClaudeCredentialsPayload.self, from: data) {
             if let accessToken = credentials.claudeAiOauth?.accessToken,
                !accessToken.isEmpty {
-                return accessToken
+                return Self.credential(accessToken: accessToken, payload: credentials.claudeAiOauth)
             }
             fileHasOnlyMCPAuthentication = credentials.mcpOAuth != nil
         }
 
-        switch keychainLookup() {
+        switch keychainLookup(allowUI) {
         case .data(let data):
-            guard let credentials = try? JSONDecoder().decode(ClaudeCredentials.self, from: data) else {
+            guard let credentials = try? JSONDecoder().decode(ClaudeCredentialsPayload.self, from: data) else {
                 throw fileHasOnlyMCPAuthentication
                     ? UsageWindowProviderIssue.claudeOAuthCredentialMissing
                     : UsageWindowProviderIssue.missingCredentials
             }
             if let accessToken = credentials.claudeAiOauth?.accessToken,
                !accessToken.isEmpty {
-                return accessToken
+                return Self.credential(accessToken: accessToken, payload: credentials.claudeAiOauth)
             }
             if credentials.mcpOAuth != nil || fileHasOnlyMCPAuthentication {
                 throw UsageWindowProviderIssue.claudeOAuthCredentialMissing
@@ -85,9 +89,15 @@ struct UsageWindowCredentialResolver: Sendable {
             throw fileHasOnlyMCPAuthentication
                 ? UsageWindowProviderIssue.claudeOAuthCredentialMissing
                 : UsageWindowProviderIssue.missingCredentials
+        case .interactionRequired:
+            throw UsageWindowProviderIssue.keychainAuthorizationRequired
         case .unavailable:
             throw UsageWindowProviderIssue.keychainUnavailable
         }
+    }
+
+    func claudeAccessToken() throws -> String {
+        try claudeCredential().accessToken
     }
 
     private func path(environmentVariable: String, fallback: URL) -> URL {
@@ -97,23 +107,47 @@ struct UsageWindowCredentialResolver: Sendable {
         return URL(fileURLWithPath: value)
     }
 
-    private static func claudeCodeKeychainCredentials() -> KeychainResult {
-        let query: [String: Any] = [
+    private static func claudeCodeKeychainCredentials(allowUI: Bool) -> KeychainResult {
+        var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: "Claude Code-credentials",
             kSecReturnData as String: true,
             kSecMatchLimit as String: kSecMatchLimitOne,
         ]
+        if !allowUI {
+            // Background reads must fail with errSecInteractionNotAllowed
+            // instead of raising the consent dialog at a random moment.
+            let context = LAContext()
+            context.interactionNotAllowed = true
+            query[kSecUseAuthenticationContext as String] = context
+        }
 
         var result: CFTypeRef?
         let status = SecItemCopyMatching(query as CFDictionary, &result)
         if status == errSecSuccess, let data = result as? Data {
             return .data(data)
         }
-        if status == errSecItemNotFound {
+        switch status {
+        case errSecItemNotFound:
             return .notFound
+        case errSecInteractionNotAllowed, errSecUserCanceled, errSecAuthFailed:
+            // A declined dialog and a suppressed one mean the same thing to
+            // callers: the item exists but the user has not let us read it.
+            return .interactionRequired
+        default:
+            return .unavailable
         }
-        return .unavailable
+    }
+
+    private static func credential(
+        accessToken: String,
+        payload: ClaudeOAuthCredentialPayload?
+    ) -> ClaudeCredential {
+        ClaudeCredential(
+            accessToken: accessToken,
+            expiresAt: payload?.expiresAt,
+            hasRefreshToken: !(payload?.refreshToken?.isEmpty ?? true)
+        )
     }
 
     private struct CodexAuth: Decodable {
@@ -141,21 +175,4 @@ struct UsageWindowCredentialResolver: Sendable {
         }
     }
 
-    private struct ClaudeCredentials: Decodable {
-        let claudeAiOauth: ClaudeOAuth?
-        let mcpOAuth: ClaudeOAuth?
-
-        enum CodingKeys: String, CodingKey {
-            case claudeAiOauth
-            case mcpOAuth
-        }
-    }
-
-    private struct ClaudeOAuth: Decodable {
-        let accessToken: String?
-
-        enum CodingKeys: String, CodingKey {
-            case accessToken
-        }
-    }
 }

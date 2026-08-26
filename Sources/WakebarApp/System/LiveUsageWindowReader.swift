@@ -67,32 +67,41 @@ actor LiveUsageWindowReader: UsageWindowReading, UsageWindowIssueReporting {
             }
         }
 
-        // A provider can answer with only a weekly cap. The logs may still hold
-        // a session window it did not mention, so they are worth one look.
-        let missingSession = ProviderID.allCases.filter { provider in
-            !windows.contains { $0.provider == provider && $0.isSessionWindow && $0.isOpen(at: now) }
+        let providersNeedingFallback = ProviderID.allCases.filter { provider in
+            switch provider {
+            case .claude:
+                !windows.contains {
+                    $0.provider == provider && $0.isSessionWindow && $0.isOpen(at: now)
+                }
+            case .codex:
+                !windows.contains { $0.provider == provider && $0.isOpen(at: now) }
+            }
         }
-        guard !missingSession.isEmpty else { return windows }
+        guard !providersNeedingFallback.isEmpty else { return windows }
 
         let fallbackWindows = await fallback.currentWindows(now: now)
-        for provider in missingSession {
+        for provider in providersNeedingFallback {
             let providerWindows = fallbackWindows.filter { $0.provider == provider }
-            // A provider that answered keeps its own reading — the API is
-            // authoritative on what it did report — and takes only the session
-            // window it was missing. One that said nothing takes the lot.
             let answered = windows.contains { $0.provider == provider }
-            let recovered = answered ? providerWindows.filter(\.isSessionWindow) : providerWindows
+            let recovered: [UsageWindow]
+            switch provider {
+            case .claude:
+                recovered = answered ? providerWindows.filter(\.isSessionWindow) : providerWindows
+            case .codex:
+                recovered = providerWindows.filter { !$0.isSessionWindow }
+            }
             windows.append(contentsOf: recovered)
 
-            if recovered.contains(where: { $0.isSessionWindow && $0.isOpen(at: now) }) {
+            let recoveredExpectedLimit = recovered.contains { window in
+                window.isOpen(at: now)
+                    && (provider == .claude ? window.isSessionWindow : !window.isSessionWindow)
+            }
+            if recoveredExpectedLimit {
                 // The logs supplied what the call could not. Whatever went wrong
                 // upstream cost the user nothing, so it is not worth a row.
                 setIssue(nil, for: provider)
             } else if !answered, recovered.isEmpty, issues[provider] == nil {
-                // Nothing from anywhere is worth explaining. A weekly cap and no
-                // session window is not: the weekly row already says so in the
-                // user's own terms, and repeating it invents a problem.
-                setIssue(.noSessionWindowReported, for: provider)
+                setIssue(provider == .claude ? .noSessionWindowReported : .invalidResponse, for: provider)
             }
         }
 
@@ -118,8 +127,8 @@ actor LiveUsageWindowReader: UsageWindowReading, UsageWindowIssueReporting {
             // Asking again in a minute is what earned the refusal. Backing off
             // costs a slightly stale reading and nothing else.
             5 * 60
-        case .missingCredentials, .claudeOAuthCredentialMissing, .keychainUnavailable,
-             .insufficientScope, .unauthorized, .noSessionWindowReported:
+        case .missingCredentials, .claudeOAuthCredentialMissing, .keychainAuthorizationRequired,
+             .keychainUnavailable, .insufficientScope, .unauthorized, .noSessionWindowReported:
             15 * 60
         }
     }
@@ -129,7 +138,7 @@ actor LiveUsageWindowReader: UsageWindowReading, UsageWindowIssueReporting {
         case .claude:
             try await claudeClient.currentWindows(now: now)
         case .codex:
-            try await codexClient.currentWindows(now: now)
+            try await codexClient.currentWindows(now: now).filter { !$0.isSessionWindow }
         }
     }
 

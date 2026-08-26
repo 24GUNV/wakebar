@@ -1,10 +1,12 @@
 import Foundation
+import WakebarCore
 
 /// A safe, user-facing reason why a provider did not contribute a live session
 /// window. Cases carry no response body or credential material.
 enum UsageWindowProviderIssue: Error, Equatable, Sendable {
     case missingCredentials
     case claudeOAuthCredentialMissing
+    case keychainAuthorizationRequired
     case keychainUnavailable
     case insufficientScope
     case unauthorized
@@ -13,18 +15,20 @@ enum UsageWindowProviderIssue: Error, Equatable, Sendable {
     case invalidResponse
     case noSessionWindowReported
 
-    var message: String {
+    func message(for provider: ProviderID) -> String {
         switch self {
-        case .missingCredentials:
-            "Credentials not found"
+        case .missingCredentials, .unauthorized:
+            provider == .claude
+                ? "Sign in again in Claude Code (run `claude`)"
+                : "Run `codex login`"
         case .claudeOAuthCredentialMissing:
-            "Claude OAuth credential unavailable"
+            "Sign in again in Claude Code (run `claude`)"
+        case .keychainAuthorizationRequired:
+            "Allow Keychain access when Wakebar next asks"
         case .keychainUnavailable:
             "Secure credential storage unavailable"
         case .insufficientScope:
-            "Token does not include usage access"
-        case .unauthorized:
-            "Credentials were rejected"
+            "Sign in again in Claude Code (run `claude`)"
         case .rateLimited:
             "Usage service is busy"
         case .network:

@@ -1,7 +1,11 @@
 import Foundation
 import WakebarCore
 import XCTest
+#if SWIFT_PACKAGE
+@testable import WakebarApp
+#else
 @testable import Wakebar
+#endif
 
 /// The reader's job is to be wrong in the least damaging direction: a provider
 /// the API cannot speak for should fall back to the logs rather than vanish
@@ -42,10 +46,7 @@ final class LiveUsageWindowReaderTests: XCTestCase {
         XCTAssertEqual(issues[.codex], .missingCredentials)
     }
 
-    /// The regression this guards: a 200 carrying only a weekly cap used to end
-    /// the read there, which is strictly worse than the log reconstruction it
-    /// replaced. The weekly the API did report is authoritative and stays.
-    func testAWeeklyOnlyResponseStillTakesItsSessionWindowFromTheLogs() async throws {
+    func testCodexKeepsOnlyTheWeeklyLimit() async throws {
         let reader = makeReader(
             responses: [
                 .codex: """
@@ -60,7 +61,7 @@ final class LiveUsageWindowReaderTests: XCTestCase {
         let issues = await reader.currentUsageWindowIssues()
 
         let codex = windows.filter { $0.provider == .codex }
-        XCTAssertEqual(codex.filter(\.isSessionWindow).count, 1, "The logs supply the session window.")
+        XCTAssertEqual(codex.filter(\.isSessionWindow).count, 0)
         XCTAssertEqual(codex.filter { !$0.isSessionWindow }.count, 1, "The reported weekly cap survives.")
         XCTAssertNil(issues[.codex])
     }
@@ -69,7 +70,7 @@ final class LiveUsageWindowReaderTests: XCTestCase {
         let reader = makeReader(
             responses: [
                 .codex: """
-                {"primary_window":{"used_percent":42.0,"reset_at":1779810921,"limit_window_seconds":18000},
+                {"primary_window":{"used_percent":42.0,"reset_at":1787806845,"limit_window_seconds":604800},
                  "secondary_window":null}
                 """,
             ],
@@ -213,7 +214,7 @@ final class LiveUsageWindowReaderTests: XCTestCase {
             homeDirectory: home,
             // Never the real Keychain: querying it prompts the user for their
             // live Claude Code token, which a test run has no business asking.
-            keychainLookup: {
+            keychainLookup: { _ in
                 keychainProbe?.record()
                 return .notFound
             }
@@ -221,7 +222,10 @@ final class LiveUsageWindowReaderTests: XCTestCase {
 
         return LiveUsageWindowReader(
             codexClient: CodexUsageAPIClient(credentialResolver: resolver, session: session),
-            claudeClient: ClaudeUsageAPIClient(credentialResolver: resolver, session: session),
+            claudeClient: ClaudeUsageAPIClient(
+                credentialStore: ClaudeCredentialStore(resolver: resolver),
+                session: session
+            ),
             fallback: fallback
         )
     }
