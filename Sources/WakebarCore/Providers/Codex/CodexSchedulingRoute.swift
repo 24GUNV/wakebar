@@ -1,7 +1,10 @@
 public enum CodexSchedulingRoute: String, CaseIterable, Codable, Hashable, Identifiable, Sendable {
+    /// Retained only so existing saved schedules decode. Do not remove.
     case chatGPTWebTask
+    /// Retained only so existing saved schedules decode. Do not remove.
     case desktopProjectTask
     case localCLI
+    /// Retained only so existing saved schedules decode. Do not remove.
     case alwaysOnRunner
 
     public var id: Self { self }
@@ -13,7 +16,7 @@ public enum CodexSchedulingRoute: String, CaseIterable, Codable, Hashable, Ident
         case .desktopProjectTask:
             "Desktop project task"
         case .localCLI:
-            "Local Codex CLI"
+            "This Mac"
         case .alwaysOnRunner:
             "Always-on runner"
         }

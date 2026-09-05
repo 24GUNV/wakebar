@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import Observation
 import WakebarCore
@@ -56,8 +57,13 @@ final class AppModel {
             claudeRoutineSyncTask = Task {
                 try? await Task.sleep(for: .milliseconds(500))
                 guard !Task.isCancelled else { return }
-                await syncClaudeRoutines(for: scheduleToSave, showsNotice: true)
+                await syncClaudeRoutines(
+                    for: scheduleToSave,
+                    showsNotice: true,
+                    credentialIntent: .userInitiated
+                )
             }
+            startCodexWake()
         }
     }
     var snapshots: [ProviderSnapshot]
@@ -85,7 +91,7 @@ final class AppModel {
     var usageWindowIssues: [ProviderID: UsageWindowProviderIssue]
     var providerStartNowStates: [ProviderID: ProviderStartNowState]
     let claudeSetup: ClaudeSetupModel
-    let codexSetup: CodexSetupModel
+    let codexWake: CodexWakeModel
 
     @ObservationIgnored private let scheduleStore: ScheduleStore
     @ObservationIgnored private let scheduleCalculator: ScheduleCalculator
@@ -96,9 +102,16 @@ final class AppModel {
     @ObservationIgnored private let usageWindowReader: any UsageWindowReading
     @ObservationIgnored private let startNowCoordinator: ProviderStartNowCoordinator
     @ObservationIgnored private let sessionChain = ChainedSessionPlanner()
+    /// Where the cloud-side "Every reset" chain should fire next. Fed by every
+    /// usage reading; a move is what earns a Routine rewrite.
+    @ObservationIgnored private var chainAnchor = ContinuousChainAnchor()
+    @ObservationIgnored private var chainSyncIsDue = false
+    @ObservationIgnored private var chainSyncInFlight = false
     @ObservationIgnored private var scheduleSaveTask: Task<Void, Never>?
     @ObservationIgnored private var claudeRoutineSyncTask: Task<Void, Never>?
     @ObservationIgnored private var claudeMaintenanceTask: Task<Void, Never>?
+    @ObservationIgnored private var codexWakeTask: Task<Void, Never>?
+    @ObservationIgnored private var codexWakeObserver: (any NSObjectProtocol)?
     @ObservationIgnored private var providerStartNowTasks: [ProviderID: Task<Void, Never>] = [:]
 
     init(
@@ -108,7 +121,7 @@ final class AppModel {
         providerDeliveryStore: ProviderDeliveryStore = ProviderDeliveryStore(),
         launchAtLoginService: LaunchAtLoginService? = nil,
         claudeSetup: ClaudeSetupModel? = nil,
-        codexSetup: CodexSetupModel? = nil,
+        codexWake: CodexWakeModel? = nil,
         providerAdapters: [ProviderID: any ProviderAdapter]? = nil,
         usageWindowReader: (any UsageWindowReading)? = nil,
         startNowCoordinator: ProviderStartNowCoordinator = ProviderStartNowCoordinator()
@@ -122,7 +135,7 @@ final class AppModel {
         self.usageWindowReader = usageWindowReader ?? LiveUsageWindowReader()
         self.startNowCoordinator = startNowCoordinator
         self.claudeSetup = claudeSetup ?? ClaudeSetupModel()
-        self.codexSetup = codexSetup ?? CodexSetupModel()
+        self.codexWake = codexWake ?? CodexWakeModel()
         self.providerAdapters = providerAdapters ?? [
             .claude: DryRunProviderAdapter(id: .claude) as any ProviderAdapter,
             .codex: DryRunProviderAdapter(id: .codex) as any ProviderAdapter,
@@ -178,12 +191,6 @@ final class AppModel {
     /// True once there is a schedule worth showing, whether or not it is running.
     var hasSchedule: Bool {
         schedule.isValid
-    }
-
-    /// Codex tasks remain external. Claude Routines are disabled directly when
-    /// the schedule is switched off.
-    var hasHostedSessions: Bool {
-        schedule.includeCodex && schedule.codexRoute.executionBackend == .providerCloud
     }
 
     var weekdaySummary: String {
@@ -383,34 +390,6 @@ final class AppModel {
         isProviderReady(provider) ? .ready : .actionRequired
     }
 
-    var isCodexTaskConfirmed: Bool {
-        get { isProviderReady(.codex) }
-        set {
-            guard schedule.includeCodex else { return }
-            if newValue {
-                providerDeliveryStates[.codex] = ProviderDeliveryState(
-                    provider: .codex,
-                    desiredRevision: desiredRevision,
-                    appliedRevision: desiredRevision,
-                    phase: .confirmed,
-                    lastConfirmedAt: .now,
-                    detail: "Task creation confirmed by the user. A task is not a sent prompt."
-                )
-            } else {
-                providerDeliveryStates[.codex] = .draft(
-                    provider: .codex,
-                    revision: desiredRevision
-                )
-            }
-            saveProviderDeliveryStates()
-        }
-    }
-
-    var codexTaskConfirmedAt: Date? {
-        guard isCodexTaskConfirmed else { return nil }
-        return providerDeliveryStates[.codex]?.lastConfirmedAt
-    }
-
     var isScheduleReady: Bool {
         scheduleMenuState == .ready
     }
@@ -458,8 +437,8 @@ final class AppModel {
             var loadedSchedule = storedSchedule ?? .default
             loadedSchedule.skippedWakeDate = nil
             loadedSchedule.claudeBackend = .providerCloud
-            loadedSchedule.codexBackend = .providerCloud
-            loadedSchedule.codexRoute = .chatGPTWebTask
+            loadedSchedule.codexBackend = .thisMac
+            loadedSchedule.codexRoute = .localCLI
             if loadedSchedule.isEnabled && !loadedSchedule.isValid {
                 loadedSchedule.isEnabled = false
             }
@@ -482,13 +461,25 @@ final class AppModel {
 
         isLoaded = true
         launchAtLoginState = launchAtLoginService.state
+        applyCodexReadiness()
         await refreshProviders()
-        // Usage is not read here. Nothing outside the popover consumes it, and
-        // on macOS each uncached Claude read can raise a credential prompt — so
-        // reading at launch charges the user a password for a panel they have
-        // not opened. The popover takes its own reading when it appears.
-        await syncClaudeRoutines(for: schedule, showsNotice: false)
+        // On a fixed schedule nothing outside the popover consumes usage, so
+        // it is not read here; the popover takes its own reading when it
+        // appears. An "Every reset" schedule is the exception.
+        // The chain Routine can only be placed once Claude has said when its
+        // window resets. Reading before the launch sync keeps that sync from
+        // deleting the chain Routine only to recreate it a moment later.
+        if chainIsLive {
+            await refreshUsageWindows()
+        }
+        await syncClaudeRoutines(
+            for: schedule,
+            showsNotice: false,
+            credentialIntent: .background
+        )
         startClaudeMaintenance()
+        startCodexWake()
+        observeSystemWake()
     }
 
     func saveSchedule(_ updatedSchedule: WakeSchedule) {
@@ -500,8 +491,8 @@ final class AppModel {
         scheduleToActivate.isEnabled = true
         scheduleToActivate.skippedWakeDate = nil
         scheduleToActivate.claudeBackend = .providerCloud
-        scheduleToActivate.codexBackend = .providerCloud
-        scheduleToActivate.codexRoute = .chatGPTWebTask
+        scheduleToActivate.codexBackend = .thisMac
+        scheduleToActivate.codexRoute = .localCLI
         schedule = scheduleToActivate
         hasSavedSchedule = true
         showTransientMessage("Schedule saved.")
@@ -551,6 +542,38 @@ final class AppModel {
         } else {
             usageWindowIssues = [:]
         }
+        providerStartNowStates = providerStartNowStates.mapValues {
+            $0.reconciled(with: usageWindows, now: now)
+        }
+        if chainAnchor.observe(windows: usageWindows, now: now) {
+            chainSyncIsDue = true
+        }
+        await syncChainIfDue()
+    }
+
+    /// True while the schedule wants a window kept open around the clock and
+    /// Claude is the provider that can be chained. Only then is a background
+    /// usage read worth a provider call.
+    private var chainIsLive: Bool {
+        schedule.isEnabled && schedule.isValid
+            && schedule.cadence == .continuous && schedule.includeClaude
+    }
+
+    private func syncChainIfDue() async {
+        guard chainSyncIsDue, !chainSyncInFlight else { return }
+        if case .syncing = claudeSetup.state { return }
+        chainSyncInFlight = true
+        defer { chainSyncInFlight = false }
+        chainSyncIsDue = false
+        let synced = await syncClaudeRoutines(
+            for: schedule,
+            showsNotice: false,
+            credentialIntent: .background
+        )
+        if !synced {
+            // Left due, the next reading or maintenance tick tries again.
+            chainSyncIsDue = true
+        }
     }
 
     func refreshProviders() async {
@@ -596,7 +619,11 @@ final class AppModel {
 
     func syncClaudeRoutines() async {
         claudeRoutineSyncTask?.cancel()
-        await syncClaudeRoutines(for: schedule, showsNotice: true)
+        await syncClaudeRoutines(
+            for: schedule,
+            showsNotice: true,
+            credentialIntent: .userInitiated
+        )
     }
 
     func startNow(_ provider: ProviderID) {
@@ -623,7 +650,7 @@ final class AppModel {
                 return
             } catch {
                 providerStartNowStates[provider] = .unconfirmed
-                activityNotice = .error(startNowFailureMessage(for: provider))
+                activityNotice = .error(startNowFailureMessage(for: provider, error: error))
             }
         }
     }
@@ -648,14 +675,25 @@ final class AppModel {
         }
     }
 
+    /// Returns true when the provider confirmed the plan.
+    @discardableResult
     private func syncClaudeRoutines(
         for syncedSchedule: WakeSchedule,
-        showsNotice: Bool
-    ) async {
-        let result = await claudeSetup.sync(for: syncedSchedule)
-        guard schedule.revision == syncedSchedule.revision else { return }
+        showsNotice: Bool,
+        credentialIntent: ClaudeCredentialIntent
+    ) async -> Bool {
+        let result = await claudeSetup.sync(
+            for: syncedSchedule,
+            credentialIntent: credentialIntent,
+            chainFiresAt: syncedSchedule.cadence == .continuous ? chainAnchor.firesAt : nil
+        )
+        guard schedule.revision == syncedSchedule.revision else { return result != nil }
 
         guard let result else {
+            // A silent maintenance failure must not erase the last provider
+            // confirmation. The next user-initiated sync can request access
+            // and publish an actionable failure if it still cannot continue.
+            guard credentialIntent == .userInitiated else { return false }
             providerDeliveryStates[.claude] = ProviderDeliveryState(
                 provider: .claude,
                 desiredRevision: desiredRevision,
@@ -667,10 +705,10 @@ final class AppModel {
                 activityNotice = .error(
                     syncedSchedule.includeClaude
                         ? "Could not sync Claude Routines."
-                        : "Could not disable the removed Claude Routines."
+                        : "Could not delete the removed Claude Routines."
                 )
             }
-            return
+            return false
         }
 
         if syncedSchedule.includeClaude {
@@ -692,6 +730,7 @@ final class AppModel {
         if showsNotice {
             showTransientMessage("Claude Routines synced. No prompt was sent.")
         }
+        return true
     }
 
     private func startClaudeMaintenance() {
@@ -704,8 +743,20 @@ final class AppModel {
                     return
                 }
                 guard !Task.isCancelled else { return }
+                // The chain follows Claude's reset, so it has to be read even
+                // while the menu stays closed. The reading rewrites the Routine
+                // when the reset moved; a failed rewrite stays due for the
+                // next tick.
+                if chainIsLive {
+                    await refreshUsageWindows()
+                }
+                guard !Task.isCancelled else { return }
                 if await claudeSetup.shouldResync(now: .now) {
-                    await syncClaudeRoutines(for: schedule, showsNotice: false)
+                    await syncClaudeRoutines(
+                        for: schedule,
+                        showsNotice: false,
+                        credentialIntent: .background
+                    )
                 }
             }
         }
@@ -728,12 +779,79 @@ final class AppModel {
         }
     }
 
-    private func startNowFailureMessage(for provider: ProviderID) -> String {
-        switch provider {
+    private func startNowFailureMessage(for provider: ProviderID, error: any Error) -> String {
+        if provider == .codex, error is UsageWindowProviderIssue {
+            return "Codex is not signed in. Run `codex login`. The window was not confirmed."
+        }
+
+        return switch provider {
         case .claude:
             "Claude did not accept the Routine request. The window was not confirmed."
         case .codex:
-            "Wakebar could not prepare ChatGPT. The window was not confirmed."
+            "Codex did not accept the request. The window was not confirmed."
+        }
+    }
+
+    // MARK: - Codex wake
+
+    /// Codex needs no hosted setup. It is ready when the CLI credential is on
+    /// this Mac, and "Needs setup" means exactly that it is not.
+    private func applyCodexReadiness() {
+        codexWake.refreshSignIn()
+        let current = providerDeliveryStates[.codex]
+        let state: ProviderDeliveryState
+        if codexWake.isSignedIn {
+            state = ProviderDeliveryState(
+                provider: .codex,
+                desiredRevision: desiredRevision,
+                appliedRevision: desiredRevision,
+                phase: .confirmed,
+                lastConfirmedAt: current?.lastConfirmedAt ?? .now,
+                detail: "Woken from this Mac while Wakebar is open."
+            )
+        } else {
+            state = ProviderDeliveryState(
+                provider: .codex,
+                desiredRevision: desiredRevision,
+                phase: .failed,
+                detail: UsageWindowProviderIssue.missingCredentials.message(for: .codex)
+            )
+        }
+        guard state != current else { return }
+        providerDeliveryStates[.codex] = state
+        saveProviderDeliveryStates()
+    }
+
+    /// Evaluates the Codex wake now and again whenever the planner says. The
+    /// sleep is capped so a Mac that was asleep through a due time catches up
+    /// within the half hour even if the wake notification never arrives.
+    private func startCodexWake() {
+        codexWakeTask?.cancel()
+        codexWakeTask = Task {
+            while !Task.isCancelled {
+                let next = await codexWake.tick(schedule: schedule)
+                guard !Task.isCancelled else { return }
+                applyCodexReadiness()
+                let delay = min(max(next?.timeIntervalSinceNow ?? 30 * 60, 5), 30 * 60)
+                do {
+                    try await Task.sleep(for: .seconds(delay))
+                } catch {
+                    return
+                }
+            }
+        }
+    }
+
+    private func observeSystemWake() {
+        guard codexWakeObserver == nil else { return }
+        codexWakeObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didWakeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in
+                self?.startCodexWake()
+            }
         }
     }
 

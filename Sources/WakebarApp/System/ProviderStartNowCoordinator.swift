@@ -16,9 +16,10 @@ struct ProviderStartNowCoordinator: Sendable {
             // Start Now is a click, so its polling may raise the Keychain
             // dialog once if consent is still missing.
             .claude: ClaudeUsageAPIClient(credentialIntent: .userInitiated),
+            .codex: CodexUsageAPIClient(),
         ],
         claudeRequester: any ClaudeStartRequesting = ClaudeRoutineStartRequester(),
-        codexRequester: any CodexStartRequesting = SystemCodexStartRequester(),
+        codexRequester: any CodexStartRequesting = CodexPingClient(),
         sleeper: any UsageWindowPollingSleeping = ContinuousClockUsageWindowPollingSleeper(),
         startDetector: UsageWindowStartDetector = UsageWindowStartDetector(),
         now: @escaping @Sendable () -> Date = { .now },
@@ -39,17 +40,17 @@ struct ProviderStartNowCoordinator: Sendable {
         for provider: ProviderID,
         schedule: WakeSchedule
     ) async throws -> ProviderStartNowOutcome {
-        if provider == .codex {
-            try await codexRequester.requestStart(prompt: provider.minimalPrompt)
-            return .unconfirmed
-        }
-
         guard let usageReader = usageReaders[provider] else {
             throw ProviderStartNowError.unavailable
         }
 
         let baseline = try? await usageReader.currentWindows(now: now())
-        try await claudeRequester.requestStart(for: schedule)
+        switch provider {
+        case .claude:
+            try await claudeRequester.requestStart(for: schedule)
+        case .codex:
+            _ = try await codexRequester.requestStart(prompt: provider.minimalPrompt)
+        }
 
         for _ in 0..<pollCount {
             try await sleeper.sleep(for: .seconds(pollInterval))
@@ -57,12 +58,12 @@ struct ProviderStartNowCoordinator: Sendable {
             guard let current = try? await usageReader.currentWindows(now: observedAt),
                   let baseline
             else { continue }
-            if startDetector.windowStarted(
+            if let confirmed = startDetector.startedWindow(
                 baseline: baseline,
                 current: current,
                 provider: provider
             ) {
-                return .started(observedAt)
+                return .started(confirmed)
             }
         }
         return .unconfirmed

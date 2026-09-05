@@ -9,7 +9,7 @@ import XCTest
 
 @MainActor
 final class ClaudeRoutineReconcilerTests: XCTestCase {
-    func testCreatesUpdatesAndDisablesOnlyPrefixedRoutines() async throws {
+    func testCreatesUpdatesAndDeletesOnlyPrefixedRoutines() async throws {
         let prefix = "Wakebar · TEST ·"
         let plan = desiredPlan(prefix: prefix)
         let transport = StubClaudeRoutinesTransport(responses: [
@@ -19,10 +19,15 @@ final class ClaudeRoutineReconcilerTests: XCTestCase {
             response("{}"),
             response("{}"),
             response("{}"),
+            response("{}"),
         ])
         let reconciler = ClaudeRoutineReconciler(client: makeClient(transport: transport))
 
-        let result = try await reconciler.reconcile(plan: plan, namePrefix: prefix)
+        let result = try await reconciler.reconcile(
+            plan: plan,
+            namePrefix: prefix,
+            credentialIntent: .userInitiated
+        )
 
         XCTAssertEqual(
             result,
@@ -30,19 +35,50 @@ final class ClaudeRoutineReconcilerTests: XCTestCase {
                 routineCount: 2,
                 createdCount: 1,
                 updatedCount: 1,
-                disabledCount: 1
+                deletedCount: 2
             )
         )
-        let mutationPaths = await transport.requests()
-            .filter { $0.httpMethod == "POST" }
-            .compactMap { $0.url?.path }
-        XCTAssertEqual(mutationPaths, [
-            "/v1/code/triggers/managed_morning",
-            "/v1/code/triggers",
-            "/v1/code/triggers/managed_extra",
+        let mutations = await transport.requests()
+            .filter { $0.httpMethod != "GET" }
+            .map { "\($0.httpMethod ?? "") \($0.url?.path ?? "")" }
+        XCTAssertEqual(mutations, [
+            "POST /v1/code/triggers/managed_morning",
+            "POST /v1/code/triggers",
+            "DELETE /v1/code/triggers/already_disabled",
+            "DELETE /v1/code/triggers/managed_extra",
         ])
-        XCTAssertFalse(mutationPaths.contains { $0.contains("foreign") })
-        XCTAssertFalse(mutationPaths.contains { $0.contains("already_disabled") })
+        XCTAssertFalse(mutations.contains { $0.contains("foreign") })
+    }
+
+    /// A schedule that was replaced left Routines under its own prefix. Owning
+    /// the whole family is what stops them firing next to the current ones.
+    func testFamilyPrefixDeletesRoutinesLeftByAnEarlierSchedule() async throws {
+        let prefix = "Wakebar · TEST ·"
+        let plan = desiredPlan(prefix: prefix)
+        let transport = StubClaudeRoutinesTransport(responses: [
+            response(profileJSON),
+            response(routineListWithEarlierSchedule(prefix: prefix)),
+            response("{}"),
+            response("{}"),
+        ])
+        let reconciler = ClaudeRoutineReconciler(client: makeClient(transport: transport))
+
+        let result = try await reconciler.reconcile(
+            plan: plan,
+            namePrefix: RoutinePlanCompiler.familyPrefix,
+            credentialIntent: .background
+        )
+
+        XCTAssertEqual(result.createdCount, 0)
+        XCTAssertEqual(result.updatedCount, 0)
+        XCTAssertEqual(result.deletedCount, 2)
+        let mutations = await transport.requests()
+            .filter { $0.httpMethod != "GET" }
+            .map { "\($0.httpMethod ?? "") \($0.url?.path ?? "")" }
+        XCTAssertEqual(mutations, [
+            "DELETE /v1/code/triggers/earlier_disabled",
+            "DELETE /v1/code/triggers/earlier_morning",
+        ])
     }
 
     func testMatchingPlanIsIdempotentAndDoesNotResolveEnvironment() async throws {
@@ -54,11 +90,15 @@ final class ClaudeRoutineReconcilerTests: XCTestCase {
         ])
         let reconciler = ClaudeRoutineReconciler(client: makeClient(transport: transport))
 
-        let result = try await reconciler.reconcile(plan: plan, namePrefix: prefix)
+        let result = try await reconciler.reconcile(
+            plan: plan,
+            namePrefix: prefix,
+            credentialIntent: .userInitiated
+        )
 
         XCTAssertEqual(result.createdCount, 0)
         XCTAssertEqual(result.updatedCount, 0)
-        XCTAssertEqual(result.disabledCount, 0)
+        XCTAssertEqual(result.deletedCount, 0)
         let requests = await transport.requests()
         XCTAssertEqual(requests.map { $0.url?.path }, [
             "/api/oauth/profile",
@@ -78,7 +118,8 @@ final class ClaudeRoutineReconcilerTests: XCTestCase {
         do {
             _ = try await reconciler.reconcile(
                 plan: desiredPlan(prefix: prefix),
-                namePrefix: prefix
+                namePrefix: prefix,
+                credentialIntent: .userInitiated
             )
             XCTFail("Expected a missing cloud environment error")
         } catch {
@@ -102,13 +143,21 @@ final class ClaudeRoutineReconcilerTests: XCTestCase {
         let reconciler = ClaudeRoutineReconciler(client: makeClient(transport: transport))
 
         do {
-            _ = try await reconciler.reconcile(plan: plan, namePrefix: prefix)
+            _ = try await reconciler.reconcile(
+                plan: plan,
+                namePrefix: prefix,
+                credentialIntent: .userInitiated
+            )
             XCTFail("Expected the second create to fail")
         } catch {
             XCTAssertEqual(error as? ClaudeRoutinesError, .requestFailed(statusCode: 500))
         }
 
-        let retry = try await reconciler.reconcile(plan: plan, namePrefix: prefix)
+        let retry = try await reconciler.reconcile(
+            plan: plan,
+            namePrefix: prefix,
+            credentialIntent: .userInitiated
+        )
 
         XCTAssertEqual(retry.createdCount, 1)
         let createdNames = await transport.requests()
@@ -180,6 +229,18 @@ final class ClaudeRoutineReconcilerTests: XCTestCase {
         {"data":[
           {"id":"morning","name":"\(prefix) Morning","cron_expression":"50 23 * * 0,1,2,3,4","enabled":true,"job_config":{"ccr":{"events":[{"data":{"message":{"content":"yes"}}}]}}},
           {"id":"refresh","name":"\(prefix) Refresh 1","cron_expression":"50 4 * * 1,2,3,4,5","enabled":true,"job_config":{"ccr":{"events":[{"data":{"message":{"content":"yes"}}}]}}}
+        ]}
+        """
+    }
+
+    private func routineListWithEarlierSchedule(prefix: String) -> String {
+        """
+        {"data":[
+          {"id":"foreign","name":"Personal routine","cron_expression":"0 9 * * 1","enabled":true,"job_config":{"ccr":{"events":[{"data":{"message":{"content":"leave me alone"}}}]}}},
+          {"id":"morning","name":"\(prefix) Morning","cron_expression":"50 23 * * 0,1,2,3,4","enabled":true,"job_config":{"ccr":{"events":[{"data":{"message":{"content":"yes"}}}]}}},
+          {"id":"refresh","name":"\(prefix) Refresh 1","cron_expression":"50 4 * * 1,2,3,4,5","enabled":true,"job_config":{"ccr":{"events":[{"data":{"message":{"content":"yes"}}}]}}},
+          {"id":"earlier_morning","name":"Wakebar · OLD1 · Morning","cron_expression":"50 23 * * 0,1,2,3,4","enabled":true,"job_config":{"ccr":{"events":[{"data":{"message":{"content":"yes"}}}]}}},
+          {"id":"earlier_disabled","name":"Wakebar · OLD2 · Morning","cron_expression":"50 23 * * 0,1,2,3,4","enabled":false,"job_config":{"ccr":{"events":[{"data":{"message":{"content":"yes"}}}]}}}
         ]}
         """
     }

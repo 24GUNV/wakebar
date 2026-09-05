@@ -43,6 +43,52 @@ struct UsageWindowStartDetectorTests {
         ))
     }
 
+    /// Codex reports an idle weekly cap as a full, unused week whose reset
+    /// keeps pace with the clock. A wake pins it. Usage still rounds to zero.
+    @Test
+    func detectsAWeeklyPlaceholderPinningIntoARealWindow() {
+        let week: TimeInterval = 7 * 24 * 60 * 60
+        let placeholder = UsageWindow(
+            provider: .codex,
+            duration: week,
+            resetsAt: now.addingTimeInterval(week),
+            usedFraction: 0,
+            observedAt: now,
+            confidence: .reported
+        )
+        let later = now.addingTimeInterval(5 * 60)
+        let stillIdle = UsageWindow(
+            provider: .codex,
+            duration: week,
+            resetsAt: later.addingTimeInterval(week),
+            usedFraction: 0,
+            observedAt: later,
+            confidence: .reported
+        )
+        let pinned = UsageWindow(
+            provider: .codex,
+            duration: week,
+            resetsAt: now.addingTimeInterval(week + 60),
+            usedFraction: 0,
+            observedAt: later,
+            confidence: .reported
+        )
+
+        #expect(detector.startedWindow(baseline: [placeholder], current: [stillIdle], provider: .codex) == nil)
+        #expect(detector.startedWindow(baseline: [placeholder], current: [pinned], provider: .codex) == pinned)
+    }
+
+    @Test
+    func unstartedIsAFullUnusedWindowWhoseResetTracksTheClock() {
+        let idle = window(provider: .codex, resetOffset: 5 * 60 * 60 - 30, usedFraction: 0)
+        let started = window(provider: .codex, resetOffset: 5 * 60 * 60 - 10 * 60, usedFraction: 0)
+        let used = window(provider: .codex, resetOffset: 5 * 60 * 60, usedFraction: 0.01)
+
+        #expect(idle.isUnstarted)
+        #expect(!started.isUnstarted)
+        #expect(!used.isUnstarted)
+    }
+
     private func window(
         provider: ProviderID,
         resetOffset: TimeInterval,

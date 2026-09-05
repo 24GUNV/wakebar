@@ -27,8 +27,13 @@ actor ClaudeRoutinesClient: ClaudeRoutinesServing {
         self.transport = transport
     }
 
-    func listRoutines() async throws -> [ClaudeRoutine] {
-        let response = try await send(path: "/v1/code/triggers", method: "GET", usesBeta: true)
+    func listRoutines(credentialIntent: ClaudeCredentialIntent) async throws -> [ClaudeRoutine] {
+        let response = try await send(
+            path: "/v1/code/triggers",
+            method: "GET",
+            usesBeta: true,
+            credentialIntent: credentialIntent
+        )
         do {
             return try decoder.decode(RoutineListResponse.self, from: response.data).data
         } catch {
@@ -36,21 +41,30 @@ actor ClaudeRoutinesClient: ClaudeRoutinesServing {
         }
     }
 
-    func routine(id: String) async throws -> ClaudeRoutine {
+    func routine(
+        id: String,
+        credentialIntent: ClaudeCredentialIntent
+    ) async throws -> ClaudeRoutine {
         let response = try await send(
             path: "/v1/code/triggers/\(id)",
             method: "GET",
-            usesBeta: true
+            usesBeta: true,
+            credentialIntent: credentialIntent
         )
         return try decodeRoutine(response.data)
     }
 
-    func createRoutine(_ spec: RoutineSpec, environmentID: String) async throws {
+    func createRoutine(
+        _ spec: RoutineSpec,
+        environmentID: String,
+        credentialIntent: ClaudeCredentialIntent
+    ) async throws {
         let payload = RoutinePayload(spec: spec, environmentID: environmentID)
         _ = try await send(
             path: "/v1/code/triggers",
             method: "POST",
             usesBeta: true,
+            credentialIntent: credentialIntent,
             body: try encoder.encode(payload)
         )
     }
@@ -58,40 +72,52 @@ actor ClaudeRoutinesClient: ClaudeRoutinesServing {
     func updateRoutine(
         id: String,
         spec: RoutineSpec,
-        environmentID: String
+        environmentID: String,
+        credentialIntent: ClaudeCredentialIntent
     ) async throws {
         let payload = RoutinePayload(spec: spec, environmentID: environmentID)
         _ = try await send(
             path: "/v1/code/triggers/\(id)",
             method: "POST",
             usesBeta: true,
+            credentialIntent: credentialIntent,
             body: try encoder.encode(payload)
         )
     }
 
-    func disableRoutine(id: String) async throws {
+    func deleteRoutine(
+        id: String,
+        credentialIntent: ClaudeCredentialIntent
+    ) async throws {
         _ = try await send(
             path: "/v1/code/triggers/\(id)",
-            method: "POST",
+            method: "DELETE",
             usesBeta: true,
-            body: try encoder.encode(EnabledPayload(enabled: false))
+            credentialIntent: credentialIntent
         )
     }
 
-    func runRoutine(id: String) async throws {
+    func runRoutine(
+        id: String,
+        credentialIntent: ClaudeCredentialIntent
+    ) async throws {
         _ = try await send(
             path: "/v1/code/triggers/\(id)/run",
             method: "POST",
             usesBeta: true,
+            credentialIntent: credentialIntent,
             body: Data("{}".utf8)
         )
     }
 
-    func environments() async throws -> [ClaudeEnvironment] {
+    func environments(
+        credentialIntent: ClaudeCredentialIntent
+    ) async throws -> [ClaudeEnvironment] {
         let response = try await send(
             path: "/v1/environment_providers",
             method: "GET",
-            usesBeta: false
+            usesBeta: false,
+            credentialIntent: credentialIntent
         )
         do {
             return try decoder.decode(EnvironmentListResponse.self, from: response.data).environments
@@ -115,9 +141,10 @@ actor ClaudeRoutinesClient: ClaudeRoutinesServing {
         path: String,
         method: String,
         usesBeta: Bool,
+        credentialIntent: ClaudeCredentialIntent,
         body: Data? = nil
     ) async throws -> ClaudeRoutinesHTTPResponse {
-        let accessToken = try await resolveAccessToken()
+        let accessToken = try await resolveAccessToken(credentialIntent: credentialIntent)
         do {
             return try await send(
                 path: path,
@@ -131,7 +158,7 @@ actor ClaudeRoutinesClient: ClaudeRoutinesServing {
             // just refused; one retry with it is legitimate. If the re-read
             // returns the same token the store refuses it, ending the loop.
             await credentialStore.invalidate(tokenMatching: accessToken)
-            let freshToken = try await resolveAccessToken()
+            let freshToken = try await resolveAccessToken(credentialIntent: credentialIntent)
             guard freshToken != accessToken else {
                 throw ClaudeRoutinesError.noAuthentication
             }
@@ -145,9 +172,11 @@ actor ClaudeRoutinesClient: ClaudeRoutinesServing {
         }
     }
 
-    private func resolveAccessToken() async throws -> String {
+    private func resolveAccessToken(
+        credentialIntent: ClaudeCredentialIntent
+    ) async throws -> String {
         do {
-            return try await credentialStore.credential(.userInitiated).accessToken
+            return try await credentialStore.credential(credentialIntent).accessToken
         } catch {
             throw ClaudeRoutinesError.noAuthentication
         }
@@ -265,10 +294,6 @@ actor ClaudeRoutinesClient: ClaudeRoutinesServing {
         struct Organization: Decodable {
             let uuid: String
         }
-    }
-
-    private struct EnabledPayload: Encodable {
-        let enabled: Bool
     }
 
     private struct RoutinePayload: Encodable {

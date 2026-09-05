@@ -9,16 +9,26 @@ actor StubClaudeRoutinesService: ClaudeRoutinesServing {
     private var routines: [ClaudeRoutine]
     private(set) var createdSpecs: [RoutineSpec] = []
     private(set) var runIDs: [String] = []
+    private(set) var deletedIDs: [String] = []
+    private(set) var credentialIntents: [ClaudeCredentialIntent] = []
 
     init(routines: [ClaudeRoutine] = []) {
         self.routines = routines
     }
 
-    func listRoutines() async throws -> [ClaudeRoutine] {
-        routines
+    func listRoutines(
+        credentialIntent: ClaudeCredentialIntent
+    ) async throws -> [ClaudeRoutine] {
+        credentialIntents.append(credentialIntent)
+        return routines
     }
 
-    func createRoutine(_ spec: RoutineSpec, environmentID: String) async throws {
+    func createRoutine(
+        _ spec: RoutineSpec,
+        environmentID: String,
+        credentialIntent: ClaudeCredentialIntent
+    ) async throws {
+        credentialIntents.append(credentialIntent)
         createdSpecs.append(spec)
         routines.append(
             ClaudeRoutine(
@@ -31,15 +41,36 @@ actor StubClaudeRoutinesService: ClaudeRoutinesServing {
         )
     }
 
-    func updateRoutine(id: String, spec: RoutineSpec, environmentID: String) async throws {}
+    func updateRoutine(
+        id: String,
+        spec: RoutineSpec,
+        environmentID: String,
+        credentialIntent: ClaudeCredentialIntent
+    ) async throws {
+        credentialIntents.append(credentialIntent)
+    }
 
-    func disableRoutine(id: String) async throws {}
+    func deleteRoutine(
+        id: String,
+        credentialIntent: ClaudeCredentialIntent
+    ) async throws {
+        credentialIntents.append(credentialIntent)
+        deletedIDs.append(id)
+        routines.removeAll { $0.id == id }
+    }
 
-    func runRoutine(id: String) async throws {
+    func runRoutine(
+        id: String,
+        credentialIntent: ClaudeCredentialIntent
+    ) async throws {
+        credentialIntents.append(credentialIntent)
         runIDs.append(id)
     }
 
-    func environments() async throws -> [ClaudeEnvironment] {
-        [ClaudeEnvironment(id: "cloud", kind: "anthropic_cloud")]
+    func environments(
+        credentialIntent: ClaudeCredentialIntent
+    ) async throws -> [ClaudeEnvironment] {
+        credentialIntents.append(credentialIntent)
+        return [ClaudeEnvironment(id: "cloud", kind: "anthropic_cloud")]
     }
 }

@@ -35,12 +35,12 @@ final class CodexRateLimitReaderTests: XCTestCase {
 
     /// A weekly cap is not something a morning session can reopen, so it must
     /// never be handed to the planner as the window to chain against.
-    func testIgnoresAWeeklyCap() {
+    func testIgnoresAWeeklyCap() throws {
         XCTAssertNil(reader.window(fromSessionLog: weeklyOnly, observedAt: observedAt))
 
         let all = reader.allWindows(fromSessionLog: weeklyOnly, observedAt: observedAt)
         XCTAssertEqual(all.count, 1)
-        XCTAssertFalse(try! XCTUnwrap(all.first).isSessionWindow)
+        XCTAssertFalse(try XCTUnwrap(all.first).isSessionWindow)
     }
 
     /// The session window is reported in whichever slot the plan puts it, so

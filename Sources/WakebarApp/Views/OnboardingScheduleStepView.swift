@@ -83,7 +83,7 @@ struct OnboardingScheduleStepView: View {
 
             serviceToggle(
                 title: "Codex",
-                detail: "ChatGPT scheduled task · you create it once from exact instructions",
+                detail: "Woken from this Mac · needs Wakebar open and Codex CLI signed in",
                 isOn: $draft.includeCodex
             )
 

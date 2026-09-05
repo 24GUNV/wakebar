@@ -20,11 +20,14 @@ final class ClaudeRoutineStartRequesterTests: XCTestCase {
         try await requester.requestStart(for: schedule)
         let createdNames = await service.createdSpecs.map(\.name)
         let runIDs = await service.runIDs
+        let credentialIntents = await service.credentialIntents
 
         XCTAssertEqual(createdNames, [
             "\(RoutinePlanCompiler.namePrefix(for: schedule)) Morning",
         ])
         XCTAssertEqual(runIDs, ["created-1"])
+        XCTAssertFalse(credentialIntents.isEmpty)
+        XCTAssertTrue(credentialIntents.allSatisfy { $0 == .userInitiated })
     }
 
     func testRunsExistingMorningWithoutCreatingRoutine() async throws {
@@ -48,8 +51,10 @@ final class ClaudeRoutineStartRequesterTests: XCTestCase {
         try await requester.requestStart(for: schedule)
         let createdSpecs = await service.createdSpecs
         let runIDs = await service.runIDs
+        let credentialIntents = await service.credentialIntents
 
         XCTAssertTrue(createdSpecs.isEmpty)
         XCTAssertEqual(runIDs, ["morning"])
+        XCTAssertTrue(credentialIntents.allSatisfy { $0 == .userInitiated })
     }
 }

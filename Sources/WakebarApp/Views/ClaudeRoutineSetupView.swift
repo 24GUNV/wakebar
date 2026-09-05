@@ -25,7 +25,7 @@ struct ClaudeRoutineSetupView: View {
             }
 
             HStack(spacing: WakebarDesign.compactSpacing) {
-                Button("Sync Routines", action: syncRoutines)
+                Button(syncButtonTitle, action: syncRoutines)
                     .buttonStyle(.borderedProminent)
                     .disabled(isSyncing)
 
@@ -63,7 +63,7 @@ struct ClaudeRoutineSetupView: View {
         case let .synced(_, _, summary):
             "\(summary). Syncing changes Routine schedules; it does not send a prompt."
         default:
-            "Wakebar creates, updates, and disables only Routines with this schedule's Wakebar prefix."
+            "Wakebar creates and updates this schedule's Routines and deletes any other Wakebar Routine."
         }
     }
 
@@ -78,6 +78,17 @@ struct ClaudeRoutineSetupView: View {
 
     private var isSyncing: Bool {
         model.claudeSetup.state == .syncing
+    }
+
+    private var syncButtonTitle: String {
+        switch model.claudeSetup.state {
+        case .synced:
+            "Sync again"
+        case .syncing:
+            "Syncing…"
+        case .idle, .failed:
+            "Sync Routines"
+        }
     }
 
     private var routinesURL: URL {

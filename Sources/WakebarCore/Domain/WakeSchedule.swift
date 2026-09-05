@@ -35,7 +35,7 @@ public struct WakeSchedule: Identifiable, Codable, Equatable, Sendable {
         includeCodex: Bool,
         claudeBackend: ExecutionBackend,
         codexBackend: ExecutionBackend,
-        codexRoute: CodexSchedulingRoute = .chatGPTWebTask,
+        codexRoute: CodexSchedulingRoute = .localCLI,
         followsSystemTimeZone: Bool,
         timeZoneIdentifier: String,
         skippedWakeDate: Date? = nil
@@ -143,8 +143,8 @@ public struct WakeSchedule: Identifiable, Codable, Equatable, Sendable {
             includeClaude: true,
             includeCodex: true,
             claudeBackend: .providerCloud,
-            codexBackend: .providerCloud,
-            codexRoute: .chatGPTWebTask,
+            codexBackend: .thisMac,
+            codexRoute: .localCLI,
             followsSystemTimeZone: true,
             timeZoneIdentifier: TimeZone.autoupdatingCurrent.identifier
         )
@@ -226,6 +226,7 @@ public struct WakeSchedule: Identifiable, Codable, Equatable, Sendable {
     }
 
     private static func legacyCodexRoute(for backend: ExecutionBackend) -> CodexSchedulingRoute {
+        // Maps routes saved by earlier versions of the app.
         switch backend {
         case .providerCloud:
             .chatGPTWebTask

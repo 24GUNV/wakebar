@@ -17,7 +17,8 @@ public struct SchedulePlanner: Sendable {
 
     /// - Parameter windows: what the providers say about the usage windows that
     ///   are open right now. Claude refreshes can follow its reported session
-    ///   window. Codex has only a weekly limit and receives one scheduled task.
+    ///   window. Codex chains off its session window, or its weekly cap when
+    ///   that is all the plan reports.
     /// - Parameter readyProviders: which providers have a confirmed setup and can
     ///   actually receive a session. Nil means readiness is unknown — the planner
     ///   then plans for everything the schedule selects, which is what the pure
@@ -99,22 +100,25 @@ public struct SchedulePlanner: Sendable {
         let nextWake = calculator.nextWakeOccurrence(after: date, for: schedule)
 
         let events: [ScheduledEvent] = providers.flatMap { provider -> [ScheduledEvent] in
-            // Codex reports a weekly cap, not a session window. Its scheduled
-            // task can still run before the named wake, but there is no rolling
-            // window for continuous cadence to refresh.
-            guard provider != .codex else { return [] }
-
-            // A provider that reports its limits but never a session window has
-            // no reset to chain to — a Codex plan carrying only a weekly cap is
-            // the case. Assuming five hours for it would march sessions at a
-            // window that does not exist. Silence is the honest plan; the
-            // schedule cadence still covers that provider before each wake.
-            let reported = windows.filter { $0.provider == provider }
-            guard reported.isEmpty || reported.contains(where: \.isSessionWindow) else {
+            // Codex is woken from this Mac, so it chains off whatever it
+            // reports: the session window when the plan has one, else the
+            // weekly cap, once, when that resets. A plan that reports its
+            // limits but no window at all has nothing to chain to, and
+            // assuming five hours would march sessions at a window that does
+            // not exist. Silence is the honest plan there.
+            let reported = windows.filter { $0.provider == provider && $0.isOpen(at: date) }
+            let window: UsageWindow?
+            var horizon = Self.continuousHorizon
+            if let session = chain.governingWindow(windows: windows, now: date, provider: provider) {
+                window = session
+            } else if provider == .codex, let weekly = reported.min(by: { $0.resetsAt < $1.resetsAt }) {
+                window = weekly
+                horizon = 1
+            } else if reported.isEmpty, provider == .claude {
+                window = nil
+            } else {
                 return []
             }
-
-            let window = chain.governingWindow(windows: windows, now: date, provider: provider)
             let step = window?.duration ?? ChainedSessionPlanner.assumedWindowDuration
 
             // With a window open the chain waits for that provider's reset. With
@@ -124,7 +128,7 @@ public struct SchedulePlanner: Sendable {
             let firstStart = window.map { $0.resetsAt.addingTimeInterval(chain.buffer) }
                 ?? date.addingTimeInterval(chain.buffer)
 
-            return (0 ..< Self.continuousHorizon).map { index in
+            return (0 ..< horizon).map { index in
                 ScheduledEvent(
                     scheduleID: schedule.id,
                     date: firstStart.addingTimeInterval(step * Double(index)),

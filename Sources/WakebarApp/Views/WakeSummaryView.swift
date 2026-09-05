@@ -22,11 +22,9 @@ struct WakeSummaryView: View {
 
                 if model.isScheduleActive {
                     serviceRows
-                } else {
-                    stoppedRows
-                }
 
-                insetDivider
+                    insetDivider
+                }
 
                 TimelineView(.periodic(from: .now, by: 60)) { context in
                     UsageSummaryBandView(
@@ -63,21 +61,6 @@ struct WakeSummaryView: View {
                 )
             }
 
-        }
-    }
-
-    /// ChatGPT tasks are user-managed, so switching Wakebar off cannot disable
-    /// them. The row keeps that external state visible.
-    private var stoppedRows: some View {
-        rowBand {
-            if model.hasHostedSessions {
-                ServiceStatusRow(
-                    title: "ChatGPT task",
-                    status: "Still scheduled",
-                    kind: .inProgress,
-                    action: { showSettings(.providers) }
-                )
-            }
         }
     }
 

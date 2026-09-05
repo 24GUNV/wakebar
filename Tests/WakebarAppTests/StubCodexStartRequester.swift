@@ -6,8 +6,15 @@
 
 actor StubCodexStartRequester: CodexStartRequesting {
     private(set) var prompts: [String] = []
+    private let error: (any Error)?
 
-    func requestStart(prompt: String) async throws {
+    init(error: (any Error)? = nil) {
+        self.error = error
+    }
+
+    func requestStart(prompt: String) async throws -> CodexStartRequestOutcome {
         prompts.append(prompt)
+        if let error { throw error }
+        return .sent
     }
 }

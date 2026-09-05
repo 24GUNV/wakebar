@@ -1,12 +1,5 @@
 import Foundation
 
-/// Why the credential is being read. Background reads must never raise the
-/// macOS Keychain dialog; only a read tied to an explicit user action may.
-enum ClaudeCredentialIntent: Sendable {
-    case background
-    case userInitiated
-}
-
 /// The single source of the Claude credential for the whole app. Every client
 /// shares this actor so one Keychain read serves all of them, and concurrent
 /// callers join the same read instead of racing to open their own prompts.

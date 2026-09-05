@@ -52,6 +52,22 @@ public struct UsageWindow: Equatable, Sendable {
         date < resetsAt
     }
 
+    /// How close to a full window `resetsAt` may sit before the window counts
+    /// as not yet started. A window opened seconds ago also reads as full,
+    /// so the tolerance is kept to little more than one polling interval.
+    public static let unstartedTolerance: TimeInterval = 90
+
+    /// True when the provider is describing a window that has not opened yet.
+    ///
+    /// Codex reports an idle limit as a full, unused window whose reset keeps
+    /// pace with the clock: reset time minus reading time equals the window
+    /// length. The moment a request lands the reset pins in place. That
+    /// placeholder is what a wake request exists to replace, so it is named.
+    public var isUnstarted: Bool {
+        guard (usedFraction ?? 0) <= 0 else { return false }
+        return resetsAt.timeIntervalSince(observedAt) >= duration - Self.unstartedTolerance
+    }
+
     /// A window long enough to be a plan-level cap is not something a morning
     /// session can reopen, so it must not drive scheduling.
     public var isSessionWindow: Bool {

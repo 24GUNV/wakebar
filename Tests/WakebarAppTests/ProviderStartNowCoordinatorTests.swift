@@ -23,22 +23,56 @@ final class ProviderStartNowCoordinatorTests: XCTestCase {
         let outcome = try await coordinator.requestStart(for: .claude, schedule: .default)
         let requestCount = await claude.requestCount
 
-        XCTAssertEqual(outcome, .started(now))
+        XCTAssertEqual(outcome, .started(changed))
         XCTAssertEqual(requestCount, 1)
     }
 
-    func testCodexCopiesMinimalPromptWithoutPollingForAFiveHourWindow() async throws {
+    /// A plan that reports only a weekly cap opens that cap. Before the wake
+    /// Codex describes it as a full, unused week whose reset keeps pace with
+    /// the clock; afterwards the reset is pinned.
+    func testCodexSendsThePromptAndConfirmsTheWeeklyWindowPinning() async throws {
+        let week: TimeInterval = 7 * 24 * 60 * 60
+        let placeholder = UsageWindow(
+            provider: .codex,
+            duration: week,
+            resetsAt: now.addingTimeInterval(week),
+            usedFraction: 0,
+            observedAt: now,
+            confidence: .reported
+        )
+        let pinned = UsageWindow(
+            provider: .codex,
+            duration: week,
+            resetsAt: now.addingTimeInterval(week - 10 * 60),
+            usedFraction: 0,
+            observedAt: now,
+            confidence: .reported
+        )
+        let usage = StubProviderUsageReading(readings: [[placeholder], [pinned]])
         let codex = StubCodexStartRequester()
         let coordinator = makeCoordinator(
-            usageReaders: [:],
+            usageReaders: [.codex: usage],
             codex: codex
         )
 
         let outcome = try await coordinator.requestStart(for: .codex, schedule: .default)
         let prompts = await codex.prompts
 
-        XCTAssertEqual(outcome, .unconfirmed)
+        XCTAssertEqual(outcome, .started(pinned))
         XCTAssertEqual(prompts, ["hi"])
+    }
+
+    func testCodexRequestFailurePropagates() async {
+        let codex = StubCodexStartRequester(error: UsageWindowProviderIssue.missingCredentials)
+        let usage = StubProviderUsageReading(readings: [[]])
+        let coordinator = makeCoordinator(usageReaders: [.codex: usage], codex: codex)
+
+        do {
+            _ = try await coordinator.requestStart(for: .codex, schedule: .default)
+            XCTFail("Expected the credential error")
+        } catch {
+            XCTAssertEqual(error as? UsageWindowProviderIssue, .missingCredentials)
+        }
     }
 
     private func makeCoordinator(

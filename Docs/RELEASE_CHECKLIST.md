@@ -34,15 +34,19 @@ Use this checklist for a direct-download, notarized macOS release.
 
 - Review skipped tests and run opt-in visual snapshots when the layout changed.
 
+- Run `LiveProviderAcceptanceTests` with `WAKEBAR_LIVE_PROVIDER_TESTS=1` and `WAKEBAR_LIVE_SCHEDULE_FILE` set to a disposable Wakebar schedule file.
+
+- Confirm that the live test fires the managed Claude Routine and receives provider-reported usage confirmation within five minutes.
+
+- Confirm that the live Codex read returns the signed-in account's weekly usage window.
+
 ## Scope check
 
 - Confirm that the app contains only the macOS target.
 
-- Confirm that Codex setup directs the user to ChatGPT web.
+- Confirm that Codex setup shows only the sign-in state, the last wake, and the next check.
 
-- Confirm that no Codex CLI task-management code is present.
-
-- Confirm that the Codex check reads usage and never creates a task.
+- Confirm that no Codex CLI task-management code is present and that Wakebar never runs `codex exec`.
 
 - Confirm that Claude synchronizes at launch, every 24 hours, and after an access-token change.
 
@@ -64,15 +68,17 @@ Use this checklist for a direct-download, notarized macOS release.
 
 ## Codex acceptance
 
-- Confirm that the setup view shows each task name, schedule, time zone, `hi` prompt, and keep-enabled instruction.
+- Confirm that the setup view shows **Codex CLI** as the sign-in when `~/.codex/auth.json` is present.
 
-- Copy the instructions and confirm that the text is ready to paste into ChatGPT.
+- Reject Codex authentication and confirm that the app says: **Run `codex login`** and the menu row shows **Needs setup**.
 
-- Confirm that the link opens `https://chatgpt.com/scheduled`.
+- Set an **Every reset** schedule with an idle Codex limit and confirm that Wakebar sends one request, then shows **Week started** or **Window started** after the next reading.
 
-- Select **I created the task** and confirm that the timestamp survives relaunch.
+- Confirm that a second check inside ten minutes does not send another request.
 
-- Reject Codex authentication and confirm that the app says: **Run `codex login`**.
+- Sleep the Mac through a **Before each wake** slot with the window closed, wake it, and confirm that Wakebar sends the missed request once.
+
+- Relaunch Wakebar and confirm that the handled slot is not sent again.
 
 ## Usage and Start now acceptance
 
@@ -92,7 +98,9 @@ Use this checklist for a direct-download, notarized macOS release.
 
 - Select Codex **Start now**.
 
-- Confirm that Wakebar copies `hi` and opens `https://chatgpt.com`.
+- Confirm that Wakebar sends one request to `chatgpt.com/backend-api/codex/responses` and shows **Requested**.
+
+- Confirm that Wakebar reports **Window started** or **Week started** only after the usage reading changes.
 
 - Confirm that Claude shows **Requested** before usage confirmation.
 
@@ -128,6 +136,8 @@ Use this checklist for a direct-download, notarized macOS release.
 
 - Run `Scripts/package_app.sh` to build a universal Release app and disk image.
 
+- Confirm that the script validates the Developer ID identity and notarytool profile before it builds.
+
 - Confirm that the app contains `arm64` and `x86_64` slices.
 
 - Confirm that the app uses the hardened runtime and the non-sandboxed release entitlements.
@@ -135,6 +145,8 @@ Use this checklist for a direct-download, notarized macOS release.
 - Confirm that `notarytool` accepted the disk image.
 
 - Confirm that `Scripts/package_app.sh` stapled the notarization ticket to the disk image.
+
+- Confirm that the script created `Wakebar.dmg.sha256` and verified it successfully.
 
 - Run `codesign --verify --deep --strict --verbose=2`.
 
@@ -154,4 +166,4 @@ Use this checklist for a direct-download, notarized macOS release.
 
 - Confirm that the documentation describes Codex window behavior as measured, not assumed.
 
-- Publish the checksum with the direct-download artifact.
+- Publish `Wakebar.dmg.sha256` with the direct-download artifact.

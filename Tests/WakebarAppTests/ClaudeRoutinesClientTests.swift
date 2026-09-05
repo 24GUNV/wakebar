@@ -27,12 +27,27 @@ final class ClaudeRoutinesClientTests: XCTestCase {
             prompt: "yes"
         )
 
-        let routines = try await client.listRoutines()
-        let routine = try await client.routine(id: "trigger_one")
-        try await client.createRoutine(spec, environmentID: "env_cloud")
-        try await client.updateRoutine(id: "trigger_one", spec: spec, environmentID: "env_cloud")
-        try await client.runRoutine(id: "trigger_one")
-        let environments = try await client.environments()
+        let routines = try await client.listRoutines(credentialIntent: .userInitiated)
+        let routine = try await client.routine(
+            id: "trigger_one",
+            credentialIntent: .userInitiated
+        )
+        try await client.createRoutine(
+            spec,
+            environmentID: "env_cloud",
+            credentialIntent: .userInitiated
+        )
+        try await client.updateRoutine(
+            id: "trigger_one",
+            spec: spec,
+            environmentID: "env_cloud",
+            credentialIntent: .userInitiated
+        )
+        try await client.runRoutine(
+            id: "trigger_one",
+            credentialIntent: .userInitiated
+        )
+        let environments = try await client.environments(credentialIntent: .userInitiated)
 
         XCTAssertEqual(routines.first?.prompt, "yes")
         XCTAssertEqual(routine.id, "trigger_one")
@@ -92,7 +107,7 @@ final class ClaudeRoutinesClientTests: XCTestCase {
         let client = makeClient(transport: transport)
 
         do {
-            _ = try await client.listRoutines()
+            _ = try await client.listRoutines(credentialIntent: .userInitiated)
             XCTFail("Expected the undocumented API change error")
         } catch {
             XCTAssertEqual(error as? ClaudeRoutinesError, .apiChanged)
@@ -107,7 +122,7 @@ final class ClaudeRoutinesClientTests: XCTestCase {
         let client = makeClient(transport: transport)
 
         do {
-            _ = try await client.listRoutines()
+            _ = try await client.listRoutines(credentialIntent: .userInitiated)
             XCTFail("Expected the beta rejection error")
         } catch {
             XCTAssertEqual(error as? ClaudeRoutinesError, .apiChanged)
@@ -127,7 +142,7 @@ final class ClaudeRoutinesClientTests: XCTestCase {
         )
 
         do {
-            _ = try await client.listRoutines()
+            _ = try await client.listRoutines(credentialIntent: .userInitiated)
             XCTFail("Expected the authentication error")
         } catch {
             XCTAssertEqual(error as? ClaudeRoutinesError, .noAuthentication)
@@ -136,12 +151,39 @@ final class ClaudeRoutinesClientTests: XCTestCase {
         XCTAssertTrue(requests.isEmpty)
     }
 
+    func testBackgroundRequestNeverAllowsCredentialUI() async throws {
+        let transport = StubClaudeRoutinesTransport(responses: [
+            response(profileJSON),
+            response(routineListJSON),
+        ])
+        let keychain = StubKeychainLookup(
+            result: .data(
+                Data(
+                    "{\"claudeAiOauth\":{\"accessToken\":\"oauth-test-token\"}}".utf8
+                )
+            )
+        )
+        let resolver = UsageWindowCredentialResolver(
+            environment: [:],
+            homeDirectory: URL(filePath: "/nonexistent-wakebar-test-home"),
+            keychainLookup: { allowUI in keychain.lookup(allowUI: allowUI) }
+        )
+        let client = ClaudeRoutinesClient(
+            credentialStore: ClaudeCredentialStore(resolver: resolver),
+            transport: transport
+        )
+
+        _ = try await client.listRoutines(credentialIntent: .background)
+
+        XCTAssertEqual(keychain.allowUIArguments, [false])
+    }
+
     func testTransportFailureIsReportedAsNetworkError() async {
         let transport = StubClaudeRoutinesTransport(responses: [])
         let client = makeClient(transport: transport)
 
         do {
-            _ = try await client.listRoutines()
+            _ = try await client.listRoutines(credentialIntent: .userInitiated)
             XCTFail("Expected the network error")
         } catch {
             XCTAssertEqual(error as? ClaudeRoutinesError, .network)

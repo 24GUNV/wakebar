@@ -46,8 +46,12 @@ struct UsageProviderView: View {
             nil
         case .requested:
             "Requested"
-        case let .started(date):
-            "Window started \(date.formatted(.dateTime.hour().minute()))"
+        case let .started(window):
+            startState.startedWindowStart.map { start in
+                window.isSessionWindow
+                    ? "Window started \(start.formatted(.dateTime.hour().minute()))"
+                    : "Week started \(start.formatted(.dateTime.weekday(.abbreviated).hour().minute()))"
+            }
         case .unconfirmed:
             "Requested; not confirmed"
         }

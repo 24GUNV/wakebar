@@ -1,6 +1,7 @@
 public enum ExecutionBackend: String, CaseIterable, Codable, Hashable, Identifiable, Sendable {
     case providerCloud
     case thisMac
+    /// Retained only so existing saved schedules decode. Do not remove.
     case alwaysOnRunner
 
     public var id: Self { self }

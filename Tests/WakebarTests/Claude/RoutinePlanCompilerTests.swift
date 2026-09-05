@@ -83,6 +83,77 @@ final class RoutinePlanCompilerTests: XCTestCase {
         XCTAssertTrue(plan.isEmpty)
     }
 
+    func testEveryResetAddsOneRoutinePinnedToTheChainedFire() throws {
+        var schedule = WakeSchedule.default
+        schedule.isEnabled = true
+        schedule.cadence = .continuous
+        schedule.followsSystemTimeZone = false
+        schedule.timeZoneIdentifier = "Asia/Bangkok"
+
+        let plan = RoutinePlanCompiler().compile(
+            schedule: schedule,
+            referenceDate: try date("2026-09-05T15:00:00Z"),
+            chainFiresAt: try date("2026-09-05T21:52:30Z")
+        )
+
+        XCTAssertEqual(plan.map(\.name), [
+            "\(RoutinePlanCompiler.namePrefix(for: schedule)) Morning",
+            "\(RoutinePlanCompiler.namePrefix(for: schedule)) Next reset",
+        ])
+        // Seconds round up so the fire never lands before the reset buffer.
+        XCTAssertEqual(plan.last?.cronExpression, "53 21 5 9 *")
+        XCTAssertEqual(plan.last?.enabled, true)
+        XCTAssertEqual(plan.last?.prompt, RoutinePlanCompiler.prompt)
+    }
+
+    func testOneShotCronCrossesTheUTCDayBoundary() throws {
+        XCTAssertEqual(
+            RoutinePlanCompiler.oneShotCronExpression(at: try date("2026-12-31T23:59:30Z")),
+            "0 0 1 1 *"
+        )
+        XCTAssertEqual(
+            RoutinePlanCompiler.oneShotCronExpression(at: try date("2026-03-01T04:10:00Z")),
+            "10 4 1 3 *"
+        )
+    }
+
+    func testEveryResetWithNothingToChainToCompilesOnlyTheFixedSlots() throws {
+        var schedule = WakeSchedule.default
+        schedule.isEnabled = true
+        schedule.cadence = .continuous
+
+        let plan = RoutinePlanCompiler().compile(
+            schedule: schedule,
+            referenceDate: try date("2026-09-05T15:00:00Z"),
+            chainFiresAt: nil
+        )
+
+        XCTAssertEqual(plan.count, 1)
+        XCTAssertTrue(plan[0].name.hasSuffix("Morning"))
+    }
+
+    func testAFixedScheduleIgnoresTheChainedFire() throws {
+        var schedule = WakeSchedule.default
+        schedule.isEnabled = true
+        schedule.cadence = .schedule
+
+        let plan = RoutinePlanCompiler().compile(
+            schedule: schedule,
+            referenceDate: try date("2026-09-05T15:00:00Z"),
+            chainFiresAt: try date("2026-09-05T21:52:30Z")
+        )
+
+        XCTAssertEqual(plan.count, 1)
+        XCTAssertFalse(plan.contains { $0.name.hasSuffix("Next reset") })
+    }
+
+    func testEverySchedulePrefixBelongsToTheWakebarFamily() {
+        let prefix = RoutinePlanCompiler.namePrefix(for: .default)
+
+        XCTAssertTrue(prefix.hasPrefix(RoutinePlanCompiler.familyPrefix))
+        XCTAssertNotEqual(prefix, RoutinePlanCompiler.familyPrefix)
+    }
+
     private func date(_ value: String) throws -> Date {
         try XCTUnwrap(ISO8601DateFormatter().date(from: value))
     }

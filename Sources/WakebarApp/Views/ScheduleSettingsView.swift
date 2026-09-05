@@ -173,7 +173,7 @@ struct ScheduleSettingsView: View {
                 Text("Before each wake").tag(SessionCadence.schedule)
                 Text("Every time the window resets").tag(SessionCadence.continuous)
             }
-            .help("Wakebar reads Claude's reset time. With none to read, it assumes five hours. Codex runs only at the named time.")
+            .help("Wakebar reads each provider's reset time. With none to read for Claude, it assumes five hours. Codex is woken from this Mac after its own limit resets.")
 
             // The cutoff and the fallback slots only mean anything to a cadence
             // that is pinned to a day. Chained sessions have no day to end.

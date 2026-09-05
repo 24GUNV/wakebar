@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="880" height="540" viewBox="0 0 880 540" role="img" aria-labelledby="title description">
   <title id="title">Wakebar provider flow</title>
-  <desc id="description">A local Wakebar schedule produces automatic Claude Routine synchronization and manual ChatGPT task instructions. Provider usage data supplies the measured Codex verdict.</desc>
+  <desc id="description">A local Wakebar schedule produces automatic Claude Routine synchronization and a Codex wake sent from this Mac. Provider usage data confirms every started window.</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M0 0l10 5-10 5z" fill="#8B93A7"/>
@@ -39,10 +39,10 @@
   <path d="M783 215l5 5 10-12" fill="none" stroke="#208A55" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
 
   <rect x="346" y="326" width="480" height="166" rx="22" class="card"/>
-  <rect x="368" y="348" width="92" height="28" rx="14" fill="#FFF2E1"/>
-  <text x="414" y="367" fill="#A05A13" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="13" font-weight="750" letter-spacing="1.1" text-anchor="middle">MANUAL</text>
-  <text x="368" y="412" class="primary" font-size="22" font-weight="680">ChatGPT scheduled task</text>
-  <text x="368" y="442" class="secondary" font-size="16">Copy exact names, local schedules, and prompt.</text>
-  <text x="368" y="470" class="secondary" font-size="16">Provider usage data supplies the stored Codex verdict.</text>
+  <rect x="368" y="348" width="104" height="28" rx="14" fill="#E8ECFF"/>
+  <text x="420" y="367" fill="#3C3FA8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="13" font-weight="750" letter-spacing="1.1" text-anchor="middle">THIS MAC</text>
+  <text x="368" y="412" class="primary" font-size="22" font-weight="680">Codex wake from this Mac</text>
+  <text x="368" y="442" class="secondary" font-size="16">One minimal request while Wakebar is open.</text>
+  <text x="368" y="470" class="secondary" font-size="16">Catches up on wake; usage data confirms the window.</text>
   <path d="M760 398a24 24 0 1 0 0 48 24 24 0 1 0 0-48zm0 10v15l10 6" fill="none" stroke="#5A5CD3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

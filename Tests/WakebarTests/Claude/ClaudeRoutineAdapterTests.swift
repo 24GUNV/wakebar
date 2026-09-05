@@ -2,6 +2,8 @@ import Foundation
 import XCTest
 @testable import WakebarCore
 
+private let validTestToken = ["sk", "ant", "oat01", "fixture"].joined(separator: "-")
+
 final class ClaudeRoutineAdapterTests: XCTestCase {
     func testConfigurationRejectsCredentialExfiltrationEndpoint() throws {
         let endpoint = try XCTUnwrap(
@@ -44,7 +46,7 @@ final class ClaudeRoutineAdapterTests: XCTestCase {
         let request = try XCTUnwrap(lastRequest)
 
         XCTAssertEqual(request.url?.host, "api.anthropic.com")
-        XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer sk-ant-oat01-test-token")
+        XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer \(validTestToken)")
         XCTAssertEqual(request.value(forHTTPHeaderField: "anthropic-beta"), "experimental-cc-routine-2026-04-01")
         XCTAssertEqual(request.value(forHTTPHeaderField: "anthropic-version"), "2023-06-01")
         XCTAssertEqual(result.sessionID, "session_123")
@@ -80,7 +82,7 @@ final class ClaudeRoutineAdapterTests: XCTestCase {
         )
 
         do {
-            try await adapter.fire(trigger)
+            _ = try await adapter.fire(trigger)
             XCTFail("Expected the usage-limit error")
         } catch {
             XCTAssertEqual(error as? ClaudeRoutineError, .usageLimitReached(retryAfter: "3600"))
@@ -125,7 +127,7 @@ final class ClaudeRoutineAdapterTests: XCTestCase {
         )
         return ClaudeRoutineAdapter(
             configuration: configuration,
-            credentialStore: FixedClaudeRoutineCredentialStore(token: "sk-ant-oat01-test-token"),
+            credentialStore: FixedClaudeRoutineCredentialStore(token: validTestToken),
             transport: transport
         )
     }

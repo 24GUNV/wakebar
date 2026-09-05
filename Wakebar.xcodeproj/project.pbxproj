@@ -32,20 +32,23 @@
 		1CC8822536EF60AF97FDA1EC /* PopoverControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B53C94AC5A36E9E69CCC97C /* PopoverControls.swift */; };
 		1FB0C240598D6A378CD2FA10 /* ClaudeRoutineFireResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 642478F114826D2DB7C41DBD /* ClaudeRoutineFireResponse.swift */; };
 		21880486E72DF6A6867F1B83 /* ClaudeRoutineSyncResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D0931A8463965B1A4A05D80 /* ClaudeRoutineSyncResult.swift */; };
+		221CB8EBEDD571821A709387 /* CodexStartRequestOutcome.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA64D77F0CF72E61AA3A9D6D /* CodexStartRequestOutcome.swift */; };
 		22ACBA1B47E206F833E94DE8 /* UsageSummaryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EBAA01272B26C750DE3F090 /* UsageSummaryViewModel.swift */; };
 		22C5F3BBCC51DD9711E13862 /* ClaudeRoutinesTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6F33B0B3804F7A9A3D84A9B /* ClaudeRoutinesTransport.swift */; };
-		2355427C2D6D6E27B2BAB7D3 /* CodexTaskSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2FFAA402788F4C82AC29614 /* CodexTaskSetupView.swift */; };
 		26B787445A2120D981887645 /* StubCodexStartRequester.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B907D03FAC602BCA0900D4D /* StubCodexStartRequester.swift */; };
 		29869C2452BAFF1CEFD9294D /* WakeSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74E290EC8FCFBAB0134993C5 /* WakeSummaryView.swift */; };
 		2A8F292A7509EB982CB935F1 /* UsageWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 327DB0F2A2A1688D769FC4A7 /* UsageWindow.swift */; };
 		2EFE2D6D17661D49B4DCED74 /* ProviderExecutionCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D2EBC07281B731082C22037 /* ProviderExecutionCoordinator.swift */; };
+		2F98FF1A26CDF667BE6B59AB /* CodexWakeModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C4F20D7C960597C2D0449A2 /* CodexWakeModelTests.swift */; };
 		303397D88D2E90AF4B1D6D5C /* SettingsDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = E155D133365D24260420E74F /* SettingsDestination.swift */; };
 		313451FF1161636D5F8CF582 /* ProviderExecutionCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF752CC6A624542668AF1171 /* ProviderExecutionCoordinatorTests.swift */; };
 		321977BD2428D45B23E2129E /* ClaudeRoutineFireResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51A90C9048DD9A3A1D73814 /* ClaudeRoutineFireResult.swift */; };
 		342243734EADBC050667E5D2 /* ProviderDeliveryState.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA05BFDE35A3489DF67E331C /* ProviderDeliveryState.swift */; };
 		344128C65E22F32F9B989113 /* RefreshSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91B291162DA9171DE13C27DF /* RefreshSummaryView.swift */; };
 		34AE4285A171BA9938D816E4 /* ClaudeCredential.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC035223B64190B0218A55C5 /* ClaudeCredential.swift */; };
+		351959607F439B407A6753BB /* ClaudeSetupModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB5A8753BD7B986AA0CFBED6 /* ClaudeSetupModelTests.swift */; };
 		378C9BFAE3649E84F2CEA2BA /* ProviderAvailability.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5E954EC2BDA9FB0787F52B1 /* ProviderAvailability.swift */; };
+		37A173F2341E95DDFC502B1D /* CodexWakeModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC3CF9BCE3903113BA28F270 /* CodexWakeModel.swift */; };
 		37FD5285BCA3303F63EF92C3 /* DryRunProviderAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0C8A4244EEB93ED3E59B55E /* DryRunProviderAdapter.swift */; };
 		3887602D263B730C18624CBC /* SessionCadence.swift in Sources */ = {isa = PBXBuildFile; fileRef = D80C909930ED38AB533FB5EE /* SessionCadence.swift */; };
 		38928521FF6E2DE7AA5A090E /* ClaudeUsageWindowDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C38C30A37CE073BF55632815 /* ClaudeUsageWindowDecoder.swift */; };
@@ -74,7 +77,6 @@
 		577929AEE6BD7D08138BB40C /* ClaudeRoutineStartRequester.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54A820418ACDCF30C211C26A /* ClaudeRoutineStartRequester.swift */; };
 		5A5737A9BA3347D93568B73B /* ClaudeRoutineAdapterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F480A78074C66B657A38F93 /* ClaudeRoutineAdapterTests.swift */; };
 		5BA1B6B792FDCD2788F8781F /* ClaudeRoutinesServing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6623BC94357A660841956519 /* ClaudeRoutinesServing.swift */; };
-		5E3B6E7F4CD6F0367C791F70 /* CodexTaskPlanCompilerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34BFD30432F9168B0116898C /* CodexTaskPlanCompilerTests.swift */; };
 		5E7410C025B77552BF9D6BD4 /* WakebarCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 223BFD28DD1C28DF2CE4B413 /* WakebarCore.framework */; };
 		62FD9AEF4F162C96853AF1AD /* ScheduleStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11761F1B5EB2B45FA0CE4CCC /* ScheduleStore.swift */; };
 		6477CCC1B5008B376254BA75 /* ExecutionAttemptResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0077739726B264C77AEF863A /* ExecutionAttemptResult.swift */; };
@@ -97,18 +99,18 @@
 		7653AE5DF80E6243DEF2AB35 /* WakebarCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 223BFD28DD1C28DF2CE4B413 /* WakebarCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		76C8F86BCC03EB41FDE9EAFD /* ActivityNoticeKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A6C86FBCBA709FF095F4839 /* ActivityNoticeKind.swift */; };
 		7943139C2D2BE90BF10364D5 /* ImmediateUsageWindowPollingSleeper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DFFA1EB8BBA501A425A5E19 /* ImmediateUsageWindowPollingSleeper.swift */; };
+		79A1B3E1EDB536E4CE386B19 /* CodexPingClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9AA2E1027A643CB014D92EB /* CodexPingClient.swift */; };
 		7A69E1430939F15FBE1F2B06 /* ExecutionBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5AA081163B4AD8F3EF37CFB /* ExecutionBackend.swift */; };
 		7BABDB659A03A10CA6D8CA30 /* UsageWindowBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C060D77063DAC9DE8B454F06 /* UsageWindowBarView.swift */; };
 		7DD6AC19111B996A4CCFA00F /* OnboardingStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74032B486BC10A8FB5368941 /* OnboardingStep.swift */; };
 		7FC78DEF23D8CE4B08B82297 /* WakebarCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 223BFD28DD1C28DF2CE4B413 /* WakebarCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		8180A8A181E1A43CAD82C866 /* MenuBarIconStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 711159075E77D2469F371041 /* MenuBarIconStateTests.swift */; };
-		81E750A0D70C456FCAF745F3 /* CodexSetupModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B281E32AB6C4715E323FE4E9 /* CodexSetupModelTests.swift */; };
-		8223C68041E2B957AE798CAD /* CodexTaskSpec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C78B506C5F3A328E185C04F /* CodexTaskSpec.swift */; };
 		8303AEBCD4181E85FEB9BB9D /* RecurringSessionSlotCompilerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7AA2E081A416CDB7DB1527A /* RecurringSessionSlotCompilerTests.swift */; };
 		831D573EE42552AB1757F441 /* ClaudeRoutineFireBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = 005D04E4C89830AC89CEA865 /* ClaudeRoutineFireBody.swift */; };
 		845037D0987F85C41BE4B6A4 /* WakebarDesign.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06865EF7A87058059E9C6BE4 /* WakebarDesign.swift */; };
 		84C3C42C23379029A5DEC784 /* ClaudeOAuthCredentialPayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 113A65B708BAA89A3DE93786 /* ClaudeOAuthCredentialPayload.swift */; };
 		84F949956CC720CF601CB847 /* ScheduledEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B8797F205DC7C9D46DE82D7 /* ScheduledEvent.swift */; };
+		866AE57F863BE61F618CE2EE /* ProviderStartNowStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C0345D76C8E50A434FADFF /* ProviderStartNowStateTests.swift */; };
 		86A1C3F8160D15C2D8EE4A6F /* ScheduleStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD98CC49B5F35DE3C94E9432 /* ScheduleStoreTests.swift */; };
 		87000838895157CA4BE8DB17 /* ClaudeRoutineHTTPResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = F56F9C67047ED591165EA7D5 /* ClaudeRoutineHTTPResponse.swift */; };
 		887A32C9F195D15AD1EADDD7 /* WakebarCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 223BFD28DD1C28DF2CE4B413 /* WakebarCore.framework */; };
@@ -117,6 +119,8 @@
 		8C0E9EB0CE3F22D690E7F300 /* StubClaudeRoutinesTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 519FDD199B8D5FAA3090452B /* StubClaudeRoutinesTransport.swift */; };
 		8C7C0E22F3055F57A0F6B855 /* ClaudeRoutineTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = C34C044C571FC955202C6A1F /* ClaudeRoutineTransport.swift */; };
 		8FE86D2E564236EC1F09E68A /* ExecutionLedgerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 265890BFDF3C85C20978BDD2 /* ExecutionLedgerTests.swift */; };
+		93BFAB2350F66A5752A06B8E /* LiveProviderAcceptanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B54BB36EC5D7AE7136C1C6A /* LiveProviderAcceptanceTests.swift */; };
+		94524FA9EB68161EA0C56BF7 /* CodexModelPreference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9705512E46B8CBA5B025E706 /* CodexModelPreference.swift */; };
 		982740814ED5664DB47CB485 /* SessionLogUsageWindowReaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E0F01E40F22CD57E7B5D8A3 /* SessionLogUsageWindowReaderTests.swift */; };
 		9A425DA712B42A5FD7B23580 /* ClaudeRoutineAPIConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64F168CAF36B2065AA16AAD8 /* ClaudeRoutineAPIConfiguration.swift */; };
 		9A4C5151087196A1BC64AF90 /* UsageWindowRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7588D9120C4A2D3040E1663 /* UsageWindowRow.swift */; };
@@ -127,7 +131,6 @@
 		9D510A50404952DE8AC1039B /* ClaudeRoutineReconcilerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4DDBD647CAFF5F6278940DC /* ClaudeRoutineReconcilerTests.swift */; };
 		9FD53F8BC8EBA049F4475E3C /* URLSessionClaudeRoutineTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EEC138B82EA1B4F6782CE0D /* URLSessionClaudeRoutineTransport.swift */; };
 		A23B7ADB056E1E6C33A7C09C /* ClaudeRoutineAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 931EF5C211164E5ADE936CF9 /* ClaudeRoutineAdapter.swift */; };
-		A49C6DC00400206214BA2B3F /* CodexTaskPlanCompiler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FB69A60683050B71675355D /* CodexTaskPlanCompiler.swift */; };
 		A4C767579062E9798A2CB8AE /* SchedulePlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD75C3F9BF9282F8934AEB8 /* SchedulePlanner.swift */; };
 		A837B54C667DF60164CED318 /* ClaudeCredentialStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03E42E2869230E3040FDC107 /* ClaudeCredentialStoreTests.swift */; };
 		A8BB649C46817E1D84B55BC6 /* ScheduleMenuDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13D52ABAEBBE83D256DB0816 /* ScheduleMenuDestination.swift */; };
@@ -146,7 +149,6 @@
 		B91013B8253FA2C093075F07 /* ClaudeRoutinesHTTPResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00CF870F6A3317D0513F4841 /* ClaudeRoutinesHTTPResponse.swift */; };
 		B9ADCFA9AC1ACD1DACD576F2 /* UsageWindowCredentialResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 102BF47B2F4B32A0C17F5B41 /* UsageWindowCredentialResolver.swift */; };
 		BA244BA6A01D60A824AAB0E1 /* ClaudeCredentialStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CF903BC2A2D14582E9604C4 /* ClaudeCredentialStore.swift */; };
-		BA735A0FABECF0CF291184EB /* CodexSetupModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C38CC47F86E3122E300629F /* CodexSetupModel.swift */; };
 		BCF9817112D4C297A6BFCB76 /* ScheduleCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DA93802DAC79D74C5E7E4AC /* ScheduleCalculator.swift */; };
 		BFBCC4EB2AF35FABB3F6A6BB /* OnboardingLaunchDecision.swift in Sources */ = {isa = PBXBuildFile; fileRef = 491F92CC0C52E8D437E15612 /* OnboardingLaunchDecision.swift */; };
 		C10F1842C84AB09BDED6A7F4 /* UsageWindowAPIError.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEB33703A3FAF967117DBD9E /* UsageWindowAPIError.swift */; };
@@ -162,18 +164,23 @@
 		C87D9EE90A7B0F19D41468A2 /* ClaudeRoutineSyncState.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF50A07F6CDE78FC2E483583 /* ClaudeRoutineSyncState.swift */; };
 		C8BEF72A3F6D6B8B8FF025EC /* RoutinePlanCompilerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02CC9805351DE849772F84D1 /* RoutinePlanCompilerTests.swift */; };
 		C902675F875EBF63277C99D3 /* ServiceStatusKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 600A658536E0F4A79B4C88FA /* ServiceStatusKind.swift */; };
+		C9B3669C1552E3CC0D41FC27 /* CodexWakePlannerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F85A6AA2710CE10670F30AE0 /* CodexWakePlannerTests.swift */; };
+		CAADA45813452784B1893F4B /* ContinuousChainAnchor.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC849F91FBA4AC22FC00388C /* ContinuousChainAnchor.swift */; };
 		CC963DB8A0184976D5305DF4 /* ClaudeStartRequesting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D7179BF99032F0CE8E0FE96 /* ClaudeStartRequesting.swift */; };
+		CD1B187ED851C4E616B743F8 /* CodexWakeSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76EADBA9C90CB54558B59ACC /* CodexWakeSetupView.swift */; };
 		D0371A786B86B061BDA8E738 /* ScheduledEventKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88ECCAD439FA677A958D7569 /* ScheduledEventKind.swift */; };
 		D1426EA6F94A3C81B40981C3 /* UsageWindowStartDetectorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 974566D72466C9833CB63A84 /* UsageWindowStartDetectorTests.swift */; };
+		D4882B094DD52A50059C9CCB /* ClaudeCredentialIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB4895368854F0B0FC49CC1B /* ClaudeCredentialIntent.swift */; };
 		D49CB5B919B88C262C9B10D3 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94BFE9AD3A7942028433E46C /* AppModel.swift */; };
 		D4CCBE5115FEA7FD14F0D9D5 /* UsageWindowPollingSleeping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0743FDF75C9789715765C8BC /* UsageWindowPollingSleeping.swift */; };
 		D4E2B89D0CB0CB5577D7253E /* OnboardingWelcomeStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FABAF6FB1DBCD85BC3AF4529 /* OnboardingWelcomeStepView.swift */; };
 		D66FD63AF781FE172749E6FB /* WakeSchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = C149D2E4F803C269EBDDEADB /* WakeSchedule.swift */; };
+		D67458FA57C3121D6AAA43E9 /* StubKeychainLookup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A74FB2FA4A2AAC6D1D5709A /* StubKeychainLookup.swift */; };
 		D7FA5214595259B69B6A7FC3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8B371AF49188F9FD49C4B7E6 /* Assets.xcassets */; };
 		DB7B6A638025F4C0FB2AEA3E /* ProviderStartNowOutcome.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E6AD01DC75AAC29050284B7 /* ProviderStartNowOutcome.swift */; };
 		DCC3227F3CF0EE9A42629223 /* CodexUsageAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AA84F865892BFA0B3581366 /* CodexUsageAPIClient.swift */; };
 		DD53510C05C6B6D1B2181F79 /* CodexUsageWindowDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2317F13521E5AFDE41A81D21 /* CodexUsageWindowDecoder.swift */; };
-		E2D64CA4BB3BFBF09900F867 /* SystemCodexStartRequester.swift in Sources */ = {isa = PBXBuildFile; fileRef = 077B908DE06EC38DE580484B /* SystemCodexStartRequester.swift */; };
+		E78D08D850238650A1B62747 /* CodexWakePlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 560B5A49C94581C1E48D448F /* CodexWakePlanner.swift */; };
 		E9B88BE84F6300459FCA4F79 /* ClaudeRoutineStartRequesterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE901B2AE9A6EC1EDC2F5C03 /* ClaudeRoutineStartRequesterTests.swift */; };
 		EA7F3F8CFA6E0214B9D9F321 /* ClaudeRoutineReconciler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08ADD2A703A531F04C43D83B /* ClaudeRoutineReconciler.swift */; };
 		EDB658EA5B067C1BBADF22FE /* SessionLogUsageWindowReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D82D3D12C588E95EC8BDE01 /* SessionLogUsageWindowReader.swift */; };
@@ -188,12 +195,14 @@
 		F6CA5A4B29E5A3B7779955F8 /* WakeScheduleTimeOfDayTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFF396C81600264F271495AD /* WakeScheduleTimeOfDayTests.swift */; };
 		F7F38B94747F5297A4CCD4A2 /* ExecutionRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17F2D2C5B0A44C51C961754E /* ExecutionRecord.swift */; };
 		F8F255DB2DD2C96E6BC7F8F9 /* ExecutionDeliveryState.swift in Sources */ = {isa = PBXBuildFile; fileRef = E694474ABE1F7AB3C0C8C583 /* ExecutionDeliveryState.swift */; };
+		FA2F162B9A04212B5F115D87 /* CodexModelPreferenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58B4D6603C1B47BD2CEBA0DA /* CodexModelPreferenceTests.swift */; };
 		FAA4AFC819417FF12CC741A0 /* ProviderDeliveryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 060EF47C0474F0B9E4BF69ED /* ProviderDeliveryStore.swift */; };
 		FBC6622C43E25614D6EDBFA6 /* WakebarApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8CFEB54F927587C82CF5287 /* WakebarApp.swift */; };
 		FBD75AEA2449ACB3C96D9CB8 /* ProviderSetupRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4824A254FF7028AFF0131626 /* ProviderSetupRequest.swift */; };
 		FCE30F0CF3C045A420BC3E09 /* CodexStartRequesting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F89AF295886E017731465ED /* CodexStartRequesting.swift */; };
 		FE4B243A9F46C98E85D59DAE /* ProviderSessionPhase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7594C76114000DB7251F53FD /* ProviderSessionPhase.swift */; };
 		FF3A6329ADDDA4406C754B8D /* LiveUsageWindowReaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1668EC95E8317C6747DDB530 /* LiveUsageWindowReaderTests.swift */; };
+		FFF4F3952EA1B24A39EF3594 /* ContinuousChainAnchorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E13D97EA880CE5D6605E3E3B /* ContinuousChainAnchorTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -255,10 +264,8 @@
 		060EF47C0474F0B9E4BF69ED /* ProviderDeliveryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderDeliveryStore.swift; sourceTree = "<group>"; };
 		06865EF7A87058059E9C6BE4 /* WakebarDesign.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WakebarDesign.swift; sourceTree = "<group>"; };
 		0743FDF75C9789715765C8BC /* UsageWindowPollingSleeping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageWindowPollingSleeping.swift; sourceTree = "<group>"; };
-		077B908DE06EC38DE580484B /* SystemCodexStartRequester.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemCodexStartRequester.swift; sourceTree = "<group>"; };
 		08ADD2A703A531F04C43D83B /* ClaudeRoutineReconciler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeRoutineReconciler.swift; sourceTree = "<group>"; };
 		0A03F2E7C0B76BB68E318898 /* WeekdayPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeekdayPicker.swift; sourceTree = "<group>"; };
-		0C78B506C5F3A328E185C04F /* CodexTaskSpec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexTaskSpec.swift; sourceTree = "<group>"; };
 		0E6AD01DC75AAC29050284B7 /* ProviderStartNowOutcome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderStartNowOutcome.swift; sourceTree = "<group>"; };
 		0F89AF295886E017731465ED /* CodexStartRequesting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexStartRequesting.swift; sourceTree = "<group>"; };
 		0F8E5E2B4FF67664A50F2E0C /* WakeScheduleTimeOfDay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WakeScheduleTimeOfDay.swift; sourceTree = "<group>"; };
@@ -273,7 +280,6 @@
 		1A6C86FBCBA709FF095F4839 /* ActivityNoticeKind.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityNoticeKind.swift; sourceTree = "<group>"; };
 		1B53C94AC5A36E9E69CCC97C /* PopoverControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverControls.swift; sourceTree = "<group>"; };
 		1C659AE2012A78EBADA31175 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
-		1FB69A60683050B71675355D /* CodexTaskPlanCompiler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexTaskPlanCompiler.swift; sourceTree = "<group>"; };
 		1FDDC2CB7E992DC4C63C8704 /* StubProviderUsageReading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StubProviderUsageReading.swift; sourceTree = "<group>"; };
 		223BFD28DD1C28DF2CE4B413 /* WakebarCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = WakebarCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		22C3759502C4544A9BAB9698 /* ProviderStartNowState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderStartNowState.swift; sourceTree = "<group>"; };
@@ -289,7 +295,6 @@
 		2EBAA01272B26C750DE3F090 /* UsageSummaryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageSummaryViewModel.swift; sourceTree = "<group>"; };
 		30B5BBDF2FDDD28ADABB7C6C /* ScheduleSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleSettingsView.swift; sourceTree = "<group>"; };
 		327DB0F2A2A1688D769FC4A7 /* UsageWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageWindow.swift; sourceTree = "<group>"; };
-		34BFD30432F9168B0116898C /* CodexTaskPlanCompilerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexTaskPlanCompilerTests.swift; sourceTree = "<group>"; };
 		34EC33FC298C6711C6588FCF /* ChainedSessionPlannerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChainedSessionPlannerTests.swift; sourceTree = "<group>"; };
 		3A256F8679DF93F1EB3539A6 /* UsageWindowDecoderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageWindowDecoderTests.swift; sourceTree = "<group>"; };
 		3A59DAF74D563D306398DA6C /* CodexRateLimitReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexRateLimitReader.swift; sourceTree = "<group>"; };
@@ -312,6 +317,8 @@
 		52A5591D00C61C48B2ECD794 /* ProviderExecutionCoordinatorError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderExecutionCoordinatorError.swift; sourceTree = "<group>"; };
 		53254679C69AD36B9B78AE91 /* WeekdayPickerSnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeekdayPickerSnapshotTests.swift; sourceTree = "<group>"; };
 		54A820418ACDCF30C211C26A /* ClaudeRoutineStartRequester.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeRoutineStartRequester.swift; sourceTree = "<group>"; };
+		560B5A49C94581C1E48D448F /* CodexWakePlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexWakePlanner.swift; sourceTree = "<group>"; };
+		58B4D6603C1B47BD2CEBA0DA /* CodexModelPreferenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexModelPreferenceTests.swift; sourceTree = "<group>"; };
 		5923CF1C4FAF98D49B4D6B27 /* ProviderDeliveryPhase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderDeliveryPhase.swift; sourceTree = "<group>"; };
 		5A6EBEC82C463D9807D5B23F /* ProviderDeliveryStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderDeliveryStoreTests.swift; sourceTree = "<group>"; };
 		5AA84F865892BFA0B3581366 /* CodexUsageAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexUsageAPIClient.swift; sourceTree = "<group>"; };
@@ -328,9 +335,9 @@
 		6A160D9D8F622B7E69CCC303 /* WakebarRelease.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WakebarRelease.swift; sourceTree = "<group>"; };
 		6A163C0F89633090B4CC8CFD /* ClaudeUsageBlockCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeUsageBlockCalculator.swift; sourceTree = "<group>"; };
 		6A5F230D29AD5B15BA59F4FB /* LaunchAtLoginSectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchAtLoginSectionView.swift; sourceTree = "<group>"; };
+		6A74FB2FA4A2AAC6D1D5709A /* StubKeychainLookup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StubKeychainLookup.swift; sourceTree = "<group>"; };
 		6AF261C4694BEA67E3F3759A /* RecurringSessionSlotCompiler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringSessionSlotCompiler.swift; sourceTree = "<group>"; };
 		6B517468EFB76B12DBC565FA /* LaunchAtLoginState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchAtLoginState.swift; sourceTree = "<group>"; };
-		6C38CC47F86E3122E300629F /* CodexSetupModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexSetupModel.swift; sourceTree = "<group>"; };
 		711159075E77D2469F371041 /* MenuBarIconStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarIconStateTests.swift; sourceTree = "<group>"; };
 		7297B39E9749495D5C79CBDF /* UsageWindowBarModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageWindowBarModel.swift; sourceTree = "<group>"; };
 		72FF15686692CA50C13558BD /* WakeCountdownView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WakeCountdownView.swift; sourceTree = "<group>"; };
@@ -341,15 +348,18 @@
 		74E290EC8FCFBAB0134993C5 /* WakeSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WakeSummaryView.swift; sourceTree = "<group>"; };
 		7594C76114000DB7251F53FD /* ProviderSessionPhase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderSessionPhase.swift; sourceTree = "<group>"; };
 		75AF0A9B9201266770BFF8CF /* ExecutionLedgerError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionLedgerError.swift; sourceTree = "<group>"; };
+		76EADBA9C90CB54558B59ACC /* CodexWakeSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexWakeSetupView.swift; sourceTree = "<group>"; };
 		7860A0734D79AB5FF5DE0422 /* UsageWindowReading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageWindowReading.swift; sourceTree = "<group>"; };
 		7A17408794414CD093A18399 /* ActivityStripView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityStripView.swift; sourceTree = "<group>"; };
 		7B247D9668FAC1FAD019B4B0 /* StubClaudeStartRequester.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StubClaudeStartRequester.swift; sourceTree = "<group>"; };
 		7C390CC997C0974C492870DE /* RecurringSessionSlot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringSessionSlot.swift; sourceTree = "<group>"; };
+		7C4F20D7C960597C2D0449A2 /* CodexWakeModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexWakeModelTests.swift; sourceTree = "<group>"; };
 		7D2EBC07281B731082C22037 /* ProviderExecutionCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderExecutionCoordinator.swift; sourceTree = "<group>"; };
 		7D8B21E6BE4C80240A50AA89 /* ClaudeCredentialsPayload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeCredentialsPayload.swift; sourceTree = "<group>"; };
 		7DA93802DAC79D74C5E7E4AC /* ScheduleCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleCalculator.swift; sourceTree = "<group>"; };
 		7FAE88055478865CCA6BF8A8 /* ActivityNotice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityNotice.swift; sourceTree = "<group>"; };
 		836FD85741091B9495B00D03 /* TriggerReceipt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerReceipt.swift; sourceTree = "<group>"; };
+		84C0345D76C8E50A434FADFF /* ProviderStartNowStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderStartNowStateTests.swift; sourceTree = "<group>"; };
 		84FD1B8EB9AA8AE50EB87FD8 /* ProviderID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderID.swift; sourceTree = "<group>"; };
 		864302993F9DB734424059BF /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		872D82DCDF4960B3D4F56DB6 /* SuccessfulProviderAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuccessfulProviderAdapter.swift; sourceTree = "<group>"; };
@@ -366,12 +376,13 @@
 		931EF5C211164E5ADE936CF9 /* ClaudeRoutineAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeRoutineAdapter.swift; sourceTree = "<group>"; };
 		94BFE9AD3A7942028433E46C /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 		96AEA300DD82F2D4A30121B1 /* URLSessionClaudeRoutinesTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLSessionClaudeRoutinesTransport.swift; sourceTree = "<group>"; };
+		9705512E46B8CBA5B025E706 /* CodexModelPreference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexModelPreference.swift; sourceTree = "<group>"; };
 		97207CEE8AC2E7F2AE5859E6 /* UsageSummaryBandView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageSummaryBandView.swift; sourceTree = "<group>"; };
 		974566D72466C9833CB63A84 /* UsageWindowStartDetectorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageWindowStartDetectorTests.swift; sourceTree = "<group>"; };
 		98B179641D883D9EAC50E6D1 /* Common.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Common.xcconfig; sourceTree = "<group>"; };
+		9B54BB36EC5D7AE7136C1C6A /* LiveProviderAcceptanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveProviderAcceptanceTests.swift; sourceTree = "<group>"; };
 		9B907D03FAC602BCA0900D4D /* StubCodexStartRequester.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StubCodexStartRequester.swift; sourceTree = "<group>"; };
 		9EEC138B82EA1B4F6782CE0D /* URLSessionClaudeRoutineTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLSessionClaudeRoutineTransport.swift; sourceTree = "<group>"; };
-		A2FFAA402788F4C82AC29614 /* CodexTaskSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexTaskSetupView.swift; sourceTree = "<group>"; };
 		A39D9B14D086B7CB09645585 /* ProviderAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderAdapter.swift; sourceTree = "<group>"; };
 		A5130827B03883A5386DB31F /* ScheduleMenuPresentationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleMenuPresentationTests.swift; sourceTree = "<group>"; };
 		A51A90C9048DD9A3A1D73814 /* ClaudeRoutineFireResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeRoutineFireResult.swift; sourceTree = "<group>"; };
@@ -379,13 +390,13 @@
 		A8C2791C8A0B30139275E509 /* ProviderSetupSectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderSetupSectionView.swift; sourceTree = "<group>"; };
 		A8CFEB54F927587C82CF5287 /* WakebarApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WakebarApp.swift; sourceTree = "<group>"; };
 		A912BCDCC288F0EC0DE2A944 /* AppIconSource.svg */ = {isa = PBXFileReference; path = AppIconSource.svg; sourceTree = "<group>"; };
+		A9AA2E1027A643CB014D92EB /* CodexPingClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexPingClient.swift; sourceTree = "<group>"; };
 		AAB6DC89E20B60ED7F45EF30 /* Weekday.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Weekday.swift; sourceTree = "<group>"; };
 		AAD75C3F9BF9282F8934AEB8 /* SchedulePlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchedulePlanner.swift; sourceTree = "<group>"; };
 		AAEB94ED30EC2B07700AF901 /* OnboardingScheduleStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingScheduleStepView.swift; sourceTree = "<group>"; };
 		AD1D1EC026546DF6D6674706 /* CodexRateLimitReaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexRateLimitReaderTests.swift; sourceTree = "<group>"; };
 		AF50A07F6CDE78FC2E483583 /* ClaudeRoutineSyncState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeRoutineSyncState.swift; sourceTree = "<group>"; };
 		AFADC5D272EDA94502410485 /* ClaudeRoutineSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeRoutineSetupView.swift; sourceTree = "<group>"; };
-		B281E32AB6C4715E323FE4E9 /* CodexSetupModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexSetupModelTests.swift; sourceTree = "<group>"; };
 		B4FD401907E5FCC1D742FFDD /* ProviderUsageReading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderUsageReading.swift; sourceTree = "<group>"; };
 		B7588D9120C4A2D3040E1663 /* UsageWindowRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageWindowRow.swift; sourceTree = "<group>"; };
 		B81647F51367E0BF60DE262A /* WakebarCoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WakebarCoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -419,9 +430,12 @@
 		D80C909930ED38AB533FB5EE /* SessionCadence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionCadence.swift; sourceTree = "<group>"; };
 		D81E72A5E1E83231B9ED5255 /* IndeterminateProviderAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndeterminateProviderAdapter.swift; sourceTree = "<group>"; };
 		D9B4B53CE337E18C23404F3C /* ClaudeUsageAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeUsageAPIClient.swift; sourceTree = "<group>"; };
+		DA64D77F0CF72E61AA3A9D6D /* CodexStartRequestOutcome.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexStartRequestOutcome.swift; sourceTree = "<group>"; };
+		DB5A8753BD7B986AA0CFBED6 /* ClaudeSetupModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeSetupModelTests.swift; sourceTree = "<group>"; };
 		DCF05014E60D68F477FEAF3D /* ContinuousClockUsageWindowPollingSleeper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContinuousClockUsageWindowPollingSleeper.swift; sourceTree = "<group>"; };
 		DE901B2AE9A6EC1EDC2F5C03 /* ClaudeRoutineStartRequesterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeRoutineStartRequesterTests.swift; sourceTree = "<group>"; };
 		E0C8A4244EEB93ED3E59B55E /* DryRunProviderAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DryRunProviderAdapter.swift; sourceTree = "<group>"; };
+		E13D97EA880CE5D6605E3E3B /* ContinuousChainAnchorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContinuousChainAnchorTests.swift; sourceTree = "<group>"; };
 		E155D133365D24260420E74F /* SettingsDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsDestination.swift; sourceTree = "<group>"; };
 		E2757278882C5F9B942BCCDF /* ClaudeRoutineCredentialStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeRoutineCredentialStore.swift; sourceTree = "<group>"; };
 		E4D1F9358C89F999370885E6 /* ClaudeRoutinesError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeRoutinesError.swift; sourceTree = "<group>"; };
@@ -432,11 +446,15 @@
 		E799CBFCD66D0677034B8B7D /* ServiceStatusRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceStatusRow.swift; sourceTree = "<group>"; };
 		E7E5C5ADC9975C1E30E3082C /* LiveUsageWindowReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveUsageWindowReader.swift; sourceTree = "<group>"; };
 		E8192C4E54224465E2A35670 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		EB4895368854F0B0FC49CC1B /* ClaudeCredentialIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeCredentialIntent.swift; sourceTree = "<group>"; };
 		EC035223B64190B0218A55C5 /* ClaudeCredential.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeCredential.swift; sourceTree = "<group>"; };
+		EC3CF9BCE3903113BA28F270 /* CodexWakeModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexWakeModel.swift; sourceTree = "<group>"; };
 		EF04174E632AB5C791BB4CF7 /* OnboardingStepHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingStepHeader.swift; sourceTree = "<group>"; };
 		F406E4471AF73165FE3EA04F /* UsageWindowStartDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageWindowStartDetector.swift; sourceTree = "<group>"; };
 		F56F9C67047ED591165EA7D5 /* ClaudeRoutineHTTPResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeRoutineHTTPResponse.swift; sourceTree = "<group>"; };
+		F85A6AA2710CE10670F30AE0 /* CodexWakePlannerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexWakePlannerTests.swift; sourceTree = "<group>"; };
 		FABAF6FB1DBCD85BC3AF4529 /* OnboardingWelcomeStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingWelcomeStepView.swift; sourceTree = "<group>"; };
+		FC849F91FBA4AC22FC00388C /* ContinuousChainAnchor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContinuousChainAnchor.swift; sourceTree = "<group>"; };
 		FD98CC49B5F35DE3C94E9432 /* ScheduleStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleStoreTests.swift; sourceTree = "<group>"; };
 		FF752CC6A624542668AF1171 /* ProviderExecutionCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderExecutionCoordinatorTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -475,7 +493,7 @@
 			children = (
 				7A17408794414CD093A18399 /* ActivityStripView.swift */,
 				AFADC5D272EDA94502410485 /* ClaudeRoutineSetupView.swift */,
-				A2FFAA402788F4C82AC29614 /* CodexTaskSetupView.swift */,
+				76EADBA9C90CB54558B59ACC /* CodexWakeSetupView.swift */,
 				6A5F230D29AD5B15BA59F4FB /* LaunchAtLoginSectionView.swift */,
 				15C0C9609345F02F2CCF8185 /* MenuBarContentView.swift */,
 				AAEB94ED30EC2B07700AF901 /* OnboardingScheduleStepView.swift */,
@@ -517,6 +535,7 @@
 			isa = PBXGroup;
 			children = (
 				EC035223B64190B0218A55C5 /* ClaudeCredential.swift */,
+				EB4895368854F0B0FC49CC1B /* ClaudeCredentialIntent.swift */,
 				7D8B21E6BE4C80240A50AA89 /* ClaudeCredentialsPayload.swift */,
 				3CF903BC2A2D14582E9604C4 /* ClaudeCredentialStore.swift */,
 				C2656FC38FB2293E228D4853 /* ClaudeEnvironment.swift */,
@@ -532,7 +551,10 @@
 				3D0931A8463965B1A4A05D80 /* ClaudeRoutineSyncResult.swift */,
 				8D7179BF99032F0CE8E0FE96 /* ClaudeStartRequesting.swift */,
 				D9B4B53CE337E18C23404F3C /* ClaudeUsageAPIClient.swift */,
+				9705512E46B8CBA5B025E706 /* CodexModelPreference.swift */,
+				A9AA2E1027A643CB014D92EB /* CodexPingClient.swift */,
 				0F89AF295886E017731465ED /* CodexStartRequesting.swift */,
+				DA64D77F0CF72E61AA3A9D6D /* CodexStartRequestOutcome.swift */,
 				5AA84F865892BFA0B3581366 /* CodexUsageAPIClient.swift */,
 				DCF05014E60D68F477FEAF3D /* ContinuousClockUsageWindowPollingSleeper.swift */,
 				29AA880F4E31394C1A80643E /* LaunchAtLoginService.swift */,
@@ -543,7 +565,6 @@
 				0E6AD01DC75AAC29050284B7 /* ProviderStartNowOutcome.swift */,
 				B4FD401907E5FCC1D742FFDD /* ProviderUsageReading.swift */,
 				2D82D3D12C588E95EC8BDE01 /* SessionLogUsageWindowReader.swift */,
-				077B908DE06EC38DE580484B /* SystemCodexStartRequester.swift */,
 				96AEA300DD82F2D4A30121B1 /* URLSessionClaudeRoutinesTransport.swift */,
 				CEB33703A3FAF967117DBD9E /* UsageWindowAPIError.swift */,
 				102BF47B2F4B32A0C17F5B41 /* UsageWindowCredentialResolver.swift */,
@@ -571,16 +592,21 @@
 				D4DDBD647CAFF5F6278940DC /* ClaudeRoutineReconcilerTests.swift */,
 				B9351BD67569AF066DF1CC80 /* ClaudeRoutinesClientTests.swift */,
 				DE901B2AE9A6EC1EDC2F5C03 /* ClaudeRoutineStartRequesterTests.swift */,
-				B281E32AB6C4715E323FE4E9 /* CodexSetupModelTests.swift */,
+				DB5A8753BD7B986AA0CFBED6 /* ClaudeSetupModelTests.swift */,
+				58B4D6603C1B47BD2CEBA0DA /* CodexModelPreferenceTests.swift */,
+				7C4F20D7C960597C2D0449A2 /* CodexWakeModelTests.swift */,
 				2DFFA1EB8BBA501A425A5E19 /* ImmediateUsageWindowPollingSleeper.swift */,
+				9B54BB36EC5D7AE7136C1C6A /* LiveProviderAcceptanceTests.swift */,
 				1668EC95E8317C6747DDB530 /* LiveUsageWindowReaderTests.swift */,
 				BA6330F18D4055FCBCAC46C5 /* PopoverSnapshotTests.swift */,
 				5E64D0AE500EDA7230CE595E /* ProviderStartNowCoordinatorTests.swift */,
+				84C0345D76C8E50A434FADFF /* ProviderStartNowStateTests.swift */,
 				2E0F01E40F22CD57E7B5D8A3 /* SessionLogUsageWindowReaderTests.swift */,
 				246506B2DA9D487491396DDF /* StubClaudeRoutinesService.swift */,
 				519FDD199B8D5FAA3090452B /* StubClaudeRoutinesTransport.swift */,
 				7B247D9668FAC1FAD019B4B0 /* StubClaudeStartRequester.swift */,
 				9B907D03FAC602BCA0900D4D /* StubCodexStartRequester.swift */,
+				6A74FB2FA4A2AAC6D1D5709A /* StubKeychainLookup.swift */,
 				1FDDC2CB7E992DC4C63C8704 /* StubProviderUsageReading.swift */,
 				9002BE720CD9758ED388EC4C /* UsageSummaryViewModelTests.swift */,
 				C066944E4627C6FE878639E1 /* UsageWindowCredentialResolverTests.swift */,
@@ -653,8 +679,7 @@
 			isa = PBXGroup;
 			children = (
 				73494841005A98F0890AFA81 /* CodexSchedulingRoute.swift */,
-				1FB69A60683050B71675355D /* CodexTaskPlanCompiler.swift */,
-				0C78B506C5F3A328E185C04F /* CodexTaskSpec.swift */,
+				560B5A49C94581C1E48D448F /* CodexWakePlanner.swift */,
 			);
 			path = Codex;
 			sourceTree = "<group>";
@@ -671,7 +696,7 @@
 		740D4E613D7C4C753C3847B4 /* Codex */ = {
 			isa = PBXGroup;
 			children = (
-				34BFD30432F9168B0116898C /* CodexTaskPlanCompilerTests.swift */,
+				F85A6AA2710CE10670F30AE0 /* CodexWakePlannerTests.swift */,
 			);
 			path = Codex;
 			sourceTree = "<group>";
@@ -692,6 +717,7 @@
 				34EC33FC298C6711C6588FCF /* ChainedSessionPlannerTests.swift */,
 				D74E0ED307E4CC95AB8CCA38 /* ClaudeUsageBlockCalculatorTests.swift */,
 				AD1D1EC026546DF6D6674706 /* CodexRateLimitReaderTests.swift */,
+				E13D97EA880CE5D6605E3E3B /* ContinuousChainAnchorTests.swift */,
 				3A256F8679DF93F1EB3539A6 /* UsageWindowDecoderTests.swift */,
 				974566D72466C9833CB63A84 /* UsageWindowStartDetectorTests.swift */,
 			);
@@ -762,6 +788,7 @@
 				C38C30A37CE073BF55632815 /* ClaudeUsageWindowDecoder.swift */,
 				3A59DAF74D563D306398DA6C /* CodexRateLimitReader.swift */,
 				2317F13521E5AFDE41A81D21 /* CodexUsageWindowDecoder.swift */,
+				FC849F91FBA4AC22FC00388C /* ContinuousChainAnchor.swift */,
 				CEB641FE5B42C6C5DB8E8631 /* UsageLimitKind.swift */,
 				327DB0F2A2A1688D769FC4A7 /* UsageWindow.swift */,
 				7860A0734D79AB5FF5DE0422 /* UsageWindowReading.swift */,
@@ -778,7 +805,7 @@
 				94BFE9AD3A7942028433E46C /* AppModel.swift */,
 				AF50A07F6CDE78FC2E483583 /* ClaudeRoutineSyncState.swift */,
 				C7759B5B5460CBCD2D10B434 /* ClaudeSetupModel.swift */,
-				6C38CC47F86E3122E300629F /* CodexSetupModel.swift */,
+				EC3CF9BCE3903113BA28F270 /* CodexWakeModel.swift */,
 				4824A254FF7028AFF0131626 /* ProviderSetupRequest.swift */,
 				22C3759502C4544A9BAB9698 /* ProviderStartNowState.swift */,
 				E155D133365D24260420E74F /* SettingsDestination.swift */,
@@ -988,6 +1015,7 @@
 				9C6510C9DCA403E3B3915169 /* ActivityStripView.swift in Sources */,
 				D49CB5B919B88C262C9B10D3 /* AppModel.swift in Sources */,
 				34AE4285A171BA9938D816E4 /* ClaudeCredential.swift in Sources */,
+				D4882B094DD52A50059C9CCB /* ClaudeCredentialIntent.swift in Sources */,
 				BA244BA6A01D60A824AAB0E1 /* ClaudeCredentialStore.swift in Sources */,
 				C6AAF5CE22B6DAE9EA384BF3 /* ClaudeCredentialsPayload.swift in Sources */,
 				06BA84F1EB201664ECA1ED1D /* ClaudeEnvironment.swift in Sources */,
@@ -1006,10 +1034,13 @@
 				F0C3014D18883A764FEC8809 /* ClaudeSetupModel.swift in Sources */,
 				CC963DB8A0184976D5305DF4 /* ClaudeStartRequesting.swift in Sources */,
 				514684FDF7DCAEF871E21053 /* ClaudeUsageAPIClient.swift in Sources */,
-				BA735A0FABECF0CF291184EB /* CodexSetupModel.swift in Sources */,
+				94524FA9EB68161EA0C56BF7 /* CodexModelPreference.swift in Sources */,
+				79A1B3E1EDB536E4CE386B19 /* CodexPingClient.swift in Sources */,
+				221CB8EBEDD571821A709387 /* CodexStartRequestOutcome.swift in Sources */,
 				FCE30F0CF3C045A420BC3E09 /* CodexStartRequesting.swift in Sources */,
-				2355427C2D6D6E27B2BAB7D3 /* CodexTaskSetupView.swift in Sources */,
 				DCC3227F3CF0EE9A42629223 /* CodexUsageAPIClient.swift in Sources */,
+				37A173F2341E95DDFC502B1D /* CodexWakeModel.swift in Sources */,
+				CD1B187ED851C4E616B743F8 /* CodexWakeSetupView.swift in Sources */,
 				C8130C8D659168F74CC1DA07 /* ContinuousClockUsageWindowPollingSleeper.swift in Sources */,
 				702CC5DC27FF82FA110C65AC /* LaunchAtLoginSectionView.swift in Sources */,
 				4C1A82CE856D085C0A05B379 /* LaunchAtLoginService.swift in Sources */,
@@ -1038,7 +1069,6 @@
 				EDB658EA5B067C1BBADF22FE /* SessionLogUsageWindowReader.swift in Sources */,
 				71DE6ED640E686ED6F0ED5EB /* SettingsControls.swift in Sources */,
 				303397D88D2E90AF4B1D6D5C /* SettingsDestination.swift in Sources */,
-				E2D64CA4BB3BFBF09900F867 /* SystemCodexStartRequester.swift in Sources */,
 				11A0A5881759662B08B414FB /* URLSessionClaudeRoutinesTransport.swift in Sources */,
 				6CAE6F30DBF4DA553D92B77C /* UsageProviderPresentation.swift in Sources */,
 				F0BEAF596005FD39E9D757A1 /* UsageProviderView.swift in Sources */,
@@ -1080,9 +1110,9 @@
 				38928521FF6E2DE7AA5A090E /* ClaudeUsageWindowDecoder.swift in Sources */,
 				A8C4478AA8088789E020984D /* CodexRateLimitReader.swift in Sources */,
 				F15704C571C31C9B9F32949E /* CodexSchedulingRoute.swift in Sources */,
-				A49C6DC00400206214BA2B3F /* CodexTaskPlanCompiler.swift in Sources */,
-				8223C68041E2B957AE798CAD /* CodexTaskSpec.swift in Sources */,
 				DD53510C05C6B6D1B2181F79 /* CodexUsageWindowDecoder.swift in Sources */,
+				E78D08D850238650A1B62747 /* CodexWakePlanner.swift in Sources */,
+				CAADA45813452784B1893F4B /* ContinuousChainAnchor.swift in Sources */,
 				37FD5285BCA3303F63EF92C3 /* DryRunProviderAdapter.swift in Sources */,
 				6477CCC1B5008B376254BA75 /* ExecutionAttemptResult.swift in Sources */,
 				7A69E1430939F15FBE1F2B06 /* ExecutionBackend.swift in Sources */,
@@ -1141,16 +1171,21 @@
 				9D510A50404952DE8AC1039B /* ClaudeRoutineReconcilerTests.swift in Sources */,
 				E9B88BE84F6300459FCA4F79 /* ClaudeRoutineStartRequesterTests.swift in Sources */,
 				9A605CE1A778D25D877DB74B /* ClaudeRoutinesClientTests.swift in Sources */,
-				81E750A0D70C456FCAF745F3 /* CodexSetupModelTests.swift in Sources */,
+				351959607F439B407A6753BB /* ClaudeSetupModelTests.swift in Sources */,
+				FA2F162B9A04212B5F115D87 /* CodexModelPreferenceTests.swift in Sources */,
+				2F98FF1A26CDF667BE6B59AB /* CodexWakeModelTests.swift in Sources */,
 				7943139C2D2BE90BF10364D5 /* ImmediateUsageWindowPollingSleeper.swift in Sources */,
+				93BFAB2350F66A5752A06B8E /* LiveProviderAcceptanceTests.swift in Sources */,
 				FF3A6329ADDDA4406C754B8D /* LiveUsageWindowReaderTests.swift in Sources */,
 				69B23C48C9CC1A727E725C51 /* PopoverSnapshotTests.swift in Sources */,
 				7630A03805DBC3817F8889BF /* ProviderStartNowCoordinatorTests.swift in Sources */,
+				866AE57F863BE61F618CE2EE /* ProviderStartNowStateTests.swift in Sources */,
 				982740814ED5664DB47CB485 /* SessionLogUsageWindowReaderTests.swift in Sources */,
 				195808240A470AB699B29CF4 /* StubClaudeRoutinesService.swift in Sources */,
 				8C0E9EB0CE3F22D690E7F300 /* StubClaudeRoutinesTransport.swift in Sources */,
 				672800ABDF061D575751FC75 /* StubClaudeStartRequester.swift in Sources */,
 				26B787445A2120D981887645 /* StubCodexStartRequester.swift in Sources */,
+				D67458FA57C3121D6AAA43E9 /* StubKeychainLookup.swift in Sources */,
 				B29F6A574CA667D428FD5D69 /* StubProviderUsageReading.swift in Sources */,
 				160CAEA67812C69B04741A60 /* UsageSummaryViewModelTests.swift in Sources */,
 				C1E2732D2E4E3DD22EAEBC4A /* UsageWindowCredentialResolverTests.swift in Sources */,
@@ -1166,7 +1201,8 @@
 				5A5737A9BA3347D93568B73B /* ClaudeRoutineAdapterTests.swift in Sources */,
 				07AD0301CD0EAF1FA7DABDDB /* ClaudeUsageBlockCalculatorTests.swift in Sources */,
 				74AFC9C2D7E588150EC5B698 /* CodexRateLimitReaderTests.swift in Sources */,
-				5E3B6E7F4CD6F0367C791F70 /* CodexTaskPlanCompilerTests.swift in Sources */,
+				C9B3669C1552E3CC0D41FC27 /* CodexWakePlannerTests.swift in Sources */,
+				FFF4F3952EA1B24A39EF3594 /* ContinuousChainAnchorTests.swift in Sources */,
 				8FE86D2E564236EC1F09E68A /* ExecutionLedgerTests.swift in Sources */,
 				B3DB82FB9DC518E242E5C834 /* IndeterminateProviderAdapter.swift in Sources */,
 				06FD1E0E88BFFFF13B9958A9 /* IndeterminateTestError.swift in Sources */,

@@ -25,25 +25,38 @@ final class ClaudeSetupModel {
         self.credentialStore = credentialStore
     }
 
-    func sync(for schedule: WakeSchedule) async -> ClaudeRoutineSyncResult? {
+    /// - Parameter chainFiresAt: the next chained fire on an "Every reset"
+    ///   schedule, or nil when there is no window to chain to. See
+    ///   ``ContinuousChainAnchor``.
+    func sync(
+        for schedule: WakeSchedule,
+        credentialIntent: ClaudeCredentialIntent,
+        chainFiresAt: Date? = nil
+    ) async -> ClaudeRoutineSyncResult? {
         state = .syncing
         lastSyncAttemptAt = .now
         do {
-            // A sync follows a user action, so this read may raise the
-            // Keychain dialog if consent is still missing.
-            let credential = try await credentialStore.credential(.userInitiated)
+            let credential = try await credentialStore.credential(credentialIntent)
             lastResolvedAccessToken = credential.accessToken
             credentialExpiresAt = credential.expiresAt
             credentialHasRefreshToken = credential.hasRefreshToken
+        } catch let issue as UsageWindowProviderIssue {
+            state = .failed(issue.message(for: .claude))
+            return nil
         } catch {
             state = .failed("Sign in again in Claude Code (run `claude`)")
             return nil
         }
-        let plan = planCompiler.compile(schedule: schedule, referenceDate: .now)
+        let plan = planCompiler.compile(
+            schedule: schedule,
+            referenceDate: .now,
+            chainFiresAt: chainFiresAt
+        )
         do {
             let result = try await reconciler.reconcile(
                 plan: plan,
-                namePrefix: RoutinePlanCompiler.namePrefix(for: schedule)
+                namePrefix: RoutinePlanCompiler.familyPrefix,
+                credentialIntent: credentialIntent
             )
             state = .synced(
                 at: .now,

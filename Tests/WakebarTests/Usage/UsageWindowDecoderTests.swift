@@ -35,6 +35,43 @@ final class UsageWindowDecoderTests: XCTestCase {
         XCTAssertFalse(windows[0].isSessionWindow)
     }
 
+    func testCodexDecodesCurrentNestedRateLimitResponse() throws {
+        let body = """
+        {
+          "plan_type": "test-plan",
+          "rate_limit": {
+            "allowed": true,
+            "limit_reached": false,
+            "primary_window": {
+              "used_percent": 14.0,
+              "reset_at": 1787806845,
+              "reset_after_seconds": 12345,
+              "limit_window_seconds": 604800
+            },
+            "secondary_window": null
+          },
+          "additional_rate_limits": []
+        }
+        """
+
+        let windows = try CodexUsageWindowDecoder().decode(body, observedAt: observedAt)
+
+        XCTAssertEqual(windows.count, 1)
+        XCTAssertEqual(windows[0].limitKind, .weekly)
+        XCTAssertEqual(windows[0].usedFraction, 0.14)
+    }
+
+    func testCodexRejectsSuccessfulPayloadWithUnknownLayout() {
+        let body = #"{"plan_type":"test-plan","credits":{}}"#
+
+        XCTAssertThrowsError(try CodexUsageWindowDecoder().decode(body, observedAt: observedAt)) {
+            error in
+            guard case CodexUsageWindowDecodingError.invalidResponse = error else {
+                return XCTFail("Expected invalidResponse, received \(error).")
+            }
+        }
+    }
+
     func testCodexBothNullIsEmpty() throws {
         let body = "{" + "\"primary_window\":null,\"secondary_window\":null}"
 

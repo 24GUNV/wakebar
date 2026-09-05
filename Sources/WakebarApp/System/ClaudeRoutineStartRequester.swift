@@ -29,7 +29,8 @@ struct ClaudeRoutineStartRequester: ClaudeStartRequesting {
         if routine == nil {
             _ = try await reconciler.reconcile(
                 plan: plan,
-                namePrefix: RoutinePlanCompiler.namePrefix(for: schedule)
+                namePrefix: RoutinePlanCompiler.familyPrefix,
+                credentialIntent: .userInitiated
             )
             routine = try await managedMorning(named: morningSpec.name)
         }
@@ -37,10 +38,14 @@ struct ClaudeRoutineStartRequester: ClaudeStartRequesting {
         guard let routine else {
             throw ClaudeRoutinesError.missingMorningRoutine
         }
-        try await client.runRoutine(id: routine.id)
+        try await client.runRoutine(
+            id: routine.id,
+            credentialIntent: .userInitiated
+        )
     }
 
     private func managedMorning(named name: String) async throws -> ClaudeRoutine? {
-        try await client.listRoutines().first { $0.name == name }
+        try await client.listRoutines(credentialIntent: .userInitiated)
+            .first { $0.name == name }
     }
 }

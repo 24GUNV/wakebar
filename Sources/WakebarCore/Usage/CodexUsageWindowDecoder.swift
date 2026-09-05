@@ -12,7 +12,13 @@ public struct CodexUsageWindowDecoder: Sendable {
     public func decode(_ body: Data, observedAt: Date) throws -> [UsageWindow] {
         do {
             let response = try JSONDecoder().decode(Response.self, from: body)
-            return [response.primaryWindow, response.secondaryWindow]
+            guard response.hasWindowLayout else {
+                throw CodexUsageWindowDecodingError.invalidResponse(
+                    errorDescription: "The Codex response did not contain a recognized rate-limit layout."
+                )
+            }
+
+            return response.windows
                 .compactMap { $0 }
                 .compactMap { window in
                     guard let duration = Self.duration(for: window.limitWindowSeconds) else {
@@ -45,6 +51,36 @@ public struct CodexUsageWindowDecoder: Sendable {
     }
 
     private struct Response: Decodable {
+        let primaryWindow: Window?
+        let secondaryWindow: Window?
+        let rateLimit: RateLimit?
+        let hasWindowLayout: Bool
+
+        var windows: [Window?] {
+            if let rateLimit {
+                return [rateLimit.primaryWindow, rateLimit.secondaryWindow]
+            }
+            return [primaryWindow, secondaryWindow]
+        }
+
+        enum CodingKeys: String, CodingKey {
+            case primaryWindow = "primary_window"
+            case secondaryWindow = "secondary_window"
+            case rateLimit = "rate_limit"
+        }
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            primaryWindow = try container.decodeIfPresent(Window.self, forKey: .primaryWindow)
+            secondaryWindow = try container.decodeIfPresent(Window.self, forKey: .secondaryWindow)
+            rateLimit = try container.decodeIfPresent(RateLimit.self, forKey: .rateLimit)
+            hasWindowLayout = container.contains(.primaryWindow)
+                || container.contains(.secondaryWindow)
+                || container.contains(.rateLimit)
+        }
+    }
+
+    private struct RateLimit: Decodable {
         let primaryWindow: Window?
         let secondaryWindow: Window?
 

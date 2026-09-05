@@ -57,7 +57,7 @@ struct ProviderSetupSectionView: View {
         if provider == .claude {
             ClaudeRoutineSetupView(model: model)
         } else {
-            CodexTaskSetupView(model: model)
+            CodexWakeSetupView(model: model)
         }
     }
 

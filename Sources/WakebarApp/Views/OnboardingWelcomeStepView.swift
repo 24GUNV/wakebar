@@ -17,8 +17,8 @@ struct OnboardingWelcomeStepView: View {
 
             pointer(
                 systemImage: "cloud",
-                title: "Provider-hosted tasks",
-                detail: "Claude Code Routines and ChatGPT scheduled tasks run in the cloud, so this Mac can be off."
+                title: "Where the wake runs",
+                detail: "Claude Code Routines run in the cloud, so this Mac can be off. Codex is woken from this Mac while Wakebar is open."
             )
 
             pointer(

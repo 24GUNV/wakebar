@@ -258,7 +258,7 @@ final class SchedulePlannerTests: XCTestCase {
         XCTAssertTrue(schedule.isValid)
     }
 
-    func testContinuousCadenceChainsClaudeAndSkipsCodex() throws {
+    func testContinuousCadenceChainsEachProviderOffItsOwnReset() throws {
         let calendar = try utcCalendar()
         let planner = SchedulePlanner(
             calculator: ScheduleCalculator(calendar: calendar),
@@ -271,22 +271,56 @@ final class SchedulePlannerTests: XCTestCase {
         schedule.cadence = .continuous
 
         let claudeReset = now.addingTimeInterval(60 * 60)
+        let codexReset = now.addingTimeInterval(4 * 60 * 60)
         let events = planner.nextEvents(
             after: now,
             for: schedule,
             windows: [
                 openWindow(resetsAt: claudeReset, observedAt: now),
-                openWindow(
-                    resetsAt: now.addingTimeInterval(4 * 60 * 60),
-                    observedAt: now,
-                    provider: .codex
-                ),
+                openWindow(resetsAt: codexReset, observedAt: now, provider: .codex),
             ]
         )
 
         let buffer = ChainedSessionPlanner.resetBuffer
         XCTAssertEqual(firstStart(for: .claude, in: events), claudeReset.addingTimeInterval(buffer))
-        XCTAssertNil(firstStart(for: .codex, in: events))
+        XCTAssertEqual(firstStart(for: .codex, in: events), codexReset.addingTimeInterval(buffer))
+    }
+
+    /// A Codex plan that reports only a weekly cap is woken once, after that
+    /// cap resets, so the new week starts at the reset and not at the user's
+    /// first request days later.
+    func testContinuousCadenceWakesWeeklyOnlyCodexOnceAfterItsReset() throws {
+        let calendar = try utcCalendar()
+        let planner = SchedulePlanner(
+            calculator: ScheduleCalculator(calendar: calendar),
+            calendar: calendar
+        )
+        let now = try XCTUnwrap(
+            calendar.date(from: DateComponents(year: 2026, month: 8, day: 20, hour: 9))
+        )
+        var schedule = makeSchedule()
+        schedule.cadence = .continuous
+        schedule.includeClaude = false
+
+        let weeklyReset = now.addingTimeInterval(3 * 24 * 60 * 60)
+        let events = planner.nextEvents(
+            after: now,
+            for: schedule,
+            windows: [
+                openWindow(
+                    resetsAt: weeklyReset,
+                    observedAt: now,
+                    duration: 7 * 24 * 60 * 60,
+                    provider: .codex
+                ),
+            ]
+        )
+
+        XCTAssertEqual(events.count, 1)
+        XCTAssertEqual(
+            firstStart(for: .codex, in: events),
+            weeklyReset.addingTimeInterval(ChainedSessionPlanner.resetBuffer)
+        )
     }
 
     /// The same drift under the schedule cadence, where the clamp used to be
@@ -422,8 +456,8 @@ final class SchedulePlannerTests: XCTestCase {
 
     /// Codex on a weekly-only plan reports a limit but never a session window.
     /// Assuming five hours for it would march sessions at a reset that never
-    /// arrives, so it gets no chained sessions at all.
-    func testContinuousSkipsAProviderThatReportsNoSessionWindow() throws {
+    /// arrives, so it gets one wake at the weekly reset while Claude chains.
+    func testContinuousWakesAWeeklyOnlyProviderOnceAtItsReset() throws {
         let calendar = try utcCalendar()
         let planner = SchedulePlanner(
             calculator: ScheduleCalculator(calendar: calendar),
@@ -434,13 +468,14 @@ final class SchedulePlannerTests: XCTestCase {
         )
         var schedule = makeSchedule()
         schedule.cadence = .continuous
+        let weeklyReset = now.addingTimeInterval(3 * 24 * 60 * 60)
 
         let events = planner.nextEvents(
             after: now,
             for: schedule,
             windows: [
                 openWindow(
-                    resetsAt: now.addingTimeInterval(3 * 24 * 60 * 60),
+                    resetsAt: weeklyReset,
                     observedAt: now,
                     duration: 7 * 24 * 60 * 60,
                     provider: .codex
@@ -449,12 +484,15 @@ final class SchedulePlannerTests: XCTestCase {
             ]
         )
 
-        let providers = events.compactMap { event -> ProviderID? in
-            guard case .providerSession(let provider, _) = event.kind else { return nil }
-            return provider
+        let codexStarts = events.compactMap { event -> Date? in
+            guard case .providerSession(.codex, _) = event.kind else { return nil }
+            return event.date
         }
-        XCTAssertFalse(providers.contains(.codex), "A weekly cap is not a reset to chain to.")
-        XCTAssertTrue(providers.contains(.claude))
+        XCTAssertEqual(codexStarts, [weeklyReset.addingTimeInterval(ChainedSessionPlanner.resetBuffer)])
+        XCTAssertTrue(events.contains { event in
+            if case .providerSession(.claude, _) = event.kind { return true }
+            return false
+        })
     }
 
     func testContinuousDoesNotAssumeAFiveHourCodexWindow() throws {

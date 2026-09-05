@@ -19,6 +19,7 @@ jobs:
       WAKEBAR_SCRATCH_PATH: ${{ runner.temp }}/wakebar-swift-scratch
       WAKEBAR_SPM_CACHE_PATH: ${{ runner.temp }}/wakebar-swiftpm-cache
       WAKEBAR_DERIVED_DATA_PATH: ${{ runner.temp }}/wakebar-derived-data
+      WAKEBAR_SNAPSHOT_DIR: ${{ runner.temp }}/wakebar-snapshots
 
     steps:
       - name: Check out repository
@@ -46,9 +47,13 @@ jobs:
           mkdir -p "$WAKEBAR_SCRATCH_PATH"
           mkdir -p "$WAKEBAR_SPM_CACHE_PATH"
           mkdir -p "$WAKEBAR_DERIVED_DATA_PATH"
+          mkdir -p "$WAKEBAR_SNAPSHOT_DIR"
 
       - name: Generate Xcode project
         run: xcodegen generate
+
+      - name: Require generated project to be committed
+        run: git diff --exit-code -- Wakebar.xcodeproj/project.pbxproj
 
       - name: Parse Swift sources
         run: find Sources Tests -name '*.swift' -print0 | xargs -0 -n 1 swiftc -frontend -parse
@@ -60,6 +65,11 @@ jobs:
           --cache-path "$WAKEBAR_SPM_CACHE_PATH"
           --scratch-path "$WAKEBAR_SCRATCH_PATH"
 
+      - name: Validate release package workflow
+        run: |
+          bash -n Scripts/package_app.sh
+          Scripts/package_app.sh --dry-run
+
       - name: Build unsigned Release app
         run: >-
           xcodebuild
@@ -70,4 +80,6 @@ jobs:
           -derivedDataPath "$WAKEBAR_DERIVED_DATA_PATH"
           CLANG_MODULE_CACHE_PATH="$CLANG_MODULE_CACHE_PATH"
           CODE_SIGNING_ALLOWED=NO
+          ARCHS="arm64 x86_64"
+          ONLY_ACTIVE_ARCH=NO
           build
