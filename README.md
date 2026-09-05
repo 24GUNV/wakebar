@@ -1,38 +1,39 @@
 # Wakebar
 
-Wakebar is a native macOS menu-bar app for Claude Code and Codex users. Set a morning time and weekdays before bed. Wakebar then schedules a minimal prompt for each provider and reports the limits each provider exposes.
+Wakebar is a small macOS menu-bar app for people who use Claude Code and Codex on a subscription.
 
-Setup is automatic for both providers. Claude wakes from a cloud Routine. Codex wakes from this Mac while Wakebar is open. The menu shows Claude five-hour, weekly, and Fable weekly usage. It shows Codex weekly usage without inventing a five-hour window.
+Both providers meter you in windows. Claude has a five-hour window and a weekly one. Codex has a weekly one, and a five-hour one on some plans. A window only starts counting when you send your first prompt. Start work at nine, hit the five-hour limit at two, and you wait until seven.
 
-![Wakebar menu overview](Docs/Images/wakebar-overview.svg)
+Wakebar sends a one-word prompt a few minutes before you get up. Your first window is already running when you open the laptop, so it resets earlier in the day. That is the whole idea.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="Docs/Images/wakebar-menu-dark.png">
+  <img alt="The Wakebar menu: next wake, provider status, and usage bars for Claude Code and Codex" src="Docs/Images/wakebar-menu-light.png" width="372">
+</picture>
 
 ## How it works
 
-![Wakebar provider flow](Docs/Images/wakebar-flow.svg)
+![How Wakebar works](Docs/Images/wakebar-flow.svg)
 
-Wakebar compiles one local schedule into two provider-specific plans:
+Tell Wakebar when you wake up and on which days. A few minutes before that, at a lead you choose, it asks each provider for a one-word reply.
 
-- Claude: Wakebar lists existing Routines and writes only the changes required for the compiled plan.
+- **Claude Code** gets a cloud Routine. Wakebar creates and updates it through the same API Claude Code uses, so it fires even when your Mac is asleep or off. Wakebar only writes the Routines it owns, and only when something changed.
 
-- Codex: Wakebar sends one minimal Codex request from this Mac at each planned wake. It signs the request with the Codex CLI credential and uses the model from `~/.codex/config.toml`.
+- **Codex** gets one tiny request sent from your Mac, signed with the Codex CLI login you already have and using the model from your Codex config. It only goes out while Wakebar is running. If the Mac was asleep at the time, Wakebar sends it when the Mac wakes, as long as the window has not started yet.
 
-- Usage: Wakebar reads Claude’s five-hour, weekly, and Fable weekly limits and Codex’s weekly limit.
+Afterwards Wakebar reads usage from both providers and says **Window started** only when the numbers actually moved. It never assumes a prompt landed.
 
-- Repeats: The optional five-hour repeat cadence applies only to Claude; Codex receives one request before each selected wake, or one after each reset on the **Every reset** cadence.
+There is also an **Every reset** mode. Instead of one fixed morning time, Wakebar reopens each window as soon as the previous one resets, so the windows chain back to back through the day. Claude chains off its five-hour window. Codex chains off whatever it reports: a five-hour window on plans that have one, otherwise a single wake after the weekly reset.
 
-A planned wake is not a sent prompt. A Claude prompt is sent only when the Routine fires. A Codex prompt is sent only when Wakebar is running at the planned time, or when the Mac wakes and the window is still closed. Wakebar does not report that a usage window started unless provider usage data confirms the change.
+The menu shows Claude's five-hour, weekly, and Fable weekly usage, and Codex's weekly usage. Wakebar does not invent a five-hour Codex bar on plans that do not report one.
 
-A September 5, 2026 live test confirmed that one minimal Codex request pins the reported limit. Codex reports a weekly limit on some plans, so Wakebar does not assume a five-hour Codex window.
+## What a wake costs
 
-## Cost of a fire
+Each wake is one short prompt on your subscription. It does not use Anthropic or OpenAI API credits.
 
-Each fire starts a short cloud session on the connected subscription. It consumes subscription usage. It does not use Anthropic or OpenAI API credits.
+- The Claude Routine is told: `Reply only with hi. Do not use tools, edit files, publish artifacts, or request permissions.`
 
-The minimal prompts are:
-
-- Claude Code Routine: `Reply only with hi. Do not use tools, edit files, publish artifacts, or request permissions.`
-
-- Codex request: `Reply only with hi. Do not use tools.` with the prompt `hi`, no tools, and low reasoning effort.
+- The Codex request says `hi` with the instruction `Reply only with hi. Do not use tools.`, no tools, and low reasoning effort. In a live test on September 5, 2026 that cost about five input tokens.
 
 ## Requirements
 
@@ -42,17 +43,15 @@ The minimal prompts are:
 
 - [XcodeGen](https://github.com/yonaskolb/XcodeGen)
 
-- Claude Code signed in with Claude.ai
+- Claude Code signed in with Claude.ai (for the Claude wake)
 
-- Codex CLI signed in with ChatGPT
+- Codex CLI signed in with ChatGPT (for the Codex wake)
 
-Wakebar is a direct-download, notarized, non-sandboxed app. The non-sandboxed build can read the existing local command-line credentials that the providers own.
+Wakebar is a direct-download, notarized app. It is not sandboxed, because it has to read the credentials that Claude Code and Codex CLI already keep on your Mac.
 
 ## Install
 
-There is no packaged release yet. Until the first release appears on [GitHub Releases](https://github.com/24GUNV/wakebar/releases), follow **Build from source** below.
-
-When a release is available:
+There is no packaged release yet, so for now follow **Build from source** below. Once the first release lands on [GitHub Releases](https://github.com/24GUNV/wakebar/releases):
 
 1. Download the latest notarized `.dmg` from [GitHub Releases](https://github.com/24GUNV/wakebar/releases).
 
@@ -60,7 +59,7 @@ When a release is available:
 
 3. Open Wakebar from Applications.
 
-Gatekeeper verifies the Developer ID signature and notarization ticket. Do not bypass Gatekeeper. If verification fails, delete the download and get a new copy from GitHub Releases.
+Gatekeeper checks the Developer ID signature and notarization ticket. If that check fails, do not bypass it. Delete the download and fetch a fresh copy.
 
 ## Build from source
 
@@ -104,55 +103,39 @@ again each time. To sign with an Apple team identity instead, set
 
 ## Set up Wakebar
 
-1. Open Wakebar from the menu bar.
+1. Click the menu-bar icon.
 
-2. Set the morning time and weekdays.
+2. Pick your wake time and the days it applies.
 
-3. Select Claude Code, Codex, or both.
+3. Choose Claude Code, Codex, or both, and save.
 
-4. Save the schedule.
+4. Claude setup syncs the Routines for you. Codex setup should show **Codex CLI** as signed in. If it says **Run `codex login`**, do that and reopen the menu.
 
-5. Open Claude setup and synchronize the Routines.
-
-6. Open Codex setup and confirm that the sign-in row shows **Codex CLI**. If it shows **Run `codex login`**, sign in and reopen the menu.
+That is it. The menu shows **Ready** next to each provider once it is wired up.
 
 ## Usage and Start now
 
-Open the menu to refresh usage immediately. Wakebar refreshes it every 60 seconds while the menu stays open. Closing the menu stops this refresh loop.
+Opening the menu refreshes usage right away, and every 60 seconds while it stays open. If a provider is signed out, its row tells you the command that fixes it.
 
-Claude shows five-hour, weekly, and Fable weekly usage. Codex shows weekly usage. If authentication is missing, the row shows the command that restores sign-in.
+**Start now** sends a wake immediately. For Claude it runs the managed Morning Routine, syncing it first if needed. For Codex it sends the request from this Mac. Wakebar then polls usage every 30 seconds for up to five minutes and shows **Window started** once the provider confirms a new five-hour window, or **Week started** when Codex only reports a weekly limit and that limit pins to the request.
 
-Select **Start now** for an immediate request:
+## Keeping Claude's Routines in sync
 
-- Claude runs the managed Morning Routine and synchronizes it first if necessary.
+Claude's cron expressions are in UTC, so Wakebar re-syncs at launch, once a day, and whenever the Claude access token changes. That keeps daylight-saving changes from drifting your wake time.
 
-- Codex sends the minimal request from this Mac.
+A sync owns every Routine whose name starts with `Wakebar ·`. If you replace a schedule, the old one's Routines are deleted rather than left firing beside the new ones.
 
-For both providers, Wakebar reads usage every 30 seconds for up to five minutes. **Window started** appears only after the provider confirms a new five-hour window. **Week started** appears when Codex reports only a weekly limit and that limit pins to the request.
+In **Every reset** mode, Wakebar keeps one extra `Next reset` Routine pinned to a minute after the current five-hour window resets. It reads Claude usage every five minutes in the background and moves that Routine when the reset moves. Because the Routine fires in the cloud, the Mac does not need to be awake.
 
-## Claude schedule maintenance
+One caveat: Anthropic does not document the Routines API. Everything that touches it lives in `ClaudeRoutinesClient`, so if it changes, the rest of the app should not.
 
-Claude cron expressions use Coordinated Universal Time (UTC). Wakebar synchronizes Routines at launch, once every 24 hours, and when the resolved Claude access token changes. This process corrects daylight-saving-time drift.
+## What Wakebar touches
 
-A sync owns every Routine named `Wakebar ·`. It deletes Routines that an earlier schedule created, so a replaced schedule cannot keep firing and the provider list stays clean.
-
-With the **Every reset** cadence, Wakebar keeps one extra `Next reset` Routine pinned to one minute after the open five-hour window resets. Wakebar reads Claude usage every five minutes in the background and rewrites that Routine when the reset moves. The Routine fires in the cloud, so the Mac does not need to be awake.
-
-Anthropic does not document the Claude Code Routines API. Wakebar isolates this integration in `ClaudeRoutinesClient`. If the provider changes the API, the rest of the scheduling and persistence code remains independent.
-
-## Security
-
-Wakebar reads only these existing credentials:
-
-- the Claude Code OAuth credential from macOS Keychain;
-
-- Codex authentication from `~/.codex`.
-
-Wakebar sends the Claude credential only to `api.anthropic.com`. It sends the Codex credential only to `chatgpt.com`. Wakebar does not upload credentials or usage data anywhere else. It does not store provider secrets in the repository or in Wakebar preferences.
+Wakebar reads two credentials that already exist on your Mac: the Claude Code OAuth token in the Keychain, and the Codex CLI login in `~/.codex`. The Claude token goes only to `api.anthropic.com`, and the Codex token only to `chatgpt.com`. Nothing is uploaded anywhere else, and no secret is written to preferences or to this repository.
 
 ## Verification
 
-Run the local checks:
+The checks CI runs, for running locally:
 
 ```sh
 xcodegen generate
@@ -183,4 +166,4 @@ Docs                     Integration and release notes
 
 See [integration details](Docs/INTEGRATIONS.md) and the [release checklist](Docs/RELEASE_CHECKLIST.md).
 
-The release packaging script creates `Wakebar.dmg` and `Wakebar.dmg.sha256` after signing and notarization succeed.
+The packaging script produces `Wakebar.dmg` and `Wakebar.dmg.sha256` once signing and notarization succeed.

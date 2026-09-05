@@ -29,6 +29,7 @@ final class PopoverSnapshotTests: XCTestCase {
             try render(model: assumedModel(), name: "assumed-\(suffix)", scheme: scheme, in: root)
             try render(model: continuousModel(), name: "continuous-\(suffix)", scheme: scheme, in: root)
             try render(model: divergedModel(), name: "diverged-\(suffix)", scheme: scheme, in: root)
+            try render(model: readmeModel(), name: "menu-\(suffix)", scheme: scheme, in: root, framed: true)
         }
     }
 
@@ -156,6 +157,13 @@ final class PopoverSnapshotTests: XCTestCase {
         return model
     }
 
+    /// The README picture: a weekday schedule with every limit reported.
+    private func readmeModel() -> AppModel {
+        let model = divergedModel()
+        model.schedule.cadence = .schedule
+        return model
+    }
+
     /// Sessions chained to the window rather than the calendar, which is the
     /// state where the hero counts down hours instead of naming a day.
     private func continuousModel() -> AppModel {
@@ -184,25 +192,73 @@ final class PopoverSnapshotTests: XCTestCase {
 
     // MARK: - Rendering
 
+    /// `framed` clips the popover to its rounded shape on a transparent
+    /// background, which is how the README shows it.
     private func render(
         model: AppModel,
         name: String,
         scheme: ColorScheme,
-        in root: URL
+        in root: URL,
+        framed: Bool = false
     ) throws {
-        let content = WakeSummaryView(model: model)
+        let panel = WakeSummaryView(model: model)
             .frame(width: WakebarDesign.popoverWidth)
             .background(scheme == .dark ? Color(white: 0.12) : Color(white: 0.96))
-            .environment(\.colorScheme, scheme)
-            .environment(\.timeZone, model.schedule.timeZone)
+        let content = Group {
+            if framed {
+                panel
+                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                            .strokeBorder(Color.primary.opacity(scheme == .dark ? 0.18 : 0.12))
+                    )
+                    .shadow(color: .black.opacity(scheme == .dark ? 0.5 : 0.22), radius: 18, y: 10)
+                    .padding(36)
+            } else {
+                panel
+            }
+        }
+        .environment(\.colorScheme, scheme)
+        .environment(\.timeZone, model.schedule.timeZone)
 
-        let renderer = ImageRenderer(content: content)
-        renderer.scale = 2
+        // An AppKit-hosted render draws real buttons and SF Symbols, which
+        // ImageRenderer leaves as placeholders.
+        let hosting = NSHostingView(rootView: content)
+        hosting.appearance = NSAppearance(named: scheme == .dark ? .darkAqua : .aqua)
+        let size = hosting.fittingSize
+        hosting.frame = NSRect(origin: .zero, size: size)
+        let window = NSWindow(
+            contentRect: hosting.frame,
+            styleMask: .borderless,
+            backing: .buffered,
+            defer: false
+        )
+        window.contentView = hosting
+        window.appearance = hosting.appearance
+        window.isOpaque = false
+        window.backgroundColor = .clear
+        hosting.layoutSubtreeIfNeeded()
+        hosting.displayIfNeeded()
 
-        let image = try XCTUnwrap(renderer.nsImage, name)
-        let tiff = try XCTUnwrap(image.tiffRepresentation, name)
-        let bitmap = try XCTUnwrap(NSBitmapImageRep(data: tiff), name)
+        let bitmap = try XCTUnwrap(
+            NSBitmapImageRep(
+                bitmapDataPlanes: nil,
+                pixelsWide: Int(size.width) * 2,
+                pixelsHigh: Int(size.height) * 2,
+                bitsPerSample: 8,
+                samplesPerPixel: 4,
+                hasAlpha: true,
+                isPlanar: false,
+                colorSpaceName: .deviceRGB,
+                bytesPerRow: 0,
+                bitsPerPixel: 0
+            ),
+            name
+        )
+        bitmap.size = size
+        hosting.cacheDisplay(in: hosting.bounds, to: bitmap)
         let png = try XCTUnwrap(bitmap.representation(using: .png, properties: [:]), name)
+        let image = NSImage(size: size)
 
         let url = root.appendingPathComponent("\(name).png")
         try png.write(to: url)

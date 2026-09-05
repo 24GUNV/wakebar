@@ -34,6 +34,8 @@ Use this checklist for a direct-download, notarized macOS release.
 
 - Review skipped tests and run opt-in visual snapshots when the layout changed.
 
+- Regenerate the README menu pictures when the popover layout changed. Run `WAKEBAR_SNAPSHOT_DIR=/tmp/wakebar-snaps swift test --filter PopoverSnapshotTests` with `DEVELOPER_DIR` set to Xcode, then copy `menu-dark.png` and `menu-light.png` to `Docs/Images/wakebar-menu-dark.png` and `Docs/Images/wakebar-menu-light.png`.
+
 - Run `LiveProviderAcceptanceTests` with `WAKEBAR_LIVE_PROVIDER_TESTS=1` and `WAKEBAR_LIVE_SCHEDULE_FILE` set to a disposable Wakebar schedule file.
 
 - Confirm that the live test fires the managed Claude Routine and receives provider-reported usage confirmation within five minutes.
