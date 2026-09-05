@@ -75,7 +75,20 @@ final class CodexWakeModel {
     func tick(schedule: WakeSchedule) async -> Date? {
         refreshSignIn()
         let readAt = now()
-        let windows = (try? await usageReader.currentWindows(now: readAt)) ?? []
+        guard schedule.isEnabled, schedule.isValid, schedule.includeCodex else { return nil }
+        guard isSignedIn else {
+            state = .failed("Connect Codex in Wakebar settings, then sign in with `codex login`.", at: readAt)
+            return readAt.addingTimeInterval(CodexWakePlanner.settleInterval)
+        }
+        let windows: [UsageWindow]
+        do {
+            windows = try await usageReader.currentWindows(now: readAt)
+        } catch {
+            state = .failed("Codex usage is unavailable. No wake was sent.", at: readAt)
+            nextCheckAt = readAt.addingTimeInterval(CodexWakePlanner.settleInterval)
+            return nextCheckAt
+        }
+        guard !Task.isCancelled else { return nil }
         let decision = planner.decide(
             schedule: schedule,
             windows: windows,
@@ -93,7 +106,11 @@ final class CodexWakeModel {
             return decision.nextCheck
         }
 
+        guard !Task.isCancelled else { return nil }
         state = .sending
+        // Persist before sending: a timeout can follow provider acceptance.
+        // Do not repeat an ambiguous attempt for the same schedule slot.
+        recordHandled(decision.dueAt ?? readAt)
         do {
             _ = try await requester.requestStart(prompt: ProviderID.codex.minimalPrompt)
         } catch {

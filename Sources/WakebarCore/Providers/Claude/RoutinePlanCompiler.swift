@@ -10,7 +10,7 @@ public struct RoutinePlanCompiler: Sendable {
     }
 
     /// Compiles the local wall-clock schedule into Claude's five-field UTC cron format.
-    /// A later sync recompiles the plan with the time-zone offset that applies then.
+    /// Each weekday uses its next occurrence, including upcoming daylight-saving changes.
     ///
     /// - Parameter chainFiresAt: on an "Every reset" schedule, when the next
     ///   chained session should fire, from ``ContinuousChainAnchor``. It adds
@@ -23,19 +23,32 @@ public struct RoutinePlanCompiler: Sendable {
     ) -> [RoutineSpec] {
         guard schedule.includeClaude else { return [] }
 
-        let offsetMinutes = schedule.timeZone.secondsFromGMT(for: referenceDate) / 60
         let prefix = Self.namePrefix(for: schedule)
 
-        var plan = slotCompiler.slots(for: schedule).map { slot in
-            RoutineSpec(
-                name: routineName(prefix: prefix, phase: slot.phase),
-                cronExpression: cronExpression(
-                    slot: slot,
-                    offsetMinutes: offsetMinutes
-                ),
-                enabled: schedule.isEnabled,
-                prompt: Self.prompt
-            )
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = schedule.timeZone
+        var plan = slotCompiler.slots(for: schedule).flatMap { slot -> [RoutineSpec] in
+            var groups: [Int: Set<Int>] = [:]
+            var utc = Calendar(identifier: .gregorian)
+            utc.timeZone = TimeZone(secondsFromGMT: 0)!
+            for weekday in slot.weekdays {
+                let match = DateComponents(hour: slot.hour, minute: slot.minute, weekday: weekday.rawValue)
+                guard let next = calendar.nextDate(after: referenceDate, matching: match,
+                                                   matchingPolicy: .nextTime, repeatedTimePolicy: .first) else { continue }
+                let parts = utc.dateComponents([.hour, .minute, .weekday], from: next)
+                guard let hour = parts.hour, let minute = parts.minute, let day = parts.weekday else { continue }
+                groups[hour * 60 + minute, default: []].insert(day - 1)
+            }
+            return groups.keys.sorted().map { minuteOfDay in
+                let days = (groups[minuteOfDay] ?? []).sorted().map(String.init).joined(separator: ",")
+                let suffix = groups.count > 1 ? " UTC minute \(minuteOfDay)" : ""
+                return RoutineSpec(
+                    name: routineName(prefix: prefix, phase: slot.phase) + suffix,
+                    cronExpression: "\(minuteOfDay % 60) \(minuteOfDay / 60) * * \(days)",
+                    enabled: schedule.isEnabled,
+                    prompt: Self.prompt
+                )
+            }
         }
 
         if schedule.cadence == .continuous, let chainFiresAt {
@@ -85,34 +98,4 @@ public struct RoutinePlanCompiler: Sendable {
         }
     }
 
-    private func cronExpression(
-        slot: RecurringSessionSlot,
-        offsetMinutes: Int
-    ) -> String {
-        let minutesPerDay = 24 * 60
-        let minutesPerWeek = 7 * minutesPerDay
-        var utcWeekdays = Set<Int>()
-        var utcHour = 0
-        var utcMinute = 0
-
-        for weekday in slot.weekdays {
-            let localMinuteOfWeek = ((weekday.rawValue - 1) * minutesPerDay)
-                + (slot.hour * 60)
-                + slot.minute
-            let utcMinuteOfWeek = positiveModulo(
-                localMinuteOfWeek - offsetMinutes,
-                modulus: minutesPerWeek
-            )
-            utcWeekdays.insert(utcMinuteOfWeek / minutesPerDay)
-            utcHour = (utcMinuteOfWeek % minutesPerDay) / 60
-            utcMinute = utcMinuteOfWeek % 60
-        }
-
-        let weekdays = utcWeekdays.sorted().map(String.init).joined(separator: ",")
-        return "\(utcMinute) \(utcHour) * * \(weekdays)"
-    }
-
-    private func positiveModulo(_ value: Int, modulus: Int) -> Int {
-        ((value % modulus) + modulus) % modulus
-    }
 }

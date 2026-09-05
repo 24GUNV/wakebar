@@ -2,6 +2,13 @@ import XCTest
 @testable import WakebarCore
 
 final class ContinuousChainAnchorTests: XCTestCase {
+    func testUnavailableReadingPreservesLastFirePastGracePeriod() {
+        let fire = Date(timeIntervalSince1970: 1_800_000_000)
+        var anchor = ContinuousChainAnchor(firesAt: fire)
+        XCTAssertFalse(anchor.observe(windows: [], now: fire.addingTimeInterval(3600), isReliable: false))
+        XCTAssertEqual(anchor.firesAt, fire)
+    }
+
     private let now = Date(timeIntervalSince1970: 1_779_800_000)
 
     func testAnchorsOneMinuteAfterTheOpenClaudeReset() {

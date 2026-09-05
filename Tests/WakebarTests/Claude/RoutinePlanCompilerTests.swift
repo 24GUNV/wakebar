@@ -154,6 +154,29 @@ final class RoutinePlanCompilerTests: XCTestCase {
         XCTAssertNotEqual(prefix, RoutinePlanCompiler.familyPrefix)
     }
 
+    func testFridaySyncUsesSundayPostDSTOffset() throws {
+        var schedule = WakeSchedule.default
+        schedule.isEnabled = true
+        schedule.selectedWeekdays = [.sunday]
+        schedule.followsSystemTimeZone = false
+        schedule.timeZoneIdentifier = "America/New_York"
+        let plan = RoutinePlanCompiler().compile(schedule: schedule, referenceDate: try date("2026-03-06T12:00:00Z"))
+        XCTAssertEqual(plan.first?.cronExpression, "50 10 * * 0")
+    }
+
+    func testSpringGapUsesNextValidLocalTime() throws {
+        var schedule = WakeSchedule.default
+        schedule.isEnabled = true
+        schedule.hour = 2
+        schedule.minute = 30
+        schedule.sessionLeadMinutes = 0
+        schedule.selectedWeekdays = [.sunday]
+        schedule.followsSystemTimeZone = false
+        schedule.timeZoneIdentifier = "America/New_York"
+        let plan = RoutinePlanCompiler().compile(schedule: schedule, referenceDate: try date("2026-03-06T12:00:00Z"))
+        XCTAssertEqual(plan.first?.cronExpression, "0 7 * * 0")
+    }
+
     private func date(_ value: String) throws -> Date {
         try XCTUnwrap(ISO8601DateFormatter().date(from: value))
     }

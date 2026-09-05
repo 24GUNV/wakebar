@@ -66,6 +66,7 @@ final class AppModel {
             startCodexWake()
         }
     }
+    var connectionRevision = 0
     var snapshots: [ProviderSnapshot]
     var activityNotice: ActivityNotice?
     var isRunning = false
@@ -111,6 +112,7 @@ final class AppModel {
     @ObservationIgnored private var claudeRoutineSyncTask: Task<Void, Never>?
     @ObservationIgnored private var claudeMaintenanceTask: Task<Void, Never>?
     @ObservationIgnored private var codexWakeTask: Task<Void, Never>?
+    @ObservationIgnored private var clockChangeTask: Task<Void, Never>?
     @ObservationIgnored private var codexWakeObserver: (any NSObjectProtocol)?
     @ObservationIgnored private var providerStartNowTasks: [ProviderID: Task<Void, Never>] = [:]
 
@@ -480,6 +482,13 @@ final class AppModel {
         startClaudeMaintenance()
         startCodexWake()
         observeSystemWake()
+        clockChangeTask = Task { [weak self] in
+            for await _ in NotificationCenter.default.notifications(named: NSNotification.Name.NSSystemTimeZoneDidChange) {
+                guard let self else { return }
+                await self.syncClaudeRoutines(for: self.schedule, showsNotice: false, credentialIntent: .background)
+                self.startCodexWake()
+            }
+        }
     }
 
     func saveSchedule(_ updatedSchedule: WakeSchedule) {
@@ -545,7 +554,7 @@ final class AppModel {
         providerStartNowStates = providerStartNowStates.mapValues {
             $0.reconciled(with: usageWindows, now: now)
         }
-        if chainAnchor.observe(windows: usageWindows, now: now) {
+        if chainAnchor.observe(windows: usageWindows, now: now, isReliable: usageWindowIssues[.claude] == nil) {
             chainSyncIsDue = true
         }
         await syncChainIfDue()
@@ -617,7 +626,46 @@ final class AppModel {
         }
     }
 
+    func isProviderConnected(_ provider: ProviderID) -> Bool {
+        _ = connectionRevision
+        return ProviderConnectionConsent.isAllowed(provider)
+    }
+
+    func connectProvider(_ provider: ProviderID) async {
+        ProviderConnectionConsent.allow(provider)
+        connectionRevision += 1
+        if provider == .claude {
+            do {
+                _ = try await ClaudeCredentialStore.shared.credential(.userInitiated)
+            } catch {
+                activityNotice = .error("Allow Wakebar to read the Claude Code credential in the macOS Keychain prompt.")
+                return
+            }
+        }
+        if let liveReader = usageWindowReader as? LiveUsageWindowReader {
+            await liveReader.invalidateCache()
+        }
+        await refreshUsageWindows()
+        if provider == .claude {
+            await syncClaudeRoutines()
+        } else {
+            applyCodexReadiness()
+            startCodexWake()
+        }
+    }
+
     func syncClaudeRoutines() async {
+        guard isProviderConnected(.claude) else { return }
+        do {
+            _ = try await ClaudeCredentialStore.shared.credential(.userInitiated)
+        } catch {
+            activityNotice = .error("Claude credential access is unavailable. Reconnect Claude Code in settings.")
+            return
+        }
+        if let liveReader = usageWindowReader as? LiveUsageWindowReader {
+            await liveReader.invalidateCache()
+        }
+        await refreshUsageWindows()
         claudeRoutineSyncTask?.cancel()
         await syncClaudeRoutines(
             for: schedule,
@@ -627,6 +675,10 @@ final class AppModel {
     }
 
     func startNow(_ provider: ProviderID) {
+        guard isProviderConnected(provider) else {
+            activityNotice = .error("Connect the provider in Wakebar settings before sending a prompt.")
+            return
+        }
         providerStartNowTasks[provider]?.cancel()
         providerStartNowStates[provider] = .requested
         let requestedSchedule = schedule
@@ -682,6 +734,9 @@ final class AppModel {
         showsNotice: Bool,
         credentialIntent: ClaudeCredentialIntent
     ) async -> Bool {
+        guard ProviderConnectionConsent.isAllowed(.claude) else { return false }
+        // Unknown usage must not remove the provider's last reset Routine.
+        guard syncedSchedule.cadence != .continuous || usageWindowIssues[.claude] == nil else { return false }
         let result = await claudeSetup.sync(
             for: syncedSchedule,
             credentialIntent: credentialIntent,
@@ -850,7 +905,10 @@ final class AppModel {
             queue: .main
         ) { [weak self] _ in
             Task { @MainActor in
-                self?.startCodexWake()
+                guard let self else { return }
+                self.startCodexWake()
+                await self.refreshUsageWindows()
+                await self.syncClaudeRoutines(for: self.schedule, showsNotice: false, credentialIntent: .background)
             }
         }
     }

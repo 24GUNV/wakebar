@@ -132,6 +132,7 @@ final class ClaudeRoutinesClientTests: XCTestCase {
     func testMissingCredentialIsReportedBeforeTransportRuns() async {
         let transport = StubClaudeRoutinesTransport(responses: [])
         let resolver = UsageWindowCredentialResolver(
+            accessAllowed: { _ in true },
             environment: [:],
             homeDirectory: URL(filePath: "/nonexistent-wakebar-test-home"),
             keychainLookup: { _ in .notFound }
@@ -164,6 +165,7 @@ final class ClaudeRoutinesClientTests: XCTestCase {
             )
         )
         let resolver = UsageWindowCredentialResolver(
+            accessAllowed: { _ in true },
             environment: [:],
             homeDirectory: URL(filePath: "/nonexistent-wakebar-test-home"),
             keychainLookup: { allowUI in keychain.lookup(allowUI: allowUI) }
@@ -195,6 +197,7 @@ final class ClaudeRoutinesClientTests: XCTestCase {
             "{\"claudeAiOauth\":{\"accessToken\":\"oauth-test-token\"}}".utf8
         )
         let resolver = UsageWindowCredentialResolver(
+            accessAllowed: { _ in true },
             environment: [:],
             homeDirectory: URL(filePath: "/nonexistent-wakebar-test-home"),
             keychainLookup: { _ in .data(credentials) }

@@ -6,6 +6,15 @@ struct CodexWakeSetupView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: WakebarDesign.sectionSpacing) {
+            if !model.isProviderConnected(.codex) {
+                Text("Connect to let Wakebar read your Codex CLI login, check usage, and send short prompts on your enabled schedule. These requests consume subscription usage.")
+                    .font(.callout)
+                    .fixedSize(horizontal: false, vertical: true)
+                Button("Connect Codex") {
+                    Task { await model.connectProvider(.codex) }
+                }
+                .buttonStyle(.borderedProminent)
+            }
             Text("Wakebar sends Codex a one-word request from this Mac at the scheduled time, or just after Codex's own limit resets on the every-reset cadence. It runs only while Wakebar is open. A wake missed while the Mac slept is sent as soon as it is back, unless you have already used Codex by then.")
                 .font(.callout)
                 .foregroundStyle(.secondary)

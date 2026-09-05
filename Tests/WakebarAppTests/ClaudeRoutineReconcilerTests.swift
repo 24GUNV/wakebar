@@ -191,6 +191,7 @@ final class ClaudeRoutineReconcilerTests: XCTestCase {
             "{\"claudeAiOauth\":{\"accessToken\":\"oauth-test-token\"}}".utf8
         )
         let resolver = UsageWindowCredentialResolver(
+            accessAllowed: { _ in true },
             environment: [:],
             homeDirectory: URL(filePath: "/nonexistent-wakebar-test-home"),
             keychainLookup: { _ in .data(credentials) }

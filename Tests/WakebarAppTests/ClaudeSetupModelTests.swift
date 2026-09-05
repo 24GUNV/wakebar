@@ -18,6 +18,7 @@ final class ClaudeSetupModelTests: XCTestCase {
             )
         )
         let resolver = UsageWindowCredentialResolver(
+            accessAllowed: { _ in true },
             environment: [:],
             homeDirectory: URL(filePath: "/nonexistent-wakebar-test-home"),
             keychainLookup: { allowUI in keychain.lookup(allowUI: allowUI) }
@@ -51,6 +52,7 @@ final class ClaudeSetupModelTests: XCTestCase {
             )
         )
         let resolver = UsageWindowCredentialResolver(
+            accessAllowed: { _ in true },
             environment: [:],
             homeDirectory: URL(filePath: "/nonexistent-wakebar-test-home"),
             keychainLookup: { allowUI in keychain.lookup(allowUI: allowUI) }
@@ -104,6 +106,7 @@ final class ClaudeSetupModelTests: XCTestCase {
     func testBackgroundAuthorizationFailureHasActionableMessage() async {
         let keychain = StubKeychainLookup(result: .interactionRequired)
         let resolver = UsageWindowCredentialResolver(
+            accessAllowed: { _ in true },
             environment: [:],
             homeDirectory: URL(filePath: "/nonexistent-wakebar-test-home"),
             keychainLookup: { allowUI in keychain.lookup(allowUI: allowUI) }

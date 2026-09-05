@@ -1,5 +1,6 @@
 import Foundation
 import Security
+import WakebarCore
 
 /// Resolves the CLIs' existing credentials without modifying or exporting
 /// them. The CLIs remain the owners of both credential files.
@@ -18,39 +19,31 @@ struct UsageWindowCredentialResolver: Sendable {
         case unavailable
     }
 
-    enum SecurityCLIRunResult: Sendable {
-        case completed(stdout: Data, exitCode: Int32)
-        case timedOut
-        case launchFailed
-    }
-
     private let environment: [String: String]
     private let homeDirectory: URL
     /// Injected so tests can answer without querying the real Keychain. The
     /// live query prompts the user for access, which a test run must never do.
     private let keychainLookup: @Sendable (_ allowUI: Bool) -> KeychainResult
-    /// Injected so tests never launch `security` or read the real Keychain.
-    private let securityCLIRunner: @Sendable () -> SecurityCLIRunResult
+    private let accessAllowed: @Sendable (ProviderID) -> Bool
 
     init(
+        accessAllowed: @escaping @Sendable (ProviderID) -> Bool = { ProviderConnectionConsent.isAllowed($0) },
         environment: [String: String] = ProcessInfo.processInfo.environment,
         homeDirectory: URL = FileManager.default.homeDirectoryForCurrentUser,
-        keychainLookup: (@Sendable (_ allowUI: Bool) -> KeychainResult)? = nil,
-        securityCLIRunner: (@Sendable () -> SecurityCLIRunResult)? = nil
+        keychainLookup: (@Sendable (_ allowUI: Bool) -> KeychainResult)? = nil
     ) {
+        self.accessAllowed = accessAllowed
         self.environment = environment
         self.homeDirectory = homeDirectory
         self.keychainLookup = keychainLookup ?? Self.claudeCodeKeychainCredentials
-        if let securityCLIRunner {
-            self.securityCLIRunner = securityCLIRunner
-        } else if keychainLookup != nil {
-            self.securityCLIRunner = { .launchFailed }
-        } else {
-            self.securityCLIRunner = Self.runClaudeCodeSecurityCLI
-        }
+    }
+
+    func requireConsent(for provider: ProviderID) throws {
+        guard accessAllowed(provider) else { throw UsageWindowProviderIssue.connectionRequired }
     }
 
     func codexCredential() throws -> CodexCredential {
+        try requireConsent(for: .codex)
         let path = path(
             environmentVariable: "CODEX_HOME",
             fallback: homeDirectory.appendingPathComponent(".codex")
@@ -70,6 +63,7 @@ struct UsageWindowCredentialResolver: Sendable {
     }
 
     func claudeCredential(allowUI: Bool = true) throws -> ClaudeCredential {
+        try requireConsent(for: .claude)
         let path = path(
             environmentVariable: "CLAUDE_CONFIG_DIR",
             fallback: homeDirectory.appendingPathComponent(".claude")
@@ -85,29 +79,9 @@ struct UsageWindowCredentialResolver: Sendable {
             fileHasOnlyMCPAuthentication = credentials.mcpOAuth != nil
         }
 
-        // Claude Code writes this item with the `security` tool, and macOS lets
-        // the tool that created an item read it back without a dialog — that is
-        // how the CLI itself reads it on every launch. The tool is judged by its
-        // own identity, not by the app that spawned it, so a read through it is
-        // quiet whichever intent asked. A read through the Security framework is
-        // judged by Wakebar's identity instead, which the item's ACL does not
-        // list, so it either prompts or fails. The tool therefore goes first for
-        // every read; the framework is only the fallback, and a background
-        // fallback must fail quietly rather than raise the dialog.
-        let keychainResult: KeychainResult
-        switch securityCLIRunner() {
-        case .completed(let stdout, 0):
-            let data = Self.decodedSecurityCLIOutput(stdout)
-            if (try? JSONDecoder().decode(ClaudeCredentialsPayload.self, from: data)) != nil {
-                keychainResult = .data(data)
-            } else {
-                keychainResult = keychainLookup(allowUI)
-            }
-        case .completed(_, 44):
-            keychainResult = .notFound
-        case .completed, .timedOut, .launchFailed:
-            keychainResult = keychainLookup(allowUI)
-        }
+        // Use Wakebar's identity for Keychain authorization. A background
+        // read fails quietly when access has not been granted by macOS.
+        let keychainResult = keychainLookup(allowUI)
 
         switch keychainResult {
         case .data(let data):
@@ -146,80 +120,11 @@ struct UsageWindowCredentialResolver: Sendable {
         return URL(fileURLWithPath: value)
     }
 
-    private static func runClaudeCodeSecurityCLI() -> SecurityCLIRunResult {
-        let process = Process()
-        let standardOutput = Pipe()
-        let standardError = Pipe()
-        process.executableURL = URL(filePath: "/usr/bin/security")
-        process.arguments = [
-            "find-generic-password",
-            "-s", "Claude Code-credentials",
-            "-w",
-        ]
-        process.standardInput = FileHandle.nullDevice
-        process.standardOutput = standardOutput
-        process.standardError = standardError
-
-        do {
-            try process.run()
-        } catch {
-            return .launchFailed
-        }
-
-        let deadline = Date.now.addingTimeInterval(5)
-        while process.isRunning {
-            if Date.now >= deadline {
-                process.terminate()
-                return .timedOut
-            }
-            Thread.sleep(forTimeInterval: 0.01)
-        }
-
-        let stdout = standardOutput.fileHandleForReading.readDataToEndOfFile()
-        _ = standardError.fileHandleForReading.readDataToEndOfFile()
-        return .completed(stdout: stdout, exitCode: process.terminationStatus)
-    }
-
-    private static func decodedSecurityCLIOutput(_ output: Data) -> Data {
-        let withoutLeadingWhitespace = output.drop { $0.isASCIIWhitespace }
-        let trimmed = Data(
-            withoutLeadingWhitespace.reversed().drop { $0.isASCIIWhitespace }.reversed()
-        )
-        guard !trimmed.isEmpty, trimmed.count.isMultiple(of: 2) else {
-            return trimmed
-        }
-
-        var decoded = Data(capacity: trimmed.count / 2)
-        var index = trimmed.startIndex
-        while index < trimmed.endIndex {
-            let nextIndex = trimmed.index(after: index)
-            guard nextIndex < trimmed.endIndex,
-                  let high = hexNibble(trimmed[index]),
-                  let low = hexNibble(trimmed[nextIndex])
-            else {
-                return trimmed
-            }
-            decoded.append((high << 4) | low)
-            index = trimmed.index(after: nextIndex)
-        }
-
-        return decoded.first == 0x7B ? decoded : trimmed
-    }
-
-    private static func hexNibble(_ byte: UInt8) -> UInt8? {
-        switch byte {
-        case 0x30...0x39:
-            byte - 0x30
-        case 0x41...0x46:
-            byte - 0x41 + 10
-        case 0x61...0x66:
-            byte - 0x61 + 10
-        default:
-            nil
-        }
-    }
+    private static let keychainLock = NSLock()
 
     private static func claudeCodeKeychainCredentials(allowUI: Bool) -> KeychainResult {
+        keychainLock.lock()
+        defer { keychainLock.unlock() }
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: "Claude Code-credentials",
@@ -305,15 +210,4 @@ struct UsageWindowCredentialResolver: Sendable {
         }
     }
 
-}
-
-private extension UInt8 {
-    var isASCIIWhitespace: Bool {
-        switch self {
-        case 0x09...0x0D, 0x20:
-            true
-        default:
-            false
-        }
-    }
 }

@@ -1,63 +1,40 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="880" height="470" viewBox="0 0 880 470" role="img" aria-labelledby="title description">
-  <title id="title">How Wakebar works</title>
-  <desc id="description">You pick a wake time. Wakebar asks Claude Code through a cloud Routine and Codex through one request from this Mac, then reads usage to confirm that each window started.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="340" viewBox="0 0 880 340" role="img" aria-labelledby="title description">
+  <title id="title">From schedule to confirmed usage</title>
+  <desc id="description">Wakebar uses your local schedule to sync a Claude Code cloud Routine or send a Codex request from your Mac. After the prompt, it checks provider usage to confirm the window started.</desc>
   <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
-      <path d="M0 0l10 5-10 5z" fill="#9AA3B5"/>
+    <marker id="arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M1 1l5 3-5 3" fill="none" stroke="#858585" stroke-width="1.2"/>
     </marker>
     <style>
       text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
-      .card { fill: #FFFFFF; stroke: #E3E7EF; stroke-width: 1.5; }
-      .title { fill: #182033; font-size: 19px; font-weight: 700; }
-      .body { fill: #5B6577; font-size: 14.5px; }
-      .tag { font-size: 11.5px; font-weight: 700; letter-spacing: 1.2px; }
-      .link { fill: none; stroke: #9AA3B5; stroke-width: 2; marker-end: url(#arrow); }
+      .heading { fill: #222; font-size: 19px; font-weight: 600; }
+      .body { fill: #626262; font-size: 16px; }
+      .label { fill: #777; font-size: 13px; }
+      .line { fill: none; stroke: #858585; stroke-width: 1.2; }
     </style>
   </defs>
-  <rect width="880" height="470" rx="28" fill="#F3F5F9"/>
+  <rect width="880" height="340" fill="#fff"/>
+  <text x="28" y="34" class="label">SCHEDULE</text>
+  <text x="370" y="34" class="label">SEND A SHORT PROMPT</text>
+  <path d="M28 49h824" stroke="#dedede"/>
 
-  <!-- You -->
-  <rect x="36" y="150" width="200" height="170" rx="20" class="card"/>
-  <rect x="58" y="172" width="48" height="24" rx="12" fill="#EEF0FF"/>
-  <text x="82" y="188" class="tag" fill="#4F53C4" text-anchor="middle">YOU</text>
-  <text x="58" y="232" class="title">Pick a time</text>
-  <text x="58" y="260" class="body">07:00, weekdays.</text>
-  <text x="58" y="282" class="body">Set it once, before bed.</text>
+  <text x="28" y="141" class="heading">Your wake time</text>
+  <text x="28" y="168" class="body">Weekdays, with a lead time.</text>
+  <text x="28" y="192" class="body">Wakebar prepares the schedule.</text>
 
-  <path d="M240 235h58" class="link"/>
+  <path d="M280 158h36V105h34M316 158v58h34" class="line"/>
+  <path d="M338 105h12" class="line" marker-end="url(#arrow)"/>
+  <path d="M338 216h12" class="line" marker-end="url(#arrow)"/>
 
-  <!-- Wakebar -->
-  <rect x="302" y="150" width="228" height="170" rx="20" class="card"/>
-  <rect x="324" y="172" width="86" height="24" rx="12" fill="#E6F3EC"/>
-  <text x="367" y="188" class="tag" fill="#1F7A4D" text-anchor="middle">WAKEBAR</text>
-  <text x="324" y="232" class="title">Works backwards</text>
-  <text x="324" y="260" class="body">A few minutes before you wake,</text>
-  <text x="324" y="282" class="body">it asks each provider to say “hi”.</text>
+  <text x="370" y="91" class="heading">Claude Code</text>
+  <text x="370" y="117" class="body">A synced Routine runs in the cloud.</text>
+  <text x="370" y="141" class="body">It can fire while your Mac sleeps.</text>
 
-  <path d="M534 210c40 0 40-90 80-90h6" class="link"/>
-  <path d="M534 260c40 0 40 90 80 90h6" class="link"/>
+  <text x="370" y="202" class="heading">Codex</text>
+  <text x="370" y="228" class="body">Wakebar sends a request from your Mac.</text>
+  <text x="370" y="252" class="body">The app must be running.</text>
 
-  <!-- Claude -->
-  <rect x="626" y="56" width="232" height="130" rx="20" class="card"/>
-  <rect x="648" y="78" width="70" height="24" rx="12" fill="#FDEEE4"/>
-  <text x="683" y="94" class="tag" fill="#B4562A" text-anchor="middle">CLOUD</text>
-  <text x="648" y="132" class="title">Claude Code</text>
-  <text x="648" y="158" class="body">A Routine fires in the cloud.</text>
-  <text x="648" y="178" class="body">Your Mac can be asleep.</text>
-
-  <!-- Codex -->
-  <rect x="626" y="284" width="232" height="130" rx="20" class="card"/>
-  <rect x="648" y="306" width="84" height="24" rx="12" fill="#E8ECFF"/>
-  <text x="690" y="322" class="tag" fill="#3C3FA8" text-anchor="middle">THIS MAC</text>
-  <text x="648" y="360" class="title">Codex</text>
-  <text x="648" y="386" class="body">One request from this Mac,</text>
-  <text x="648" y="406" class="body">while Wakebar is open.</text>
-
-  <!-- Confirmation -->
-  <path d="M416 322v56" class="link"/>
-  <rect x="242" y="382" width="348" height="58" rx="16" fill="#FFFFFF" stroke="#E3E7EF" stroke-width="1.5"/>
-  <circle cx="272" cy="411" r="11" fill="#DDF7E8"/>
-  <path d="M266.5 411l4 4 7.5-9" fill="none" stroke="#208A55" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <text x="294" y="407" class="body" fill="#182033" font-weight="600">Then it reads usage from both providers</text>
-  <text x="294" y="426" class="body">and only says “started” when the numbers moved.</text>
+  <path d="M28 280h824" stroke="#dedede"/>
+  <text x="28" y="312" class="heading">After the prompt</text>
+  <text x="230" y="312" class="body">Wakebar checks provider usage before reporting a started window.</text>
 </svg>

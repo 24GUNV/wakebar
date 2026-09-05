@@ -6,6 +6,15 @@ struct ClaudeRoutineSetupView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: WakebarDesign.sectionSpacing) {
+            if !model.isProviderConnected(.claude) || model.claudeSetup.state == .idle {
+                Text("Connect to let Wakebar read your Claude Code login from Keychain, check usage, and manage Wakebar cloud Routines. Enabled schedules consume subscription usage.")
+                    .font(.callout)
+                    .fixedSize(horizontal: false, vertical: true)
+                Button("Connect Claude Code") {
+                    Task { await model.connectProvider(.claude) }
+                }
+                .buttonStyle(.borderedProminent)
+            }
             LabeledContent("Last sync") {
                 WindowStatusValue(text: syncStatus, kind: syncStatusKind)
             }
@@ -27,7 +36,7 @@ struct ClaudeRoutineSetupView: View {
             HStack(spacing: WakebarDesign.compactSpacing) {
                 Button(syncButtonTitle, action: syncRoutines)
                     .buttonStyle(.borderedProminent)
-                    .disabled(isSyncing)
+                    .disabled(isSyncing || !model.isProviderConnected(.claude))
 
                 Link("Verify on claude.ai", destination: routinesURL)
             }

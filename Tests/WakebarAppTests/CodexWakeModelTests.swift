@@ -41,16 +41,45 @@ final class CodexWakeModelTests: XCTestCase {
         XCTAssertEqual(model.state, .idle)
     }
 
-    func testAFailedRequestIsReportedAndLeavesTheWakeDue() async {
+    func testDisconnectedProviderDoesNotSend() async {
         let usage = StubProviderUsageReading(readings: [[weekly(resetsAt: now.addingTimeInterval(week), used: 0)]])
         let requester = StubCodexStartRequester(error: UsageWindowProviderIssue.missingCredentials)
         let model = makeModel(usage: usage, requester: requester, signedIn: false)
 
         _ = await model.tick(schedule: continuous)
 
-        XCTAssertEqual(model.state, .failed("Run `codex login`", at: now))
+        XCTAssertEqual(model.state, .failed("Connect Codex in Wakebar settings, then sign in with `codex login`.", at: now))
         XCTAssertNil(model.lastHandledAt)
         XCTAssertFalse(model.isSignedIn)
+    }
+
+    func testUsageOutageNeverSendsEvenAcrossRepeatedChecks() async {
+        let usage = StubProviderUsageReading(readings: [], error: UsageWindowAPIError.network)
+        let requester = StubCodexStartRequester()
+        let model = makeModel(usage: usage, requester: requester)
+        for _ in 0..<3 { _ = await model.tick(schedule: continuous) }
+        let prompts = await requester.prompts
+        XCTAssertTrue(prompts.isEmpty)
+        XCTAssertNil(model.lastHandledAt)
+    }
+
+    func testEmptySuccessfulReadingDoesNotSend() async {
+        let requester = StubCodexStartRequester()
+        let model = makeModel(usage: StubProviderUsageReading(readings: [[]]), requester: requester)
+        _ = await model.tick(schedule: continuous)
+        let prompts = await requester.prompts
+        XCTAssertTrue(prompts.isEmpty)
+    }
+
+    func testAmbiguousRequestIsRecordedBeforeRetry() async {
+        let usage = StubProviderUsageReading(readings: [[weekly(resetsAt: now.addingTimeInterval(week), used: 0)]])
+        let requester = StubCodexStartRequester(error: UsageWindowAPIError.network)
+        let model = makeModel(usage: usage, requester: requester)
+        _ = await model.tick(schedule: continuous)
+        _ = await model.tick(schedule: continuous)
+        let prompts = await requester.prompts
+        XCTAssertEqual(prompts.count, 1)
+        XCTAssertEqual(model.lastHandledAt, now)
     }
 
     private var continuous: WakeSchedule {

@@ -46,11 +46,11 @@ Use this checklist for a direct-download, notarized macOS release.
 
 - Confirm that the app contains only the macOS target.
 
-- Confirm that Codex setup shows only the sign-in state, the last wake, and the next check.
+- Confirm that both provider setup screens request explicit connection consent before reading credentials.
 
 - Confirm that no Codex CLI task-management code is present and that Wakebar never runs `codex exec`.
 
-- Confirm that Claude synchronizes at launch, every 24 hours, and after an access-token change.
+- Confirm that Claude synchronizes at launch, on Mac wake, on time-zone changes, and when a maintenance check finds a changed upcoming plan or access token.
 
 ## Claude acceptance
 
@@ -169,3 +169,12 @@ Use this checklist for a direct-download, notarized macOS release.
 - Confirm that the documentation describes Codex window behavior as measured, not assumed.
 
 - Publish `Wakebar.dmg.sha256` with the direct-download artifact.
+
+## Release boundaries
+
+- Confirm a first launch cannot read either provider credential before connection consent.
+- Decline Keychain authorization and verify that no alternate credential-reading process runs.
+- Simulate usage-read outages: no automatic Codex requests and no deletion of Claude's last reset Routine.
+- Verify the signing script selects only the Wakebar private key. Test it with a disposable Keychain containing an unrelated signing key.
+- Inspect the Release executable for LLVM coverage instrumentation; it must be absent.
+- Verify the signed and notarized download on a clean Mac before offering a packaged release.

@@ -29,7 +29,8 @@ public struct ContinuousChainAnchor: Equatable, Sendable {
     /// Folds one usage reading into the anchor. Returns true when the fire
     /// moved, which is when the cloud Routine needs its cron rewritten.
     @discardableResult
-    public mutating func observe(windows: [UsageWindow], now: Date) -> Bool {
+    public mutating func observe(windows: [UsageWindow], now: Date, isReliable: Bool = true) -> Bool {
+        guard isReliable else { return false }
         let claudeWindows = windows.filter { $0.provider == .claude }
         let next = chain.nextSession(windows: claudeWindows, now: now, cutoff: nil)?.firesAt
 

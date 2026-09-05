@@ -44,8 +44,8 @@ public struct CodexWakePlanner: Sendable {
 
     /// - Parameter windows: the latest Codex reading. Session windows govern
     ///   when the plan reports any; a plan carrying only a weekly cap is woken
-    ///   once after that cap resets. No reading at all is treated as unknown,
-    ///   and the wake is sent on trust so a bad credential fails loudly.
+    ///   once after that cap resets. Missing readings are unknown and never
+    ///   authorize a wake; the caller retries the usage read later.
     /// - Parameter lastHandledAt: the `dueAt` of the previous decision that
     ///   was acted on, or the time of the last wake sent.
     public func decide(
@@ -59,7 +59,10 @@ public struct CodexWakePlanner: Sendable {
         }
 
         let tracked = trackedWindows(in: windows, now: now)
-        let needsWake = tracked.isEmpty || tracked.contains(where: \.isUnstarted)
+        guard !tracked.isEmpty else {
+            return Decision(firesNow: false, dueAt: nil, nextCheck: now.addingTimeInterval(Self.settleInterval))
+        }
+        let needsWake = tracked.contains(where: \.isUnstarted)
         let soonestReset = tracked.filter { !$0.isUnstarted }.map(\.resetsAt).min()
 
         if let lastHandledAt, now < lastHandledAt.addingTimeInterval(Self.settleInterval),

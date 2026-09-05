@@ -13,6 +13,8 @@ final class ClaudeSetupModel {
     @ObservationIgnored private let reconciler: ClaudeRoutineReconciler
     @ObservationIgnored private let credentialStore: ClaudeCredentialStore
     @ObservationIgnored private var lastResolvedAccessToken: String?
+    @ObservationIgnored private var lastPlan: [RoutineSpec]?
+    @ObservationIgnored private var lastSchedule: WakeSchedule?
     @ObservationIgnored private var lastSyncAttemptAt: Date?
 
     init(
@@ -58,6 +60,8 @@ final class ClaudeSetupModel {
                 namePrefix: RoutinePlanCompiler.familyPrefix,
                 credentialIntent: credentialIntent
             )
+            lastPlan = plan
+            lastSchedule = schedule
             state = .synced(
                 at: .now,
                 routineCount: result.routineCount,
@@ -81,6 +85,11 @@ final class ClaudeSetupModel {
     }
 
     func shouldResync(now: Date) async -> Bool {
+        if let lastSchedule, let lastPlan {
+            let upcoming = planCompiler.compile(schedule: lastSchedule, referenceDate: now)
+            let fixed = lastPlan.filter { !$0.name.hasSuffix(RoutinePlanCompiler.chainRoutineSuffix) }
+            if upcoming != fixed { return true }
+        }
         let changed: Bool
         // A maintenance poll must never raise the Keychain dialog.
         if let credential = try? await credentialStore.credential(.background) {

@@ -14,7 +14,7 @@ actor LiveUsageWindowReader: UsageWindowReading, UsageWindowIssueReporting {
 
     private let codexClient: CodexUsageAPIClient
     private let claudeClient: ClaudeUsageAPIClient
-    private let fallback: any UsageWindowReading
+    private let fallback: (any UsageWindowReading)?
     private let cacheDuration: TimeInterval
 
     private var cache: [ProviderID: CacheEntry] = [:]
@@ -23,7 +23,7 @@ actor LiveUsageWindowReader: UsageWindowReading, UsageWindowIssueReporting {
     init(
         codexClient: CodexUsageAPIClient = CodexUsageAPIClient(),
         claudeClient: ClaudeUsageAPIClient = ClaudeUsageAPIClient(),
-        fallback: any UsageWindowReading = SessionLogUsageWindowReader(),
+        fallback: (any UsageWindowReading)? = nil,
         // A usage window turns over every five hours, so a reading minutes old
         // is still true to within a rounding error. The cost of a short cache is
         // not bandwidth but the macOS credential prompt each uncached Claude
@@ -77,7 +77,7 @@ actor LiveUsageWindowReader: UsageWindowReading, UsageWindowIssueReporting {
                 !windows.contains { $0.provider == provider && $0.isOpen(at: now) }
             }
         }
-        guard !providersNeedingFallback.isEmpty else { return windows }
+        guard let fallback, !providersNeedingFallback.isEmpty else { return windows }
 
         let fallbackWindows = await fallback.currentWindows(now: now)
         for provider in providersNeedingFallback {
@@ -99,13 +99,18 @@ actor LiveUsageWindowReader: UsageWindowReading, UsageWindowIssueReporting {
             if recoveredExpectedLimit {
                 // The logs supplied what the call could not. Whatever went wrong
                 // upstream cost the user nothing, so it is not worth a row.
-                setIssue(nil, for: provider)
+                // Keep any live-read failure visible to scheduling logic.
             } else if !answered, recovered.isEmpty, issues[provider] == nil {
                 setIssue(provider == .claude ? .noSessionWindowReported : .invalidResponse, for: provider)
             }
         }
 
         return windows
+    }
+
+    func invalidateCache() {
+        cache.removeAll()
+        issues.removeAll()
     }
 
     func currentUsageWindowIssues() async -> [ProviderID: UsageWindowProviderIssue] {
@@ -127,7 +132,7 @@ actor LiveUsageWindowReader: UsageWindowReading, UsageWindowIssueReporting {
             // Asking again in a minute is what earned the refusal. Backing off
             // costs a slightly stale reading and nothing else.
             5 * 60
-        case .missingCredentials, .claudeOAuthCredentialMissing, .keychainAuthorizationRequired,
+        case .connectionRequired, .missingCredentials, .claudeOAuthCredentialMissing, .keychainAuthorizationRequired,
              .keychainUnavailable, .insufficientScope, .unauthorized, .noSessionWindowReported:
             15 * 60
         }

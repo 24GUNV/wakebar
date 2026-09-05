@@ -33,6 +33,12 @@ actor ClaudeCredentialStore {
     }
 
     func credential(_ intent: ClaudeCredentialIntent) async throws -> ClaudeCredential {
+        do {
+            try resolver.requireConsent(for: .claude)
+        } catch {
+            cached = nil
+            throw error
+        }
         let asked = now()
         if let cached, isUsable(cached, at: asked) {
             return cached.credential
@@ -101,6 +107,7 @@ actor ClaudeCredentialStore {
         _ entry: (credential: ClaudeCredential, fetchedAt: Date),
         at date: Date
     ) -> Bool {
+        guard date < entry.fetchedAt.addingTimeInterval(Self.unknownExpiryLifetime) else { return false }
         if let expiresAt = entry.credential.expiresAt {
             return date < expiresAt.addingTimeInterval(-Self.expiryMargin)
         }

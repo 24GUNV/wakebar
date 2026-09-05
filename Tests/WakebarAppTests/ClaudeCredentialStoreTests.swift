@@ -182,6 +182,7 @@ final class ClaudeCredentialStoreTests: XCTestCase {
         clock: TestClock
     ) -> ClaudeCredentialStore {
         let resolver = UsageWindowCredentialResolver(
+            accessAllowed: { _ in true },
             environment: [:],
             homeDirectory: URL(filePath: "/nonexistent-wakebar-test-home"),
             keychainLookup: { allowUI in keychain.lookup(allowUI: allowUI) }

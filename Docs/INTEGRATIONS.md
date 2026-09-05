@@ -1,12 +1,12 @@
 # Provider integrations
 
-Wakebar keeps the Claude and Codex paths independent. Each path uses provider-owned scheduling and provider-reported usage data.
+Wakebar keeps the Claude and Codex paths independent. Claude uses cloud Routines; Codex sends requests from the Mac. Both use provider-reported usage data.
 
 ## Shared schedule
 
-The user selects a local morning time and weekdays. An optional five-hour repeat cadence applies only to Claude. Codex receives one task before each selected wake.
+The user selects a local morning time and weekdays. The Every reset cadence follows the limits each provider reports.
 
-A fire starts a short cloud session on the user’s subscription. It consumes subscription usage, not API credit.
+A fire requests a short reply on the user’s subscription. It consumes subscription usage, not API credit.
 
 ## Claude Code Routines
 
@@ -38,15 +38,15 @@ Select **Start now** to run the managed Morning Routine. If the Routine does not
 
 Wakebar shows **Requested** when the user starts this flow. A successful Routine response confirms only that Claude accepted the run request. Wakebar then checks Claude usage every 30 seconds for up to five minutes. It shows **Window started** only after provider data reports a later five-hour reset or increased five-hour usage.
 
-Claude expects five-field cron expressions in Coordinated Universal Time (UTC). Wakebar synchronizes at app launch and once every 24 hours to correct daylight-saving-time drift. It also synchronizes when the resolved Claude access token changes.
+Claude expects five-field cron expressions in Coordinated Universal Time (UTC). Each weekday uses the UTC time of its next local occurrence, so an upcoming daylight-saving transition is included before it happens. Nonexistent local times use the next valid time; repeated times use the first occurrence. Wakebar checks for plan changes every five minutes, on Mac wake, and on system time-zone changes. An app that remains closed cannot update the cloud schedule indefinitely; open it after travel or a clock change.
 
-Wakebar reads the Claude Code OAuth credential from macOS Keychain. Every read first uses the Apple `security` command. Claude Code writes the item with that command, and macOS lets the tool that created an item read it back without a consent dialog, whichever app runs the tool. This is the same read Claude Code makes at launch, and it survives Claude Code rewriting the item's access control list (ACL) on a token refresh. If the command fails, a user-initiated read falls back to the Security framework and may show the consent dialog. A background read falls back with keychain interaction disabled process-wide, so it fails quietly instead. An `LAContext` with `interactionNotAllowed` does not suppress the login keychain dialog; securityd still displays the prompt. If the credential JSON includes an expiry, the app shows when the token expires. Wakebar does not refresh the token. If authentication fails, sign in again in Claude Code by running `claude`.
+Wakebar requires an explicit **Connect Claude Code** action before reading credentials. It uses the Security framework under Wakebar's own app identity. A user-initiated read can show the macOS Keychain dialog; background reads fail quietly if authorization is unavailable. It does not invoke the `security` tool to read provider credentials. Credentials are cached for at most 15 minutes, or less when close to expiry. Wakebar does not refresh the token; sign in again through Claude Code if authentication fails.
 
 Anthropic does not document the Claude Code Routines API. The integration can change without notice. Wakebar isolates all endpoint, header, and payload knowledge in `ClaudeRoutinesClient` so a provider change has a limited code surface.
 
 ## Codex wake
 
-OpenAI does not offer a scheduled Codex run that opens the usage window, and a ChatGPT scheduled task counts against a separate ChatGPT meter. Wakebar therefore wakes Codex from this Mac.
+Wakebar sends Codex requests from this Mac after the user selects **Connect Codex**. This uses an internal provider endpoint, not a supported public scheduling API.
 
 A wake is one request to `POST https://chatgpt.com/backend-api/codex/responses`, the endpoint Codex CLI uses for a turn. The request carries the Codex CLI access token and account id from `~/.codex/auth.json`, the model from `~/.codex/config.toml`, the instructions `Reply only with hi. Do not use tools.`, the input `hi`, no tools, and low reasoning effort. It streams until the provider reports `response.completed`. A September 5, 2026 live test measured about five input tokens per request.
 
@@ -58,7 +58,7 @@ Wakebar does not run `codex exec`. A Codex CLI turn loads the coding-agent conte
 
 - **Every reset**: one request after each reset of the limit Codex reports. On a plan with a five-hour window, the requests chain off that window. On a weekly-only plan, one request follows the weekly reset.
 
-The wake runs only while Wakebar is open. Wakebar checks the plan at launch, when the Mac wakes from sleep, and at least every 30 minutes. A slot the Mac slept through is sent on wake when the window is still closed, and settled without a request when the window is already open. Wakebar records the last handled slot in preferences so a relaunch does not send it twice.
+The wake runs only while Wakebar is open. Wakebar checks the plan at launch, when the Mac wakes from sleep, and at least every 30 minutes. A slot the Mac slept through is sent on wake when the window is still closed, and settled without a request when the window is already open. Wakebar records an attempted slot before sending, so an ambiguous timeout does not immediately duplicate a request after relaunch. Failed or empty usage readings do not authorize a wake.
 
 Wakebar reads usage before and after each request and reports **Window started** or **Week started** only when the provider's reading changes: increased usage, a later reset, or an idle placeholder that pins to a real reset. Codex reports an idle limit as a full, unused window whose reset keeps pace with the clock.
 
@@ -82,7 +82,7 @@ The menu also shows one countdown to the next compiled provider-session event. C
 
 ## Security boundary
 
-Wakebar reads the Claude Code OAuth token from macOS Keychain and Codex authentication from `~/.codex`. It sends credentials only to their provider:
+After explicit provider connection, Wakebar reads the Claude Code OAuth token from macOS Keychain and Codex authentication from `~/.codex`. It sends credentials only to their provider:
 
 - Claude credential → `api.anthropic.com`
 
@@ -105,3 +105,7 @@ Wakebar uses these reporting rules throughout the app:
 - A Codex request that returns `response.completed` is a sent prompt, but the window counts as started only when the next usage reading confirms it.
 
 - **Requested** identifies a user request without claiming that a provider sent a prompt or reset a window.
+
+## Unavailable usage
+
+A failed usage read is unknown, not evidence that a window is inactive. Codex waits for a usable reading before sending automatically. Claude preserves its last reset Routine during a usage outage; it does not delete it based on an empty failed reading.

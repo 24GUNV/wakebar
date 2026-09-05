@@ -27,7 +27,7 @@ final class LiveUsageWindowReaderTests: XCTestCase {
         let issues = await reader.currentUsageWindowIssues()
 
         XCTAssertEqual(windows.map(\.provider), [.claude])
-        XCTAssertNil(issues[.claude], "A recovered session window is not a problem worth reporting.")
+        XCTAssertEqual(issues[.claude], .network, "An estimated fallback must not hide a live-read failure from scheduling.")
         XCTAssertEqual(issues[.codex], .network, "Codex had nothing to recover, so it still owes an explanation.")
     }
 
@@ -207,6 +207,7 @@ final class LiveUsageWindowReaderTests: XCTestCase {
         }
 
         let resolver = UsageWindowCredentialResolver(
+            accessAllowed: { _ in true },
             environment: [
                 "CODEX_HOME": home.appendingPathComponent(".codex").path,
                 "CLAUDE_CONFIG_DIR": home.appendingPathComponent(".claude").path,

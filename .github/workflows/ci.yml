@@ -5,6 +5,9 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
 concurrency:
   group: wakebar-${{ github.ref }}
   cancel-in-progress: true
@@ -13,28 +16,32 @@ jobs:
   macos:
     runs-on: macos-26
     timeout-minutes: 25
-    env:
-      CLANG_MODULE_CACHE_PATH: ${{ runner.temp }}/wakebar-clang-module-cache
-      SWIFTPM_MODULECACHE_OVERRIDE: ${{ runner.temp }}/wakebar-clang-module-cache
-      WAKEBAR_SCRATCH_PATH: ${{ runner.temp }}/wakebar-swift-scratch
-      WAKEBAR_SPM_CACHE_PATH: ${{ runner.temp }}/wakebar-swiftpm-cache
-      WAKEBAR_DERIVED_DATA_PATH: ${{ runner.temp }}/wakebar-derived-data
-      WAKEBAR_SNAPSHOT_DIR: ${{ runner.temp }}/wakebar-snapshots
-
     steps:
+      - name: Set build paths
+        run: |
+          echo "CLANG_MODULE_CACHE_PATH=$RUNNER_TEMP/wakebar-clang-module-cache" >> "$GITHUB_ENV"
+          echo "SWIFTPM_MODULECACHE_OVERRIDE=$RUNNER_TEMP/wakebar-clang-module-cache" >> "$GITHUB_ENV"
+          echo "WAKEBAR_SCRATCH_PATH=$RUNNER_TEMP/wakebar-swift-scratch" >> "$GITHUB_ENV"
+          echo "WAKEBAR_SPM_CACHE_PATH=$RUNNER_TEMP/wakebar-swiftpm-cache" >> "$GITHUB_ENV"
+          echo "WAKEBAR_DERIVED_DATA_PATH=$RUNNER_TEMP/wakebar-derived-data" >> "$GITHUB_ENV"
+          echo "WAKEBAR_SNAPSHOT_DIR=$RUNNER_TEMP/wakebar-snapshots" >> "$GITHUB_ENV"
       - name: Check out repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
 
       - name: Require Xcode 26
         run: |
           xcodebuild -version
           xcodebuild -version | grep -q '^Xcode 26\.'
 
-      - name: Install XcodeGen
-        run: brew install xcodegen
+      - name: Install XcodeGen 2.46.0
+        run: |
+          curl --fail --location --retry 3 https://github.com/yonaskolb/XcodeGen/releases/download/2.46.0/xcodegen.zip -o "$RUNNER_TEMP/xcodegen.zip"
+          echo "4d9e34b62172d645eed6457cac13fc222569974098ef4ee9c3368bedf0196806  $RUNNER_TEMP/xcodegen.zip" | shasum -a 256 -c -
+          unzip -q "$RUNNER_TEMP/xcodegen.zip" -d "$RUNNER_TEMP/xcodegen"
+          echo "$RUNNER_TEMP/xcodegen/xcodegen/bin" >> "$GITHUB_PATH"
 
       - name: Restore SwiftPM download cache
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: ${{ env.WAKEBAR_SPM_CACHE_PATH }}
           key: swiftpm-${{ runner.os }}-xcode26-${{ hashFiles('Package.swift', 'Package.resolved') }}

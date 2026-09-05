@@ -64,7 +64,7 @@ echo "Enter your login keychain (login account) password:"
 read -r -s keychain_password
 security set-key-partition-list \
   -S "apple-tool:,apple:,codesign:" \
-  -s -k "$keychain_password" \
+  -s -l "$identity_name" -t private -k "$keychain_password" \
   "$login_keychain" > /dev/null
 unset keychain_password
 

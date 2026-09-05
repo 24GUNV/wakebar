@@ -4,6 +4,7 @@ import WakebarCore
 /// A safe, user-facing reason why a provider did not contribute a live session
 /// window. Cases carry no response body or credential material.
 enum UsageWindowProviderIssue: Error, Equatable, Sendable {
+    case connectionRequired
     case missingCredentials
     case claudeOAuthCredentialMissing
     case keychainAuthorizationRequired
@@ -17,6 +18,8 @@ enum UsageWindowProviderIssue: Error, Equatable, Sendable {
 
     func message(for provider: ProviderID) -> String {
         switch self {
+        case .connectionRequired:
+            "Connect \(provider == .claude ? "Claude Code" : "Codex") in Wakebar settings"
         case .missingCredentials, .unauthorized:
             provider == .claude
                 ? "Sign in again in Claude Code (run `claude`)"

@@ -141,7 +141,7 @@ final class CodexWakePlannerTests: XCTestCase {
         XCTAssertEqual(decision.dueAt, slot)
     }
 
-    func testNoReadingFiresOnTrustSoABadCredentialFailsLoudly() throws {
+    func testNoReadingWaitsWithoutSending() throws {
         let now = try date(hour: 9)
         let decision = planner().decide(
             schedule: schedule(cadence: .continuous),
@@ -150,7 +150,8 @@ final class CodexWakePlannerTests: XCTestCase {
             lastHandledAt: nil
         )
 
-        XCTAssertTrue(decision.firesNow)
+        XCTAssertFalse(decision.firesNow)
+        XCTAssertNil(decision.dueAt)
     }
 
     func testDisabledOrCodexFreeSchedulesDoNothing() throws {

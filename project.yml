@@ -107,7 +107,7 @@ schemes:
       config: Debug
     test:
       config: Debug
-      gatherCoverageData: true
+      gatherCoverageData: false
       targets:
         - WakebarCoreTests
         - WakebarAppTests
